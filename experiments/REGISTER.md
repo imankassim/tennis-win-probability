@@ -27,8 +27,8 @@ the leading digit(s) indicate the theme, not a strict run order.
 
 | ID | Possibility considered | Role | Status |
 |---|---|---|---|
-| EXP1 | Always-50/50 probability | Primitive baseline | Planned |
-| EXP2 | Current-score-leader heuristic | Primitive baseline | Planned |
+| [EXP1](EXP1-always-fifty-fifty.md) | Always-50/50 probability | Primitive baseline | Retained |
+| [EXP2](EXP2-score-leader-heuristic.md) | Current-score-leader heuristic | Primitive baseline | Retained |
 | EXP10 | Constant tour-average serve rate Markov chain | Analytic baseline | Planned |
 | EXP11 | Per-player overall serve-win rate | Baseline refinement | Planned |
 | EXP12 | Surface-specific serve-win rate | Baseline tuning | Planned |
