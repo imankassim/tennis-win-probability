@@ -1,9 +1,20 @@
 from fastapi.testclient import TestClient
 
 from backend.fixtures import DEMO_MATCH_ID
-from backend.main import app
+from backend.main import _artefacts, app
+from backend.probability import MARKOV_MODEL_VERSION
 
 client = TestClient(app)
+
+# Whether the promoted pipeline (pricing/promote_model.py) has actually
+# been run against this checkout — the artefact file is gitignored (see
+# .gitignore's "model artefacts" entry), so a fresh clone or CI run has
+# none and the API is expected to fall back to Markov-only. Assert
+# against the app's own live state instead of hardcoding one outcome, so
+# these tests pass correctly in both cases rather than only ever matching
+# whichever state happens to be true on one machine.
+_EXPECTED_MODEL_VERSION = MARKOV_MODEL_VERSION if _artefacts is None else _artefacts.model_version
+_EXPECTED_FALLBACK_USED = _artefacts is None
 
 
 def test_health():
@@ -36,11 +47,11 @@ def test_probability_for_a_known_point():
     body = response.json()
     assert body["match_id"] == DEMO_MATCH_ID
     assert body["point_sequence"] == 1
-    assert body["model_version"] == "markov_v1"
+    assert body["model_version"] == _EXPECTED_MODEL_VERSION
     assert 0 <= body["probability_player_a"] <= 1
     assert body["price_player_a"] >= 1.0
     assert body["price_player_b"] >= 1.0
-    assert body["fallback_used"] is False
+    assert body["fallback_used"] is _EXPECTED_FALLBACK_USED
     assert body["suspended"] is False
     # A request ID should be present and distinct across requests.
     assert body["probability_request_id"]

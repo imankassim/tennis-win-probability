@@ -19,9 +19,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.event_log import log_quote
 from backend.fixtures import demo_repository_data
 from backend.match_state import compute_break_point, game_score_before
-from backend.probability import MODEL_VERSION, compute_probability
+from backend.probability import compute_probability, load_artefacts
 from backend.repository import InMemoryMatchRepository, MatchRepository, load_from_csv
 from pricing.markov.serve_rate import COLD_START_SERVE_RATE, bulk_shrunk_serve_rates
+from pricing.ml.features import compute_match_context_features
 from trading_rules.rules import apply_trading_rules
 from backend.schemas import (
     MatchListResponse,
@@ -97,6 +98,21 @@ _serve_rate_cache: dict[str, tuple[float, float]] = bulk_shrunk_serve_rates(
     repository.list_matches(), repository.all_points_by_match()
 )
 
+# Same reasoning as the serve-rate cache above, for the ML model's context
+# features (form/surface/h2h/Elo): computed once per match in one archive
+# pass at startup, not per request. Uses the exact same bulk function the
+# promotion script (pricing/promote_model.py) trained against, so a live
+# request scores the identical feature the model learned from — no
+# separate "live" reimplementation to drift out of sync.
+_context_cache: dict[str, dict[str, float]] = compute_match_context_features(
+    repository.list_matches(), repository.all_outcomes()
+)
+
+# The promoted pipeline (Journey 17), if pricing/promote_model.py has been
+# run against this data. None on a fresh clone — compute_probability
+# degrades to Markov-only in that case (see backend/probability.py).
+_artefacts = load_artefacts()
+
 
 def _serve_rates_for(match) -> tuple[float, float]:
     return _serve_rate_cache.get(match.match_id, (COLD_START_SERVE_RATE, COLD_START_SERVE_RATE))
@@ -171,11 +187,15 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
     break_point = compute_break_point(points, point)
     points_a, points_b = game_score_before(points, point)
     p_a_serve, p_b_serve = _serve_rates_for(match)
+    points_so_far = [p for p in points if p.point_no < point.point_no]
 
-    probability_a = compute_probability(
+    pricing_result = compute_probability(
+        artefacts=_artefacts,
+        match=match,
+        points_so_far=points_so_far,
+        context=_context_cache.get(match.match_id, {}),
         p_a_serve_rate=p_a_serve,
         p_b_serve_rate=p_b_serve,
-        best_of=match.best_of,
         sets_won_a=point.sets_won_a,
         sets_won_b=point.sets_won_b,
         games_won_a=point.games_won_a,
@@ -184,7 +204,7 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
         points_a=points_a,
         points_b=points_b,
     )
-    trading_result = apply_trading_rules(probability_a)
+    trading_result = apply_trading_rules(pricing_result.probability_a)
 
     response = ProbabilityResponse(
         probability_request_id=f"req_{next(_request_ids):x}",
@@ -196,11 +216,11 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
             server=point.server,
             break_point=break_point,
         ),
-        probability_player_a=None if trading_result.suspended else probability_a,
+        probability_player_a=None if trading_result.suspended else pricing_result.probability_a,
         price_player_a=trading_result.price_a,
         price_player_b=trading_result.price_b,
-        model_version=MODEL_VERSION,
-        fallback_used=False,
+        model_version=pricing_result.model_version,
+        fallback_used=pricing_result.fallback_used,
         suspended=trading_result.suspended,
     )
     latency_ms = (time.perf_counter() - started_at) * 1000

@@ -24,6 +24,7 @@ class MatchRepository(Protocol):
     def get_outcome(self, match_id: str) -> OutcomeLabel | None: ...
     def list_matches(self) -> list[Match]: ...
     def all_points_by_match(self) -> dict[str, list[Point]]: ...
+    def all_outcomes(self) -> dict[str, OutcomeLabel]: ...
 
 
 class InMemoryMatchRepository:
@@ -68,6 +69,12 @@ class InMemoryMatchRepository:
         needs every player's history across the whole archive, not just
         one match's points."""
         return self._points
+
+    def all_outcomes(self) -> dict[str, OutcomeLabel]:
+        """For context-feature estimation (pricing/ml/features.py), the
+        same bulk-access shape as all_points_by_match — the ML context
+        cache needs every match's confirmed outcome, not just one."""
+        return self._outcomes
 
 
 def load_from_csv(matches_csv: Path, *points_csvs: Path) -> InMemoryMatchRepository:
