@@ -6,7 +6,7 @@
 // concept with no equivalent in a completed match archive. This module is
 // for browsing and replaying *real* matches through the actual API.
 
-import type { MatchReplay, MatchSummary, PointEvent, ProbabilityQuote, Surface } from "./types";
+import type { MatchReplay, MatchSummary, OpsSummary, PointEvent, ProbabilityQuote, Surface } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -47,6 +47,30 @@ interface ApiReplayResponse {
 interface ApiMatchListResponse {
   matches: ApiMatchSummary[];
   total: number;
+}
+
+interface ApiOpsSummaryResponse {
+  latency: {
+    n_quotes: number;
+    median_ms: number | null;
+    p95_ms: number | null;
+  };
+  errors: {
+    fallback_count: number;
+    fallback_rate: number;
+    suspended_count: number;
+    suspended_rate: number;
+    model_version_counts: Record<string, number>;
+  };
+  model: {
+    model_version: string;
+    trained_at: string;
+    n_training_matches: number;
+    n_calibration_matches: number;
+    calibration_brier: number;
+    calibration_log_loss: number;
+    calibration_ece: number;
+  } | null;
 }
 
 interface ApiProbabilityResponse {
@@ -121,6 +145,38 @@ async function fetchProbability(
     modelVersion: q.model_version,
     fallbackUsed: q.fallback_used,
     suspended: q.suspended,
+  };
+}
+
+/** Journey 19's monitoring dashboard: GET /ops/summary. */
+export async function getOpsSummary(): Promise<OpsSummary> {
+  const res = await fetch(`${API_BASE_URL}/ops/summary`);
+  if (!res.ok) throw new Error(`Failed to fetch ops summary: ${res.status}`);
+  const s: ApiOpsSummaryResponse = await res.json();
+  return {
+    latency: {
+      nQuotes: s.latency.n_quotes,
+      medianMs: s.latency.median_ms,
+      p95Ms: s.latency.p95_ms,
+    },
+    errors: {
+      fallbackCount: s.errors.fallback_count,
+      fallbackRate: s.errors.fallback_rate,
+      suspendedCount: s.errors.suspended_count,
+      suspendedRate: s.errors.suspended_rate,
+      modelVersionCounts: s.errors.model_version_counts,
+    },
+    model: s.model
+      ? {
+          modelVersion: s.model.model_version,
+          trainedAt: s.model.trained_at,
+          nTrainingMatches: s.model.n_training_matches,
+          nCalibrationMatches: s.model.n_calibration_matches,
+          calibrationBrier: s.model.calibration_brier,
+          calibrationLogLoss: s.model.calibration_log_loss,
+          calibrationEce: s.model.calibration_ece,
+        }
+      : null,
   };
 }
 

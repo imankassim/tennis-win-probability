@@ -68,3 +68,28 @@ export interface MatchReplay {
 }
 
 export type PageState = "loading" | "success" | "error";
+
+/** Journey 19's monitoring dashboard, as data — see GET /ops/summary. */
+export interface OpsSummary {
+  latency: {
+    nQuotes: number;
+    medianMs: number | null;
+    p95Ms: number | null;
+  };
+  errors: {
+    fallbackCount: number;
+    fallbackRate: number;
+    suspendedCount: number;
+    suspendedRate: number;
+    modelVersionCounts: Record<string, number>;
+  };
+  model: {
+    modelVersion: string;
+    trainedAt: string;
+    nTrainingMatches: number;
+    nCalibrationMatches: number;
+    calibrationBrier: number;
+    calibrationLogLoss: number;
+    calibrationEce: number;
+  } | null;
+}

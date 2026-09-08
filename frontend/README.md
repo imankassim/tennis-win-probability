@@ -5,8 +5,10 @@ live win-probability chart, price ticker and model-version badge.
 
 ## Status
 
-Journey 6 (replay behaviour) is complete. There are now two data paths,
-both rendered by the same `/replay/[matchId]` route and components:
+Journey 6 (replay behaviour) and Journey 19 (dashboards) are complete.
+There are now two data paths for replay, both rendered by the same
+`/replay/[matchId]` route and components, plus a separate operations
+view:
 
 - **Scenario library** (`/`) — two scripted mock matches
   (`src/lib/mockData.ts`) covering the target model scenarios: routine
@@ -25,6 +27,15 @@ both rendered by the same `/replay/[matchId]` route and components:
 
 `ReplayView` picks the path via `isScenarioLibraryMatch(matchId)`.
 
+- **Operations dashboard** (`/ops`) — `GET /ops/summary`: latency
+  (median/p95) and error rates (fallback/suspended) from every quote
+  served since the backend's quote event log was last cleared, plus the
+  promoted pipeline's own calibration-time quality snapshot (Brier,
+  log-loss, ECE) if one has been promoted — `null` otherwise, rendered as
+  "no promoted pipeline found." Not a live-quality metric — this system
+  replays static historical data, so there's no live feed of outcomes to
+  score served quotes against.
+
 ## Structure
 
 - `src/lib/types.ts` — shared types mirroring the API response contract.
@@ -38,7 +49,8 @@ both rendered by the same `/replay/[matchId]` route and components:
   (loading/error), and `ReplayView` which composes them and picks the data
   source.
 - `src/app/` — `/` (scenario library), `/matches` (real match browser),
-  `/replay/[matchId]` (the replay view, shared by both).
+  `/replay/[matchId]` (the replay view, shared by both), `/ops`
+  (operations dashboard).
 
 ## Development
 
