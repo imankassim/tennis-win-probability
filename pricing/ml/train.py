@@ -18,6 +18,8 @@ from dataclasses import dataclass
 import pandas as pd
 from lightgbm import LGBMClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 from evaluation.metrics import brier_score, log_loss
 from pricing.ml.features import CONTEXT_FEATURES, MOMENTUM_FEATURES, STATE_FEATURES
@@ -70,7 +72,11 @@ def train_and_evaluate(
     y_test = test_df["label"].tolist()
 
     if model_kind == "logistic":
-        model = LogisticRegression(max_iter=1000)
+        # Elo (~1500-2000) and score-state (0-6ish) features live on very
+        # different scales; unscaled, lbfgs took 123s and still failed to
+        # converge on the full archive. Scaling has no effect on
+        # LightGBM's tree splits, so it's only applied here.
+        model = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000))
     elif model_kind == "lightgbm":
         model = LGBMClassifier(n_estimators=100, max_depth=6, verbose=-1)
     else:
