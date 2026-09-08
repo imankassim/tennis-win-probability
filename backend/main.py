@@ -18,9 +18,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.event_log import log_quote
 from backend.fixtures import demo_repository_data
-from backend.match_state import compute_break_point
+from backend.match_state import compute_break_point, game_score_before
 from backend.probability import MODEL_VERSION, compute_quote
 from backend.repository import InMemoryMatchRepository, MatchRepository, load_from_csv
+from pricing.markov.engine import estimate_match_serve_rates
 from backend.schemas import (
     MatchListResponse,
     MatchStateInterpretation,
@@ -75,6 +76,20 @@ def _build_repository() -> MatchRepository:
 
 
 repository: MatchRepository = _build_repository()
+
+# Serve rates only depend on a match's own date and the archive up to it,
+# not on which point is being priced — computed once per match rather
+# than once per point/request. Safe to cache for the process lifetime:
+# this is a read-only, in-memory archive with no live updates.
+_serve_rate_cache: dict[str, tuple[float, float]] = {}
+
+
+def _serve_rates_for(match) -> tuple[float, float]:
+    if match.match_id not in _serve_rate_cache:
+        _serve_rate_cache[match.match_id] = estimate_match_serve_rates(
+            match, repository.list_matches(), repository.all_points_by_match()
+        )
+    return _serve_rate_cache[match.match_id]
 
 
 @app.get("/health")
@@ -144,12 +159,20 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
         )
     point = matching[0]
     break_point = compute_break_point(points, point)
+    points_a, points_b = game_score_before(points, point)
+    p_a_serve, p_b_serve = _serve_rates_for(match)
 
     probability_a, price_a, price_b = compute_quote(
+        p_a_serve_rate=p_a_serve,
+        p_b_serve_rate=p_b_serve,
+        best_of=match.best_of,
         sets_won_a=point.sets_won_a,
         sets_won_b=point.sets_won_b,
         games_won_a=point.games_won_a,
         games_won_b=point.games_won_b,
+        server=point.server,
+        points_a=points_a,
+        points_b=points_b,
     )
 
     response = ProbabilityResponse(

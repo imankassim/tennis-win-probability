@@ -36,7 +36,7 @@ def test_probability_for_a_known_point():
     body = response.json()
     assert body["match_id"] == DEMO_MATCH_ID
     assert body["point_sequence"] == 1
-    assert body["model_version"] == "score_leader_heuristic_v0"
+    assert body["model_version"] == "markov_v1"
     assert 0 <= body["probability_player_a"] <= 1
     assert body["price_player_a"] >= 1.0
     assert body["price_player_b"] >= 1.0

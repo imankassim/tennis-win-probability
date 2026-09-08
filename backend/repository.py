@@ -23,6 +23,7 @@ class MatchRepository(Protocol):
     def get_points(self, match_id: str) -> list[Point]: ...
     def get_outcome(self, match_id: str) -> OutcomeLabel | None: ...
     def list_matches(self) -> list[Match]: ...
+    def all_points_by_match(self) -> dict[str, list[Point]]: ...
 
 
 class InMemoryMatchRepository:
@@ -61,6 +62,12 @@ class InMemoryMatchRepository:
         points isn't replayable. `load_from_csv` may parse thousands of
         rows of match metadata against only a bounded sample of points."""
         return [m for match_id, m in self._matches.items() if self._points.get(match_id)]
+
+    def all_points_by_match(self) -> dict[str, list[Point]]:
+        """For serve-rate estimation (pricing/markov/serve_rate.py), which
+        needs every player's history across the whole archive, not just
+        one match's points."""
+        return self._points
 
 
 def load_from_csv(matches_csv: Path, points_csv: Path) -> InMemoryMatchRepository:
