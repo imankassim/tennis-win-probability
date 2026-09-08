@@ -6,6 +6,12 @@ serve rates specific to that match's two players) that a
 (sets_a, sets_b, games_a, games_b) -> probability signature can't express.
 It still reuses evaluation/metrics.py, so results are directly comparable
 to EXP1/EXP2's harness.py-based numbers.
+
+Uses bulk_shrunk_serve_rates rather than calling
+estimate_match_serve_rates once per match: the latter re-scans the whole
+prior archive for every match (fine for one live request, quadratic for
+bulk-evaluating thousands — this was measured directly and fixed, see
+pricing/markov/serve_rate.py's docstring).
 """
 
 from __future__ import annotations
@@ -13,7 +19,8 @@ from __future__ import annotations
 from database.models import Match, OutcomeLabel, Point
 from evaluation.harness import EvaluationResult
 from evaluation.metrics import brier_score, log_loss
-from pricing.markov.engine import estimate_match_serve_rates, markov_probability
+from pricing.markov.engine import markov_probability
+from pricing.markov.serve_rate import bulk_shrunk_serve_rates
 
 
 def evaluate_markov(
@@ -26,13 +33,15 @@ def evaluate_markov(
     actuals: list[float] = []
     n_matches = 0
 
+    serve_rates = bulk_shrunk_serve_rates(matches, points_by_match)
+
     for match in matches:
         outcome = outcomes.get(match.match_id)
         points = points_by_match.get(match.match_id)
         if outcome is None or not points:
             continue
         n_matches += 1
-        p_a, p_b = estimate_match_serve_rates(match, matches, points_by_match)
+        p_a, p_b = serve_rates[match.match_id]
         actual = 1.0 if outcome.actual_winner == "player_a" else 0.0
         for point in points:
             prediction = markov_probability(
