@@ -1,0 +1,71 @@
+from fastapi.testclient import TestClient
+
+from backend.fixtures import DEMO_MATCH_ID
+from backend.main import app
+
+client = TestClient(app)
+
+
+def test_health():
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
+def test_replay_returns_demo_match():
+    response = client.get(f"/replay/{DEMO_MATCH_ID}")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["match"]["match_id"] == DEMO_MATCH_ID
+    assert body["match"]["player_a"] == "Demo Player A"
+    assert len(body["points"]) == 70
+    # The demo match is deliberately left in progress — no outcome yet.
+    assert body["outcome"] is None
+
+
+def test_replay_unknown_match_is_404():
+    response = client.get("/replay/does_not_exist")
+    assert response.status_code == 404
+
+
+def test_probability_for_a_known_point():
+    response = client.post(
+        "/probability", json={"match_id": DEMO_MATCH_ID, "point_sequence": 1}
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["match_id"] == DEMO_MATCH_ID
+    assert body["point_sequence"] == 1
+    assert body["model_version"] == "score_leader_heuristic_v0"
+    assert 0 <= body["probability_player_a"] <= 1
+    assert body["price_player_a"] >= 1.0
+    assert body["price_player_b"] >= 1.0
+    assert body["fallback_used"] is False
+    assert body["suspended"] is False
+    # A request ID should be present and distinct across requests.
+    assert body["probability_request_id"]
+
+
+def test_probability_for_unknown_match_is_404():
+    response = client.post("/probability", json={"match_id": "nope", "point_sequence": 1})
+    assert response.status_code == 404
+
+
+def test_probability_for_unknown_point_sequence_is_404():
+    response = client.post(
+        "/probability", json={"match_id": DEMO_MATCH_ID, "point_sequence": 9999}
+    )
+    assert response.status_code == 404
+
+
+def test_probability_moves_toward_the_leader():
+    """Sanity check: by the end of set 1 (won 6-4 by player_a), the quoted
+    probability for player_a should be higher than at the very first point."""
+    first = client.post(
+        "/probability", json={"match_id": DEMO_MATCH_ID, "point_sequence": 1}
+    ).json()
+    # Point 47 is the first point of game 11 (start of set 2, player_a up 1-0 in sets).
+    later = client.post(
+        "/probability", json={"match_id": DEMO_MATCH_ID, "point_sequence": 47}
+    ).json()
+    assert later["probability_player_a"] > first["probability_player_a"]
