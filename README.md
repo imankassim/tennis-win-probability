@@ -92,6 +92,7 @@ courtedge/
 ├── backend/             # FastAPI routes and orchestration
 ├── database/            # schemas, migrations and seeds
 ├── pricing/
+│   ├── baselines/       # primitive 50/50 and score-leader heuristics
 │   ├── markov/          # analytic point/game/set/match model
 │   ├── ml/               # feature engineering and learned models
 │   ├── blend/             # fusion and meta-model
@@ -144,8 +145,7 @@ matches, one of which includes a rain-delay suspension.
 
 ## Project status
 
-**Journey 1 — Investigation setup** and **Journey 2 — first visible
-dashboard** are complete:
+**Journeys 1–3** are complete:
 
 - Repository scaffold, project charter, all architecture views, the
   decision records, the experiment register, data provenance rules and the
@@ -153,9 +153,12 @@ dashboard** are complete:
 - A static Next.js replay dashboard (`frontend/`) running on two scripted
   mock matches, with all four target page states reachable: loading,
   success, error (unknown match), and a suspended quote mid-replay.
+- The primitive baselines — always-50/50 and the current-score-leader
+  heuristic (`EXP1`, `EXP2`, in `pricing/baselines/`) — as the weak,
+  measurable floor every later component must clear.
 
-Next: **Journey 3 — primitive baselines** (the always-50/50 and
-score-leader heuristics, `EXP1`–`EXP2`).
+Next: **Journey 4 — data foundation** (the PostgreSQL match/player/point
+model, ingestion and quality gates).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
