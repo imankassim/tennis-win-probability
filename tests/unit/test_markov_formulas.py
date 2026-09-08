@@ -85,6 +85,20 @@ class TestProbWinSet:
     def test_who_serves_first_does_matter_mid_set(self):
         assert prob_win_set(0.6, 0.55, 3, 2, True) != prob_win_set(0.6, 0.55, 3, 2, False)
 
+    def test_an_advantage_set_deep_past_six_all_does_not_recurse_forever(self):
+        # Real historical data (pre-2022-era deciding sets played without
+        # a tiebreak) can reach scores like 10-9 or deeper. This must
+        # terminate (via truncation past a combined-games cap), not raise
+        # a RecursionError — caught from real ingested data.
+        result = prob_win_set(0.55, 0.5, games_a=10, games_b=9, a_serves_next=True)
+        assert 0.0 <= result <= 1.0
+
+    def test_advantage_set_still_resolves_a_clear_lead_correctly(self):
+        # Below the truncation cap, a 2-game lead past 6-6 must still be
+        # a clean win, not a truncated coin flip.
+        assert prob_win_set(0.6, 0.5, games_a=10, games_b=8) == 1.0
+        assert prob_win_set(0.6, 0.5, games_a=8, games_b=10) == 0.0
+
 
 class TestProbWinMatch:
     def test_even_players_split_a_best_of_three_evenly(self):

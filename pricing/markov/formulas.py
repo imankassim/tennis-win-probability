@@ -101,6 +101,19 @@ def prob_win_tiebreak(
     ) * prob_win_tiebreak(p_a, p_b, a, b + 1, a_serves_point_1)
 
 
+# Real historical data includes advantage sets (no tiebreak at 6-6 —
+# standard at most tournaments' deciding sets until roughly 2022, and the
+# only format some older matches in the archive were ever played under),
+# which can in principle run indefinitely at 2-games-apiece parity, the
+# same unbounded-recursion shape as prob_win_tiebreak's — with no closed
+# form, since which player serves each extra game keeps alternating.
+# Caught in practice: real ingested data past this journey's evaluation
+# sample hit a RecursionError from exactly this (a set past 6-6 with
+# neither player 2 games clear). Truncated the same way, for the same
+# reason: negligible probability mass this deep, whatever the format.
+_SET_TRUNCATION_GAMES = 40
+
+
 @lru_cache(maxsize=_CACHE_SIZE)
 def prob_win_set(
     p_a: float,
@@ -120,6 +133,8 @@ def prob_win_set(
         return 0.0
     if games_a == 6 and games_b == 6:
         return prob_win_tiebreak(p_a, p_b, a_serves_point_1=a_serves_next)
+    if games_a + games_b >= _SET_TRUNCATION_GAMES:
+        return 0.5
 
     p_server = p_a if a_serves_next else p_b
     p_a_wins_this_game = (
