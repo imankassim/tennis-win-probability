@@ -17,13 +17,19 @@ returns `0.5` unconditionally.
 
 ## Metrics
 
-Not measured against held-out outcomes yet — the outcome-label set and
-evaluation harness are built in Journey 8. Exercised now only by unit
-tests (`tests/unit/test_baselines.py`) confirming it is state-independent.
-Once Journey 8's harness exists, its Brier score and log-loss on any
-balanced evaluation set are fixed, known constants (Brier = 0.25, log-loss
-= ln 2 ≈ 0.693), which is exactly why it is useful as a floor: nothing
-about the data can make it look better or worse.
+Evaluated with `evaluation/harness.py` (Journey 8) against every point of
+every match with a confirmed outcome in the real ingested sample (183
+matches, 27,999 points):
+
+| Metric | Value |
+|---|---|
+| Brier score | 0.2500 |
+| Log-loss | 0.6931 |
+
+Exactly the theoretical constants (Brier = 0.25, log-loss = ln 2), as
+expected — nothing about the data can move them, which is exactly why this
+is a useful, stable floor. Also exercised by unit tests
+(`tests/unit/test_baselines.py`) confirming it is state-independent.
 
 ## Decision
 

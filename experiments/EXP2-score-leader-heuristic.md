@@ -20,17 +20,26 @@ baseline rather than drifting into the Markov/ML territory.
 
 ## Metrics
 
-As with EXP1, historical accuracy against held-out outcomes is deferred to
-Journey 8. Unit tests (`tests/unit/test_baselines.py`) confirm the
-mechanical behaviour: ties return 0.5, a set lead dominates a game deficit,
-and the function is symmetric between the two players.
+Evaluated with `evaluation/harness.py` (Journey 8) against the same 183
+matches / 27,999 points as EXP1:
+
+| Metric | EXP1 (floor) | EXP2 | Change |
+|---|---|---|---|
+| Brier score | 0.2500 | 0.1831 | −26.8% |
+| Log-loss | 0.6931 | 0.5515 | −20.4% |
+
+Confirms the hypothesis: knowing only who's ahead beats always-50/50 by a
+clear margin. Also exercised by unit tests
+(`tests/unit/test_baselines.py`) confirming the mechanical behaviour:
+ties return 0.5, a set lead dominates a game deficit, and the function is
+symmetric between the two players.
 
 ## Decision
 
 Retained as the second rung of the baseline floor, above EXP1 and below
-the Markov chain (Journey 9). It is expected to modestly beat EXP1 once
-measured, and to be clearly beaten by the Markov baseline — if it isn't,
-that would itself be a finding worth investigating before building
+the Markov chain (Journey 9). It clearly beats EXP1, as expected; it is
+expected to be clearly beaten by the Markov baseline in turn — if it
+isn't, that would itself be a finding worth investigating before building
 anything more advanced.
 
 ## Known failures
