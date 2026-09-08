@@ -70,9 +70,11 @@ class InMemoryMatchRepository:
         return self._points
 
 
-def load_from_csv(matches_csv: Path, points_csv: Path) -> InMemoryMatchRepository:
+def load_from_csv(matches_csv: Path, *points_csvs: Path) -> InMemoryMatchRepository:
     """Builds a repository from real, freshly-downloaded Match Charting
-    Project CSVs (see database/README.md) — not committed to the repo."""
+    Project CSVs (see database/README.md) — not committed to the repo.
+    Accepts multiple points files (e.g. one per decade — real match_ids
+    never repeat across them), same as database/ingestion/run.py."""
     parsed_matches, _errors = parse_matches(matches_csv)
     matches = [m for m, _a, _b in parsed_matches]
     players: dict[str, Player] = {}
@@ -81,5 +83,8 @@ def load_from_csv(matches_csv: Path, points_csv: Path) -> InMemoryMatchRepositor
         players[player_b.player_id] = player_b
 
     match_ids = {m.match_id for m in matches}
-    points_by_match, _errors = parse_points_by_match(points_csv, match_ids)
+    points_by_match: dict[str, list[Point]] = {}
+    for points_csv in points_csvs:
+        parsed_points, _errors = parse_points_by_match(points_csv, match_ids)
+        points_by_match.update(parsed_points)
     return InMemoryMatchRepository(matches, list(players.values()), points_by_match)
