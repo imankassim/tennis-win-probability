@@ -29,10 +29,10 @@ the leading digit(s) indicate the theme, not a strict run order.
 |---|---|---|---|
 | [EXP1](EXP1-always-fifty-fifty.md) | Always-50/50 probability | Primitive baseline | Retained |
 | [EXP2](EXP2-score-leader-heuristic.md) | Current-score-leader heuristic | Primitive baseline | Retained |
-| EXP10 | Constant tour-average serve rate Markov chain | Analytic baseline | Planned |
-| EXP11 | Per-player overall serve-win rate | Baseline refinement | Planned |
+| [EXP10](EXP10-tour-average-markov.md) | Constant tour-average serve rate Markov chain | Analytic baseline | Retained |
+| [EXP11](EXP11-per-player-serve-rate.md) | Per-player overall serve-win rate | Baseline refinement | Retained (data-volume limited — see write-up) |
 | EXP12 | Surface-specific serve-win rate | Baseline tuning | Planned |
-| EXP13 | Bayesian shrinkage for low-sample players | Robustness experiment | Planned |
+| [EXP13](EXP13-bayesian-shrinkage.md) | Bayesian shrinkage for low-sample players | Robustness experiment | Retained |
 | EXP14 | Non-i.i.d. Markov variant with a separate deuce-phase rate | Advanced analytic experiment | Planned |
 | EXP20 | Logistic regression on score-state features only | Learned baseline | Planned |
 | EXP21 | Logistic regression with player/context features added | Representation comparison | Planned |
