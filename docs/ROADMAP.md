@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–17 are complete.** Journey 10 (context features) was built
+**Journeys 1–18 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 Journey 16 (optional extensions) is deliberately deferred — it's
@@ -236,8 +236,32 @@ Done so far:
   [backend/README.md](../backend/README.md) and
   [pricing/README.md](../pricing/README.md).
 
-Next: **Journey 18** (reliability — failure injection, sync and drift
-tests).
+- Reliability (`tests/unit/test_probability_reliability.py`,
+  `tests/unit/test_feature_sync.py`, `evaluation/drift_check.py`): three
+  kinds of test, matching the journey's own name in the roadmap table.
+  **Failure injection** found and fixed two real gaps:
+  `load_artefacts()` would have crashed the whole API at startup on a
+  corrupted artefact file rather than degrading like a missing one, and
+  the ML/blend/calibration path didn't distinguish "ML model failed"
+  from "blend/calibration failed after a successful ML estimate" the way
+  [docs/architecture/deployment.md](architecture/deployment.md)'s
+  fallback table specifies — the latter case now sets
+  `widen_margin=True`, which `backend/main.py` uses to price with
+  `trading_rules.WIDENED_MARGIN` (0.10) instead of the default (0.05).
+  **A sync test** (`build_feature_row` vs `build_point_features`) checks
+  the live and offline feature-computation paths produce byte-identical
+  values for the same point — a real ML reliability risk
+  (train/serve skew) that would otherwise be invisible from either side
+  alone. **A cross-era drift check** (EXP44) scored the promoted pipeline
+  across the 2010s/2020s halves of the archive: no sharp collapse in
+  either era, but a real ~11% relative Brier gap, honestly reported
+  alongside the methodological confound that makes it not (yet) a clean
+  drift measurement. See
+  [docs/architecture/deployment.md](architecture/deployment.md#availability-and-fallback-paths)
+  and [evaluation/README.md](../evaluation/README.md).
+
+Next: **Journey 19** (dashboards — quality, latency, errors and
+regressions).
 
 ## Source
 
