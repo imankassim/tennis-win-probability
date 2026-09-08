@@ -113,10 +113,9 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–9 are complete, in order.** Journey 10 (context features) was
-built ahead of schedule by mistake between Journeys 6 and 7 — corrected
-rather than hidden; the work itself is real and tested, just out of
-sequence. Finishing Journey 10's remaining scope (ranking) is next.
+**Journeys 1–10 are complete.** Journey 10 (context features) was built
+ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
+than hidden; the work itself is real and tested, just out of sequence.
 
 Done so far:
 
@@ -133,7 +132,9 @@ Done so far:
   players, points and outcome labels, and an ingestion pipeline for the
   [Match Charting Project](https://github.com/JeffSackmann/tennis_MatchChartingProject)
   (the originally-named data source had been removed from GitHub — see
-  [decision 9](decisions/9-match-charting-project-data-source.md)).
+  [decision 9](decisions/9-match-charting-project-data-source.md)). Run
+  against the full 2010s+2020s archive: 5,453 matches / 890,356 points
+  with a confirmed outcome, 115 correctly quarantined incomplete charts.
 - A FastAPI backend (`backend/`) exposing `/health`, `GET /matches`,
   `/replay/{match_id}` and `/probability`, matching the documented
   response contract exactly, plus a real match-state parser for
@@ -142,27 +143,29 @@ Done so far:
   ingested matches, replayed through the same components as the scenario
   library, which stays separate (mock data) since it demonstrates page
   states — suspension — a completed match archive can't produce.
-- **(Journey 10, early)** Deterministic context features
-  (`backend/context_features.py`): recent form, surface record and
-  head-to-head, computed entirely from our own ingested match archive with
-  a strict no-look-ahead cutoff. Player ranking remains unsourced —
-  deferred until the ML feature set needs it.
-- Journey 7 — instrumentation (`backend/event_log.py`): every served quote
-  is logged as a JSONL record (request ID, model version, latency,
+- Instrumentation (`backend/event_log.py`): every served quote is logged
+  as a JSONL record (request ID, model version, latency,
   fallback/suspended) to a plain analytical file, not a database.
-- Journey 8 — evaluation (`evaluation/`): Brier score, log-loss and
-  latency percentiles, plus a harness that scores any configuration
-  against every point of every match with a confirmed outcome.
-- Journey 9 — the Markov baseline (`pricing/markov/`): the recursive
-  point-to-match formulas (Klaassen & Magnus, 2003), serve-rate estimation
-  with Bayesian shrinkage (EXP10/11/13), wired into `/probability` as
-  `markov_v1`, replacing the score-leader placeholder. See
+- Evaluation (`evaluation/`): Brier score, log-loss and latency
+  percentiles, plus a harness that scores any configuration against every
+  point of every match with a confirmed outcome.
+- The Markov baseline (`pricing/markov/`): the recursive point-to-match
+  formulas (Klaassen & Magnus, 2003), serve-rate estimation with Bayesian
+  shrinkage (EXP10/11/13), wired into `/probability` as `markov_v1`,
+  replacing the score-leader placeholder. Real result on the full
+  archive: beats EXP2 by 4.9% lower Brier score, 2.8% lower log-loss —
+  widened from a marginal gap on an earlier, smaller sample once more
+  history was ingested. See
   [pricing/markov/README.md](../pricing/markov/README.md) and
-  [evaluation/README.md](../evaluation/README.md) for real evaluation
-  results against ingested match data.
+  [evaluation/README.md](../evaluation/README.md).
+- Context features (`backend/context_features.py`): recent form, surface
+  record and head-to-head from our own archive, no-look-ahead. Player
+  strength (`backend/player_rating.py`): a self-computed Elo rating,
+  since no external ranking feed was ever found — verified sensible
+  against real data (top-rated players: Sinner, Alcaraz, Djokovic,
+  Federer).
 
-Next: finishing **Journey 10** (ranking data, still unsourced) before
-**Journey 11** (the ML model).
+Next: **Journey 11** (the ML model — XGBoost/LightGBM).
 
 ## Source
 
