@@ -5,7 +5,11 @@ FastAPI application layer: `/health`, `GET /matches`,
 
 ## Status
 
-Journey 7 (context features) is complete, on top of Journey 6. Uses
+Journeys 5-6 (API, replay behaviour) are complete. `context_features.py`
+is Journey 10 content, built ahead of schedule by mistake — the module
+itself is correct and tested, but Journeys 7-9 (instrumentation,
+evaluation, Markov baseline) are being filled in before continuing past
+Journey 10. Uses
 the score-leader heuristic (EXP2) as a stand-in estimator until the Markov
 chain (Journey 9) exists, and a real match-state parser
 (`match_state.py`) for break-point detection — reconstructed from the
@@ -30,10 +34,11 @@ match archive has no equivalent of.
   by default so the app runs without needing real downloaded data.
 - `match_state.py` — the match-state parser: derives whether a point is a
   break point from the earlier points in the same game.
-- `context_features.py` — the player context service: recent form,
-  surface record and head-to-head, computed from our own match archive
-  with a strict no-look-ahead cutoff. Not yet wired into an endpoint — its
-  first consumer will be the ML feature set (Journey 10-11).
+- `context_features.py` — the player context service (Journey 10, built
+  early): recent form, surface record and head-to-head, computed from our
+  own match archive with a strict no-look-ahead cutoff. Not yet wired
+  into an endpoint — its first consumer will be the ML feature set
+  (Journey 11).
 - `probability.py` — computes a probability/price from the score-leader
   heuristic; the placeholder margin and lack of trading rules are
   documented in the module.

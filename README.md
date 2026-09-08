@@ -152,7 +152,13 @@ at real ingested data with `COURTEDGE_DATA_DIR` — see
 
 ## Project status
 
-**Journeys 1–7** are complete:
+**Journeys 1–6 are complete, in order.** Journey 10 (context features) was
+then built ahead of schedule by mistake — corrected here rather than
+hidden; the work itself is real and tested, just out of sequence. Journeys
+7-9 (instrumentation, evaluation, Markov baseline) are being filled in now
+before continuing past 10.
+
+Done so far:
 
 - Repository scaffold, project charter, all architecture views, the
   decision records, the experiment register, data provenance rules and the
@@ -180,13 +186,17 @@ at real ingested data with `COURTEDGE_DATA_DIR` — see
   library, which stays separate (mock data) since it demonstrates page
   states — suspension — a completed match archive can't produce.
 
-- Deterministic context features (`backend/context_features.py`): recent
-  form, surface record and head-to-head, computed entirely from our own
-  ingested match archive with a strict no-look-ahead cutoff. Player
-  ranking remains unsourced — deferred until the ML feature set needs it.
+- **(Journey 10, early)** Deterministic context features
+  (`backend/context_features.py`): recent form, surface record and
+  head-to-head, computed entirely from our own ingested match archive with
+  a strict no-look-ahead cutoff. Player ranking remains unsourced —
+  deferred until the ML feature set needs it.
 
-Next: **Journey 8 — evaluation** (outcome labels are already in place;
-Brier score, log-loss and latency measurement come next).
+Next: **Journey 7 — instrumentation** (quote event logging; request IDs
+and model version are already in the `/probability` response), then
+**Journey 8 — evaluation** (Brier score, log-loss, latency measurement)
+and **Journey 9 — the Markov baseline**, before returning to Journey 10's
+remaining scope (ranking) and Journey 11 onward.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
