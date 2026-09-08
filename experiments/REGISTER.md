@@ -48,6 +48,7 @@ the leading digit(s) indicate the theme, not a strict run order.
 | [EXP41](EXP40-EXP43-calibration.md) | Platt scaling | Calibration candidate | Rejected — worse than no calibration on every metric (retained as evidence) |
 | [EXP42](EXP40-EXP43-calibration.md) | Isotonic regression | Calibration candidate | Retained |
 | [EXP43](EXP40-EXP43-calibration.md) | Dynamic, phase-level calibration | Calibration candidate | **Retained — leading configuration** |
+| [EXP44](EXP44-cross-era-drift.md) | Cross-era drift check: the promoted pipeline scored across 2010s vs 2020s matches | Reliability / drift check | Retained (diagnostic finding) |
 | EXP50 | Shot-level and rally momentum features | Optional representation experiment | Planned |
 | EXP51 | Cross-sport Poisson extension (football goal model) | Optional generalisation experiment | Planned |
 

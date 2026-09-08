@@ -115,3 +115,22 @@ expected, honest result, not a "beat the market" claim (none was made).
 Context features do meaningfully close the gap versus serve-rate-only
 Markov alone (0.2305 → 0.1984). See
 [trading_rules/README.md](../trading_rules/README.md).
+
+## Real evidence (cross-era drift check, EXP44)
+
+`drift_check.py` scores the promoted `blend_v1_calibrated` pipeline
+(unmodified) against the full archive — 5,457 matches / 891,514 points —
+then buckets the results at the 2010s/2020s boundary:
+
+| Era | Matches | Brier score | Log-loss | ECE |
+|---|---|---|---|---|
+| 2010s (pre-2020) | 2,182 | 0.1183 | 0.3718 | 0.0455 |
+| 2020s (2020+) | 3,275 | 0.1312 | 0.4067 | 0.0350 |
+
+No sharp collapse in either era, but a real ~11% relative Brier gap
+between them — confounded, though, with `promote_model.py`'s
+recency-based (not era-based) train/calibration split, so this can't yet
+distinguish genuine era drift from the model having simply seen more of
+the older data. See
+[experiments/EXP44-cross-era-drift.md](../experiments/EXP44-cross-era-drift.md)
+for the full reasoning and the honest caveat.

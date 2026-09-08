@@ -14,7 +14,7 @@ updated as each journey stage closes.
 | Latency growth as layers are added | Slower response time. | Compute Markov and ML in parallel; cache static player context; report p95. |
 | Unlicensed or paid data-source use | Legal and licensing exposure. | Use only permitted free datasets; record provenance and licence terms. |
 | Ethical or responsible-gambling exposure if generalised | Potential harm if presented as betting guidance. | Explicit research framing; safer-gambling note; no staking recommendation in outputs. |
-| Overfitting to a particular rule or equipment era | Looks strong on historic slams but generalises poorly. | Evaluate across multiple years and surfaces; monitor drift. |
+| Overfitting to a particular rule or equipment era | Looks strong on historic slams but generalises poorly. | Evaluate across multiple years and surfaces; monitor drift — see [EXP44](../../experiments/EXP44-cross-era-drift.md): no sharp collapse in either era, but a real ~11% relative Brier gap between the 2010s and 2020s halves of the archive, confounded with the promotion script's recency-based (not era-based) train/calibration split. |
 | Complex local setup for the feature/replay store | May exceed local development constraints. | Start with a simple local Parquet store; move to a managed environment only if needed. |
 
 ## Source
