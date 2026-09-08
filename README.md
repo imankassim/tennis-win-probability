@@ -128,13 +128,34 @@ courtedge/
 | [docs/REFERENCES.md](docs/REFERENCES.md) | Academic and technical sources behind the modelling approach. |
 | [docs/CourtEdge_Architecture_and_Task_Definition.docx](docs/CourtEdge_Architecture_and_Task_Definition.docx) | The original, full source specification this repository implements. |
 
+## Running the dashboard
+
+The dashboard is currently static (mock data only — there is no backend
+yet). To run it locally:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Then open the printed local URL and pick one of the two scripted demo
+matches, one of which includes a rain-delay suspension.
+
 ## Project status
 
-Currently on **Journey 1 — Investigation setup**. Complete: repository
-scaffold, project charter, all architecture views, the ADR set, the
-experiment register, data provenance rules and the risk register. Next:
-**Journey 2 — first visible dashboard** (static Next.js replay route with
-mock data and all page states).
+**Journey 1 — Investigation setup** and **Journey 2 — first visible
+dashboard** are complete:
+
+- Repository scaffold, project charter, all architecture views, the
+  decision records, the experiment register, data provenance rules and the
+  risk register.
+- A static Next.js replay dashboard (`frontend/`) running on two scripted
+  mock matches, with all four target page states reachable: loading,
+  success, error (unknown match), and a suspended quote mid-replay.
+
+Next: **Journey 3 — primitive baselines** (the always-50/50 and
+score-leader heuristics, `EXP1`–`EXP2`).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
