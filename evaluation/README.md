@@ -94,3 +94,13 @@ negative result, not a modelling mistake: the blend's raw output was
 already reasonably well-calibrated, and Platt's fixed logistic-shape
 correction distorted rather than fixed it. See
 [pricing/calibration/README.md](../pricing/calibration/README.md).
+
+## Real evidence (the meta-model, EXP34)
+
+Rejected: a learned combiner (stacking the Markov and ML outputs with
+the raw features) underperformed the simple tuned blend (EXP33) in
+every variant tried, some badly enough to score worse than Markov alone.
+Diagnosed as overfitting — 716,025 point-rows come from only 4,363
+independent matches, far less real signal for a many-parameter model
+than the row count suggests. See
+[pricing/blend/README.md](../pricing/blend/README.md).

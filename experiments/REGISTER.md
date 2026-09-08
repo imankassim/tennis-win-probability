@@ -43,7 +43,7 @@ the leading digit(s) indicate the theme, not a strict run order.
 | [EXP31](EXP30-EXP31-markov-and-ml-only.md) | ML-only probability | Learned comparator | Retained (comparator) |
 | [EXP32](EXP32-EXP33-blend.md) | Fixed-weight blend of Markov and ML | Fusion baseline | Rejected — worse than ML alone (retained as evidence) |
 | [EXP33](EXP32-EXP33-blend.md) | Validation-tuned weighted blend | Fusion alternative | **Retained — leading configuration** |
-| EXP34 | Stacked meta-model combining Markov output, ML output and features | Meta-learning candidate | Planned |
+| [EXP34](EXP34-meta-model.md) | Stacked meta-model combining Markov output, ML output and features | Meta-learning candidate | Rejected — overfits vs. the simple tuned blend (retained as evidence) |
 | [EXP40](EXP40-EXP43-calibration.md) | No calibration (raw blended probability) | Calibration baseline | Retained (comparator) |
 | [EXP41](EXP40-EXP43-calibration.md) | Platt scaling | Calibration candidate | Rejected — worse than no calibration on every metric (retained as evidence) |
 | [EXP42](EXP40-EXP43-calibration.md) | Isotonic regression | Calibration candidate | Retained |

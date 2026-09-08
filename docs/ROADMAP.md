@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–13 are complete.** Journey 10 (context features) was built
+**Journeys 1–14 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 
@@ -190,9 +190,18 @@ Done so far:
   live API: `suspended` is now genuinely computed, not always false. See
   [pricing/calibration/README.md](../pricing/calibration/README.md) and
   [trading_rules/README.md](../trading_rules/README.md).
+- The learned meta-model (`pricing/blend/meta_model.py`): EXP34 —
+  rejected. A learned combiner (stacking Markov + ML outputs with the raw
+  features) underperformed the simple tuned blend (EXP33) in every
+  variant tried, diagnosed as overfitting (716,025 point-rows come from
+  only 4,363 independent matches — far less real signal than the row
+  count suggests). The fallback logic
+  (`predict_with_fallback` — degrades to Markov-only or ML-only if either
+  base estimate is missing) is retained regardless. See
+  [pricing/blend/README.md](../pricing/blend/README.md).
 
-Next: **Journey 14** (the learned meta-model — stacking Markov output, ML
-output and features, with fallback).
+Next: **Journey 15** (bounded value-detection — a market-comparison
+feature against tennis-data.co.uk odds, research-only, with a backtest).
 
 ## Source
 
