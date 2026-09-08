@@ -9,7 +9,12 @@ the offline/online separation principle: nothing here depends on the
 serving path).
 
 Usage:
-    python -m database.ingestion.run <matches.csv> <points.csv>
+    python -m database.ingestion.run <matches.csv> <points.csv> [<points2.csv> ...]
+
+Multiple points files are accepted (e.g. the Match Charting Project's
+separate per-decade files) and merged — real match_ids never repeat
+across them, since each decade file only contains matches from that
+decade.
 
 The source CSVs are never committed to the repository — see
 docs/data_sheets/data_provenance.md. Download them yourself:
@@ -23,11 +28,11 @@ from pathlib import Path
 
 from database.ingestion.match_charting_project import parse_matches, parse_points_by_match
 from database.ingestion.outcomes import derive_outcome
-from database.models import Match, OutcomeLabel, Player, QuarantinedMatch
+from database.models import Match, OutcomeLabel, Player, Point, QuarantinedMatch
 from database.quality_gates import check_unique_nonnull_match_ids, validate_match_points
 
 
-def ingest(matches_csv: Path, points_csv: Path) -> dict:
+def ingest(matches_csv: Path, *points_csvs: Path) -> dict:
     matches: list[Match] = []
     players: dict[str, Player] = {}
     parsed_matches, match_parse_errors = parse_matches(matches_csv)
@@ -39,8 +44,16 @@ def ingest(matches_csv: Path, points_csv: Path) -> dict:
     match_level_violations = check_unique_nonnull_match_ids(matches) + match_parse_errors
 
     match_ids = {m.match_id for m in matches}
-    points_by_match, point_parse_errors = parse_points_by_match(points_csv, match_ids)
-    match_level_violations += point_parse_errors
+    points_by_match: dict[str, list[Point]] = {}
+    for points_csv in points_csvs:
+        parsed_points, point_parse_errors = parse_points_by_match(points_csv, match_ids)
+        overlap = set(parsed_points) & set(points_by_match)
+        if overlap:
+            match_level_violations.append(
+                f"{points_csv}: {len(overlap)} match_id(s) already seen in an earlier points file"
+            )
+        points_by_match.update(parsed_points)
+        match_level_violations += point_parse_errors
 
     outcome_labels: list[OutcomeLabel] = []
     quarantined: list[QuarantinedMatch] = []
@@ -64,6 +77,7 @@ def ingest(matches_csv: Path, points_csv: Path) -> dict:
         "matches_parsed": len(matches),
         "players_parsed": len(players),
         "matches_with_points": len(points_by_match),
+        "points_parsed": sum(len(pts) for pts in points_by_match.values()),
         "match_level_violations": match_level_violations,
         "point_level_violations": point_violations,
         "outcome_labels": outcome_labels,
@@ -75,6 +89,7 @@ def _print_report(result: dict) -> None:
     print(f"Matches parsed:          {result['matches_parsed']}")
     print(f"Players parsed:          {result['players_parsed']}")
     print(f"Matches with points:     {result['matches_with_points']}")
+    print(f"Points parsed:           {result['points_parsed']}")
     print(f"Match-level violations:  {len(result['match_level_violations'])}")
     print(f"Outcome labels derived:  {len(result['outcome_labels'])}")
     print(f"Matches quarantined:     {len(result['quarantined'])}")
@@ -85,8 +100,8 @@ def _print_report(result: dict) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 3:
         print(__doc__)
         raise SystemExit(1)
-    result = ingest(Path(sys.argv[1]), Path(sys.argv[2]))
+    result = ingest(Path(sys.argv[1]), *(Path(p) for p in sys.argv[2:]))
     _print_report(result)
