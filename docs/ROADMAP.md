@@ -113,8 +113,56 @@ relationship, not an assessment decision.
 
 ## Current status
 
-See the [README](../README.md#project-status) for which journey/stage is in
-progress.
+**Journeys 1–9 are complete, in order.** Journey 10 (context features) was
+built ahead of schedule by mistake between Journeys 6 and 7 — corrected
+rather than hidden; the work itself is real and tested, just out of
+sequence. Finishing Journey 10's remaining scope (ranking) is next.
+
+Done so far:
+
+- Repository scaffold, project charter, all architecture views, the
+  decision records, the experiment register, data provenance rules and the
+  risk register.
+- A static Next.js replay dashboard (`frontend/`) running on two scripted
+  mock matches, with all four target page states reachable: loading,
+  success, error (unknown match), and a suspended quote mid-replay.
+- The primitive baselines — always-50/50 and the current-score-leader
+  heuristic (`EXP1`, `EXP2`, in `pricing/baselines/`) — as the weak,
+  measurable floor every later component must clear.
+- The data foundation (`database/`): a PostgreSQL schema for matches,
+  players, points and outcome labels, and an ingestion pipeline for the
+  [Match Charting Project](https://github.com/JeffSackmann/tennis_MatchChartingProject)
+  (the originally-named data source had been removed from GitHub — see
+  [decision 9](decisions/9-match-charting-project-data-source.md)).
+- A FastAPI backend (`backend/`) exposing `/health`, `GET /matches`,
+  `/replay/{match_id}` and `/probability`, matching the documented
+  response contract exactly, plus a real match-state parser for
+  break-point detection.
+- The frontend is wired to it: `/matches` browses and filters real
+  ingested matches, replayed through the same components as the scenario
+  library, which stays separate (mock data) since it demonstrates page
+  states — suspension — a completed match archive can't produce.
+- **(Journey 10, early)** Deterministic context features
+  (`backend/context_features.py`): recent form, surface record and
+  head-to-head, computed entirely from our own ingested match archive with
+  a strict no-look-ahead cutoff. Player ranking remains unsourced —
+  deferred until the ML feature set needs it.
+- Journey 7 — instrumentation (`backend/event_log.py`): every served quote
+  is logged as a JSONL record (request ID, model version, latency,
+  fallback/suspended) to a plain analytical file, not a database.
+- Journey 8 — evaluation (`evaluation/`): Brier score, log-loss and
+  latency percentiles, plus a harness that scores any configuration
+  against every point of every match with a confirmed outcome.
+- Journey 9 — the Markov baseline (`pricing/markov/`): the recursive
+  point-to-match formulas (Klaassen & Magnus, 2003), serve-rate estimation
+  with Bayesian shrinkage (EXP10/11/13), wired into `/probability` as
+  `markov_v1`, replacing the score-leader placeholder. See
+  [pricing/markov/README.md](../pricing/markov/README.md) and
+  [evaluation/README.md](../evaluation/README.md) for real evaluation
+  results against ingested match data.
+
+Next: finishing **Journey 10** (ranking data, still unsourced) before
+**Journey 11** (the ML model).
 
 ## Source
 
