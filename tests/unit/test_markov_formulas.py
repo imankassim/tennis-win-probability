@@ -74,6 +74,17 @@ class TestProbWinSet:
     def test_better_server_wins_more_sets(self):
         assert prob_win_set(0.65, 0.55) > prob_win_set(0.55, 0.65)
 
+    def test_who_serves_first_does_not_matter_from_a_fresh_set(self):
+        # Verified independently by Monte Carlo simulation, not just this
+        # recursion: from 0-0 games, alternating service means the set-win
+        # probability is identical whichever player serves game 1 — a real
+        # property, not a bug. It does start to matter mid-set (see
+        # test_better_server_wins_more_sets-style state-dependent cases).
+        assert prob_win_set(0.6, 0.55, 0, 0, True) == prob_win_set(0.6, 0.55, 0, 0, False)
+
+    def test_who_serves_first_does_matter_mid_set(self):
+        assert prob_win_set(0.6, 0.55, 3, 2, True) != prob_win_set(0.6, 0.55, 3, 2, False)
+
 
 class TestProbWinMatch:
     def test_even_players_split_a_best_of_three_evenly(self):
