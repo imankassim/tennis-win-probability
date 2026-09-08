@@ -34,11 +34,11 @@ the leading digit(s) indicate the theme, not a strict run order.
 | EXP12 | Surface-specific serve-win rate | Baseline tuning | Planned |
 | [EXP13](EXP13-bayesian-shrinkage.md) | Bayesian shrinkage for low-sample players | Robustness experiment | Retained |
 | EXP14 | Non-i.i.d. Markov variant with a separate deuce-phase rate | Advanced analytic experiment | Planned |
-| EXP20 | Logistic regression on score-state features only | Learned baseline | Planned |
-| EXP21 | Logistic regression with player/context features added | Representation comparison | Planned |
-| EXP22 | XGBoost/LightGBM classifier, state features only | Learned model | Planned |
-| EXP23 | XGBoost/LightGBM classifier, state and context features | Learned model | Planned |
-| EXP24 | XGBoost/LightGBM classifier, state, context and momentum features | Representation comparison | Planned |
+| [EXP20](EXP20-logistic-state-only.md) | Logistic regression on score-state features only | Learned baseline | Retained |
+| [EXP21](EXP21-logistic-state-context.md) | Logistic regression with player/context features added | Representation comparison | Retained |
+| [EXP22](EXP22-lightgbm-state-only.md) | XGBoost/LightGBM classifier, state features only | Learned model | Retained |
+| [EXP23](EXP23-lightgbm-state-context.md) | XGBoost/LightGBM classifier, state and context features | Learned model | Retained |
+| [EXP24](EXP24-lightgbm-state-context-momentum.md) | XGBoost/LightGBM classifier, state, context and momentum features | Representation comparison | **Retained — leading ML candidate** |
 | EXP30 | Markov-only probability | Analytic comparator | Planned |
 | EXP31 | ML-only probability | Learned comparator | Planned |
 | EXP32 | Fixed-weight blend of Markov and ML | Fusion baseline | Planned |
