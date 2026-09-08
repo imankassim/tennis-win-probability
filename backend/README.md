@@ -5,11 +5,12 @@ FastAPI application layer: `/health`, `GET /matches`,
 
 ## Status
 
-Journeys 5-9 (API, replay behaviour, instrumentation, evaluation, Markov
-baseline) are complete. `context_features.py` is Journey 10 content,
-built ahead of schedule by mistake — the module itself is correct and
-tested, but its remaining scope (ranking) is picked up properly when
-Journey 10 resumes.
+Journeys 5-10 (API, replay behaviour, instrumentation, evaluation, Markov
+baseline, context features) are complete. `context_features.py` was built
+ahead of schedule by mistake, between Journeys 6 and 7 — the module
+itself was always correct and tested, just out of sequence; `player_rating.py`
+finishes Journey 10's remaining scope (ranking) with a self-computed Elo
+rating, since no external ranking feed was ever sourced.
 
 `/probability` now uses the Markov engine (`pricing/markov/`, model
 version `markov_v1`) as its estimator, replacing the score-leader
@@ -36,11 +37,16 @@ match archive has no equivalent of.
   by default so the app runs without needing real downloaded data.
 - `match_state.py` — the match-state parser: derives whether a point is a
   break point from the earlier points in the same game.
-- `context_features.py` — the player context service (Journey 10, built
-  early): recent form, surface record and head-to-head, computed from our
-  own match archive with a strict no-look-ahead cutoff. Not yet wired
-  into an endpoint — its first consumer will be the ML feature set
-  (Journey 11).
+- `context_features.py` — the player context service: recent form,
+  surface record and head-to-head, computed from our own match archive
+  with a strict no-look-ahead cutoff.
+- `player_rating.py` — a self-computed Elo rating (finishing Journey 10):
+  no external ATP/WTA rankings feed was ever sourced, so this computes a
+  standard Elo rating directly from our own match archive instead — same
+  no-look-ahead discipline. Verified sensible against real data: top
+  rated players are Sinner, Alcaraz, Djokovic, Federer, in that order.
+  Neither this nor `context_features.py` is wired into an endpoint yet —
+  their first consumer will be the ML feature set (Journey 11).
 - `event_log.py` — Journey 7 (instrumentation): logs one JSONL record per
   served quote (request ID, model version, latency, fallback/suspended)
   to `data/quote_log.jsonl` by default, or `COURTEDGE_QUOTE_LOG_PATH`.

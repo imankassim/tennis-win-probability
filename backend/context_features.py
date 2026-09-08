@@ -4,10 +4,13 @@ deterministic ranking, recent form, surface and head-to-head extraction.
 Recent form, surface record and head-to-head are computed directly from
 our own ingested match archive (database/models.py Match + OutcomeLabel) —
 no external source needed, since they're just aggregates over matches we
-already have. Current ranking/rank_points are NOT computed here: no
-ranking feed has been sourced yet (Player.current_rank/rank_points stay
-unpopulated) — see docs/data_sheets/data_provenance.md. Callers should
-treat a missing ranking as "unknown", not as rank 0 or similar.
+already have. Player strength ("ranking") is NOT computed here: no
+external ranking feed was ever sourced (Player.current_rank/rank_points
+stay unpopulated — see docs/data_sheets/data_provenance.md), so
+backend/player_rating.py computes a self-sufficient Elo rating from this
+same archive instead — a separate module since it needs its own
+sequential, whole-archive pass (a running rating per player) rather than
+a per-match aggregate like the functions here.
 
 Every function here takes `as_of_date` and strictly excludes matches on or
 after it — the "no look-ahead" training control (ADR 9's context, and
