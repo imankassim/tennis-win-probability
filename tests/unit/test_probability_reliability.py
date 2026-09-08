@@ -65,6 +65,9 @@ def _artefacts(ml_model, calibrator) -> PricingArtefacts:
         trained_at="2026-01-01T00:00:00+00:00",
         n_training_matches=10,
         n_calibration_matches=2,
+        calibration_brier=0.2,
+        calibration_log_loss=0.5,
+        calibration_ece=0.05,
     )
 
 

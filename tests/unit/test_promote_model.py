@@ -18,7 +18,7 @@ from pricing.promote_model import (
 PLAYERS = ["p1", "p2", "p3", "p4"]
 
 
-def _synthetic_archive(n_matches=40, points_per_match=20, seed=0):
+def _synthetic_archive(n_matches=100, points_per_match=20, seed=0):
     """A small, deterministic archive with a real per-match progression
     (not just 1-2 points), so context features, momentum and serve rates
     all have something real to compute from. Mirrors the shape of
@@ -96,8 +96,15 @@ def test_train_and_promote_produces_a_complete_artefact_bundle():
     assert artefacts.model_version == MODEL_VERSION
     assert artefacts.blend_markov_weight == BLEND_MARKOV_WEIGHT
     assert artefacts.feature_columns == FEATURE_SETS["state_context_momentum"]
-    assert artefacts.n_training_matches + artefacts.n_calibration_matches == 40
+    # n_calibration_matches only counts the half of the 15% holdout the
+    # calibrator was actually fit on — the other half (never fit on by
+    # anything) produced calibration_brier/_log_loss/_ece, so the two
+    # numbers deliberately don't sum to the full archive size.
+    assert artefacts.n_training_matches < 100
     assert artefacts.n_calibration_matches >= 1
+    assert 0.0 <= artefacts.calibration_brier <= 1.0
+    assert artefacts.calibration_log_loss >= 0.0
+    assert 0.0 <= artefacts.calibration_ece <= 1.0
 
 
 def test_promoted_model_predicts_probabilities_in_range():

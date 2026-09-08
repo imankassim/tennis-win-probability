@@ -36,6 +36,9 @@ def _artefacts() -> PricingArtefacts:
         trained_at="2026-01-01T00:00:00+00:00",
         n_training_matches=1,
         n_calibration_matches=1,
+        calibration_brier=0.2,
+        calibration_log_loss=0.5,
+        calibration_ece=0.05,
     )
 
 
