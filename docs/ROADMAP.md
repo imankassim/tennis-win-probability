@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–14 are complete.** Journey 10 (context features) was built
+**Journeys 1–15 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 
@@ -199,9 +199,18 @@ Done so far:
   (`predict_with_fallback` — degrades to Markov-only or ML-only if either
   base estimate is missing) is retained regardless. See
   [pricing/blend/README.md](../pricing/blend/README.md).
+- Bounded value-detection (`trading_rules/value_detection.py`,
+  `database/ingestion/tennis_data_co_uk.py`): real 2025-2026 ATP odds
+  matched to 621 of our own archived matches by surname and date. Our
+  best model (the blend) scores clearly worse pre-match than the
+  de-vigged market (Brier 0.1984 vs 0.1828) — the honest, expected
+  result; no "beat the market" claim made. Context features do
+  meaningfully close the gap versus Markov alone (0.2305 → 0.1984). See
+  [trading_rules/README.md](../trading_rules/README.md).
 
-Next: **Journey 15** (bounded value-detection — a market-comparison
-feature against tennis-data.co.uk odds, research-only, with a backtest).
+Next: **Journey 16** (optional extensions — shot-level/momentum features,
+a grounded explanation layer — separate advanced investigations, may be
+deferred).
 
 ## Source
 

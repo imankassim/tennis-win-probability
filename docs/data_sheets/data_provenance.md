@@ -10,7 +10,7 @@ quality gates and by the governance architecture.
 |---|---|---|---|
 | Jeff Sackmann, [`tennis_MatchChartingProject`](https://github.com/JeffSackmann/tennis_MatchChartingProject) GitHub repository | Crowdsourced, shot-by-shot point-by-point data and match metadata for charted ATP/WTA matches | CC BY-NC-SA 4.0 (non-commercial), stated in the repo's README | Primary source for matches, players, points and outcome labels. See [decision 9](../decisions/9-match-charting-project-data-source.md) for why this replaced `tennis_slam_pointbypoint`. |
 | ATP/WTA rankings | Player ranking history | Not yet sourced | Still deferred — Journey 7 built recent-form, surface-record and head-to-head context features entirely from our own ingested match archive (no external source needed for those). Only `current_rank`/`rank_points` remain unpopulated; sourced when the ML feature set (Journey 10-11) actually needs them. |
-| tennis-data.co.uk | Historical match odds | Published for personal / non-commercial research use | Evaluation benchmark only — for de-vigged comparison and the bounded, research-only value-detection layer. Never used as an input feature and never treated as ground truth. |
+| [tennis-data.co.uk](http://tennis-data.co.uk/alldata.php) | Historical ATP/WTA match results and closing odds (yearly `.xlsx` files, one per tour) | Published for personal / non-commercial research use | Evaluation benchmark only — for de-vigged comparison and the bounded, research-only value-detection layer (Journey 15). Never used as an input feature and never treated as ground truth. Uses the `AvgW`/`AvgL` columns (the average closing odds across bookmakers), not any single bookmaker's price. |
 
 ### A note on the originally-named sources
 

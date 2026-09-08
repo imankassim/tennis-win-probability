@@ -27,6 +27,12 @@ Journey 4 (data foundation) is complete:
   a match's points, without parsing score notation (see the module
   docstring), quarantining matches whose chart doesn't confirm a complete
   match.
+- `ingestion/tennis_data_co_uk.py` — parses tennis-data.co.uk's yearly
+  odds files and matches them to our own archive by player surname and
+  date proximity (no shared match_id between the two sources). Evaluation
+  benchmark only — see
+  [trading_rules/README.md](../trading_rules/README.md) for the Journey
+  15 value-detection backtest this feeds.
 - `ingestion/run.py` — the ingestion entry point: parse, validate,
   quarantine, report. Accepts multiple points files (e.g. one per decade)
   and merges them. Not yet wired to a live PostgreSQL connection — see

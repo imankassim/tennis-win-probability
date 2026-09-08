@@ -104,3 +104,13 @@ Diagnosed as overfitting — 716,025 point-rows come from only 4,363
 independent matches, far less real signal for a many-parameter model
 than the row count suggests. See
 [pricing/blend/README.md](../pricing/blend/README.md).
+
+## Real evidence (value-detection backtest, EXP15)
+
+621 real matches with both a confirmed outcome and matched 2025-2026 ATP
+odds (tennis-data.co.uk). Our best model (the blend) scores a clearly
+worse pre-match Brier than the de-vigged market (0.1984 vs 0.1828) — the
+expected, honest result, not a "beat the market" claim (none was made).
+Context features do meaningfully close the gap versus serve-rate-only
+Markov alone (0.2305 → 0.1984). See
+[trading_rules/README.md](../trading_rules/README.md).
