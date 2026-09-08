@@ -39,10 +39,10 @@ the leading digit(s) indicate the theme, not a strict run order.
 | [EXP22](EXP22-lightgbm-state-only.md) | XGBoost/LightGBM classifier, state features only | Learned model | Retained |
 | [EXP23](EXP23-lightgbm-state-context.md) | XGBoost/LightGBM classifier, state and context features | Learned model | Retained |
 | [EXP24](EXP24-lightgbm-state-context-momentum.md) | XGBoost/LightGBM classifier, state, context and momentum features | Representation comparison | **Retained — leading ML candidate** |
-| EXP30 | Markov-only probability | Analytic comparator | Planned |
-| EXP31 | ML-only probability | Learned comparator | Planned |
-| EXP32 | Fixed-weight blend of Markov and ML | Fusion baseline | Planned |
-| EXP33 | Validation-tuned weighted blend | Fusion alternative | Planned |
+| [EXP30](EXP30-EXP31-markov-and-ml-only.md) | Markov-only probability | Analytic comparator | Retained (comparator) |
+| [EXP31](EXP30-EXP31-markov-and-ml-only.md) | ML-only probability | Learned comparator | Retained (comparator) |
+| [EXP32](EXP32-EXP33-blend.md) | Fixed-weight blend of Markov and ML | Fusion baseline | Rejected — worse than ML alone (retained as evidence) |
+| [EXP33](EXP32-EXP33-blend.md) | Validation-tuned weighted blend | Fusion alternative | **Retained — leading configuration** |
 | EXP34 | Stacked meta-model combining Markov output, ML output and features | Meta-learning candidate | Planned |
 | EXP40 | No calibration (raw blended probability) | Calibration baseline | Planned |
 | EXP41 | Platt scaling | Calibration candidate | Planned |
