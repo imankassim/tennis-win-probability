@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–10 are complete.** Journey 10 (context features) was built
+**Journeys 1–11 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 
@@ -164,8 +164,18 @@ Done so far:
   since no external ranking feed was ever found — verified sensible
   against real data (top-rated players: Sinner, Alcaraz, Djokovic,
   Federer).
+- The ML model (`pricing/ml/`): EXP20-24, logistic regression and
+  LightGBM over increasing feature sets (state, +context, +momentum) on
+  a chronological match-level held-out split. The leading candidate
+  (EXP24, LightGBM with all three) beats Markov by 15.1% lower Brier
+  score, 15.7% lower log-loss. Finding: which features are included
+  mattered far more than model family (logistic vs LightGBM scored
+  within noise of each other on the same features). Not yet wired into
+  the live API — the architecture blends the Markov and ML estimates
+  (Journey 12) rather than one replacing the other. See
+  [pricing/ml/README.md](../pricing/ml/README.md).
 
-Next: **Journey 11** (the ML model — XGBoost/LightGBM).
+Next: **Journey 12** (the blend — combining the Markov and ML estimates).
 
 ## Source
 
