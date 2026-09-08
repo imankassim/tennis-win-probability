@@ -145,7 +145,7 @@ matches, one of which includes a rain-delay suspension.
 
 ## Project status
 
-**Journeys 1–3** are complete:
+**Journeys 1–4** are complete:
 
 - Repository scaffold, project charter, all architecture views, the
   decision records, the experiment register, data provenance rules and the
@@ -156,9 +156,16 @@ matches, one of which includes a rain-delay suspension.
 - The primitive baselines — always-50/50 and the current-score-leader
   heuristic (`EXP1`, `EXP2`, in `pricing/baselines/`) — as the weak,
   measurable floor every later component must clear.
+- The data foundation (`database/`): a PostgreSQL schema for matches,
+  players, points and outcome labels, and an ingestion pipeline for the
+  [Match Charting Project](https://github.com/JeffSackmann/tennis_MatchChartingProject)
+  (the originally-named data source had been removed from GitHub — see
+  [decision 9](docs/decisions/9-match-charting-project-data-source.md)),
+  run against real data: 183 confirmed match outcomes, 7 incomplete charts
+  correctly quarantined instead of guessed at.
 
-Next: **Journey 4 — data foundation** (the PostgreSQL match/player/point
-model, ingestion and quality gates).
+Next: **Journey 5 — API** (FastAPI health, probability and replay
+endpoints).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
