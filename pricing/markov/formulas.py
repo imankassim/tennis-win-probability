@@ -16,8 +16,20 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+# Bounded, not unlimited: each unique (p_a, p_b) serve-rate pair produces
+# its own family of cache entries that are essentially single-use once a
+# match's evaluation moves on to a different pair — reused heavily within
+# one match's points, never again after. Measured directly: with an
+# unbounded cache, evaluating 2,000 real matches took 93s (vs 1s for 200
+# matches) — not because the math got slower, but because Python's
+# garbage collector re-scans an ever-growing cache on every cycle. A
+# bounded cache evicts old, no-longer-useful entries and keeps this
+# roughly linear in the number of points evaluated, whether serving one
+# live match or bulk-evaluating thousands (evaluation/evaluate_markov.py).
+_CACHE_SIZE = 100_000
 
-@lru_cache(maxsize=None)
+
+@lru_cache(maxsize=_CACHE_SIZE)
 def prob_win_game(p: float, a: int = 0, b: int = 0) -> float:
     """Probability the server wins their own service game, given `p` =
     their probability of winning any single point on serve, from a score
@@ -68,7 +80,7 @@ def _tiebreak_server_is_a(point_number: int, a_serves_point_1: bool) -> bool:
 _TIEBREAK_TRUNCATION_POINTS = 40
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=_CACHE_SIZE)
 def prob_win_tiebreak(
     p_a: float, p_b: float, a: int = 0, b: int = 0, a_serves_point_1: bool = True
 ) -> float:
@@ -89,7 +101,7 @@ def prob_win_tiebreak(
     ) * prob_win_tiebreak(p_a, p_b, a, b + 1, a_serves_point_1)
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=_CACHE_SIZE)
 def prob_win_set(
     p_a: float,
     p_b: float,
@@ -122,7 +134,7 @@ def prob_win_set(
     )
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=_CACHE_SIZE)
 def prob_win_match(
     p_a: float,
     p_b: float,
