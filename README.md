@@ -145,7 +145,7 @@ matches, one of which includes a rain-delay suspension.
 
 ## Project status
 
-**Journeys 1–4** are complete:
+**Journeys 1–5** are complete:
 
 - Repository scaffold, project charter, all architecture views, the
   decision records, the experiment register, data provenance rules and the
@@ -163,9 +163,13 @@ matches, one of which includes a rain-delay suspension.
   [decision 9](docs/decisions/9-match-charting-project-data-source.md)),
   run against real data: 183 confirmed match outcomes, 7 incomplete charts
   correctly quarantined instead of guessed at.
+- A FastAPI backend (`backend/`) exposing `/health`, `/replay/{match_id}`
+  and `/probability`, matching the documented response contract exactly.
+  Uses the score-leader heuristic as a stand-in estimator until the Markov
+  chain exists; the frontend isn't wired to it yet — that's next.
 
-Next: **Journey 5 — API** (FastAPI health, probability and replay
-endpoints).
+Next: **Journey 6 — replay behaviour** (connect the frontend to the real
+API, match detail, scenario library, filters).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
