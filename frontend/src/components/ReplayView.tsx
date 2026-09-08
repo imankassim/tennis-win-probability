@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getMatchReplay } from "@/lib/mockData";
+import { getRealMatchReplay } from "@/lib/api";
+import { getMatchReplay, isScenarioLibraryMatch } from "@/lib/mockData";
 import type { MatchReplay, PageState } from "@/lib/types";
 import { ErrorState, LoadingState } from "./StatusStates";
 import { ModelVersionBadge } from "./ModelVersionBadge";
@@ -11,8 +12,9 @@ import { PointTicker } from "./PointTicker";
 import { PlaybackControls } from "./PlaybackControls";
 
 const PLAY_INTERVAL_MS = 700;
-// Mock-only: real loading will be an actual fetch to FastAPI (Journey 5).
-// This delay exists purely so the loading state is reachable and testable.
+// Scenario-library matches use scripted mock data (see mockData.ts) — this
+// delay exists purely so the loading state stays reachable and testable
+// now that real matches have their own, actually-asynchronous fetch.
 const SIMULATED_LOAD_MS = 400;
 
 /**
@@ -28,9 +30,9 @@ export function ReplayView({ matchId }: { matchId: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    const timer = setTimeout(() => {
+
+    const onLoaded = (data: MatchReplay | null) => {
       if (cancelled) return;
-      const data = getMatchReplay(matchId);
       if (!data) {
         setReplay(null);
         setPageState("error");
@@ -39,10 +41,21 @@ export function ReplayView({ matchId }: { matchId: string }) {
       setReplay(data);
       setQuoteIndex(0);
       setPageState("success");
-    }, SIMULATED_LOAD_MS);
+    };
+
+    if (isScenarioLibraryMatch(matchId)) {
+      const timer = setTimeout(() => onLoaded(getMatchReplay(matchId)), SIMULATED_LOAD_MS);
+      return () => {
+        cancelled = true;
+        clearTimeout(timer);
+      };
+    }
+
+    getRealMatchReplay(matchId)
+      .then((data) => onLoaded(data))
+      .catch(() => onLoaded(null));
     return () => {
       cancelled = true;
-      clearTimeout(timer);
     };
   }, [matchId]);
 

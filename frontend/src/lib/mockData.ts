@@ -186,6 +186,12 @@ export function listMatches(): MatchSummary[] {
   return MATCH_SUMMARIES;
 }
 
+/** True for the scripted scenario-library matches (mock data); false for
+ * anything that should be fetched from the real API instead. */
+export function isScenarioLibraryMatch(matchId: string): boolean {
+  return matchId in REPLAYS;
+}
+
 /** Returns null for an unknown match ID — the dashboard's error-state trigger. */
 export function getMatchReplay(matchId: string): MatchReplay | null {
   const build = REPLAYS[matchId];
