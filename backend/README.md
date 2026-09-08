@@ -5,10 +5,10 @@ FastAPI application layer: `/health`, `GET /matches`,
 
 ## Status
 
-Journeys 5-7 (API, replay behaviour, instrumentation) are complete.
-`context_features.py` is Journey 10 content, built ahead of schedule by
-mistake — the module itself is correct and tested, but Journeys 8-9
-(evaluation, Markov baseline) are being filled in before continuing past
+Journeys 5-8 (API, replay behaviour, instrumentation, evaluation) are
+complete. `context_features.py` is Journey 10 content, built ahead of
+schedule by mistake — the module itself is correct and tested, but
+Journey 9 (the Markov baseline) is being filled in before continuing past
 Journey 10. Uses
 the score-leader heuristic (EXP2) as a stand-in estimator until the Markov
 chain (Journey 9) exists, and a real match-state parser

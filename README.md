@@ -152,11 +152,11 @@ at real ingested data with `COURTEDGE_DATA_DIR` — see
 
 ## Project status
 
-**Journeys 1–6 are complete, in order.** Journey 10 (context features) was
-then built ahead of schedule by mistake — corrected here rather than
-hidden; the work itself is real and tested, just out of sequence. Journeys
-7-9 (instrumentation, evaluation, Markov baseline) are being filled in now
-before continuing past 10.
+**Journeys 1–8 are complete, in order.** Journey 10 (context features) was
+built ahead of schedule by mistake between Journeys 6 and 7 — corrected
+here rather than hidden; the work itself is real and tested, just out of
+sequence. Journey 9 (Markov baseline) is next, then back to finishing
+Journey 10 (ranking).
 
 Done so far:
 
@@ -193,13 +193,17 @@ Done so far:
   deferred until the ML feature set needs it.
 - Journey 7 — instrumentation (`backend/event_log.py`): every served quote
   is logged as a JSONL record (request ID, model version, latency,
-  fallback/suspended) to a plain analytical file, not a database — the
-  evidence Journey 8's evaluation harness reads.
+  fallback/suspended) to a plain analytical file, not a database.
+- Journey 8 — evaluation (`evaluation/`): Brier score, log-loss and
+  latency percentiles, plus a harness that scores any configuration
+  against every point of every match with a confirmed outcome. Real
+  result on 183 matches / 27,999 points: EXP2 clearly beats EXP1 (Brier
+  0.1831 vs 0.2500, log-loss 0.5515 vs 0.6931).
 
-Next: **Journey 8 — evaluation** (Brier score, log-loss, latency
-measurement using the outcome labels and quote log already in place), then
-**Journey 9 — the Markov baseline**, before returning to Journey 10's
-remaining scope (ranking) and Journey 11 onward.
+Next: **Journey 9 — the Markov baseline** (serve-rate estimation, the
+recursive point-to-match formula, tuning — measured with the same
+harness), then back to Journey 10's remaining scope (ranking) and Journey
+11 onward.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
