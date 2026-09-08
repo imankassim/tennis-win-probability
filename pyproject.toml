@@ -11,6 +11,7 @@ dependencies = [
     "scikit-learn",
     "lightgbm",
     "openpyxl",
+    "joblib",
 ]
 
 [project.optional-dependencies]
