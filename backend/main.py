@@ -21,7 +21,7 @@ from backend.fixtures import demo_repository_data
 from backend.match_state import compute_break_point, game_score_before
 from backend.probability import MODEL_VERSION, compute_quote
 from backend.repository import InMemoryMatchRepository, MatchRepository, load_from_csv
-from pricing.markov.engine import estimate_match_serve_rates
+from pricing.markov.serve_rate import COLD_START_SERVE_RATE, bulk_shrunk_serve_rates
 from backend.schemas import (
     MatchListResponse,
     MatchStateInterpretation,
@@ -69,8 +69,12 @@ def _build_repository() -> MatchRepository:
     if data_dir:
         directory = Path(data_dir)
         matches_csv = next(directory.glob("charting-*-matches.csv"))
-        points_csv = next(directory.glob("charting-*-points-*.csv"))
-        return load_from_csv(matches_csv, points_csv)
+        # All matching points files, not just the first — the data
+        # directory may hold one per decade (or a smaller sample
+        # alongside the full files); real match_ids never repeat across
+        # them, same as database/ingestion/run.py.
+        points_csvs = sorted(directory.glob("charting-*-points-*.csv"))
+        return load_from_csv(matches_csv, *points_csvs)
     matches, players, points_by_match = demo_repository_data()
     return InMemoryMatchRepository(matches, players, points_by_match)
 
@@ -78,18 +82,23 @@ def _build_repository() -> MatchRepository:
 repository: MatchRepository = _build_repository()
 
 # Serve rates only depend on a match's own date and the archive up to it,
-# not on which point is being priced — computed once per match rather
-# than once per point/request. Safe to cache for the process lifetime:
-# this is a read-only, in-memory archive with no live updates.
-_serve_rate_cache: dict[str, tuple[float, float]] = {}
+# not on which point is being priced — computed once per match, at
+# startup, rather than lazily per request. Lazily calling
+# estimate_match_serve_rates on first use (this module's original
+# approach) re-scans the whole prior archive for whichever match happens
+# to be requested first — measured directly at this data's scale: ~750ms
+# for a single match's first request against the full ~900K-point
+# archive, vs ~0.2ms once cached. bulk_shrunk_serve_rates computes every
+# match's rate in one archive pass up front instead (a few seconds at
+# startup, comparable to the time already spent building the repository),
+# so no single request ever pays that cost.
+_serve_rate_cache: dict[str, tuple[float, float]] = bulk_shrunk_serve_rates(
+    repository.list_matches(), repository.all_points_by_match()
+)
 
 
 def _serve_rates_for(match) -> tuple[float, float]:
-    if match.match_id not in _serve_rate_cache:
-        _serve_rate_cache[match.match_id] = estimate_match_serve_rates(
-            match, repository.list_matches(), repository.all_points_by_match()
-        )
-    return _serve_rate_cache[match.match_id]
+    return _serve_rate_cache.get(match.match_id, (COLD_START_SERVE_RATE, COLD_START_SERVE_RATE))
 
 
 @app.get("/health")
