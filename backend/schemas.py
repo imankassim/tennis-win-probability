@@ -42,6 +42,11 @@ class ReplayResponse(BaseModel):
     outcome: OutcomeSchema | None
 
 
+class MatchListResponse(BaseModel):
+    matches: list[MatchSummarySchema]
+    total: int
+
+
 class ProbabilityRequest(BaseModel):
     match_id: str
     point_sequence: int

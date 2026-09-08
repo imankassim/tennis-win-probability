@@ -58,6 +58,34 @@ def test_probability_for_unknown_point_sequence_is_404():
     assert response.status_code == 404
 
 
+def test_list_matches_includes_the_demo_match():
+    response = client.get("/matches")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] == 1
+    assert body["matches"][0]["match_id"] == DEMO_MATCH_ID
+
+
+def test_list_matches_filters_by_surface():
+    assert client.get("/matches", params={"surface": "hard"}).json()["total"] == 1
+    assert client.get("/matches", params={"surface": "clay"}).json()["total"] == 0
+
+
+def test_probability_flags_a_real_break_point():
+    # Game 9 in the demo fixture is scripted as a break: player_b serves,
+    # wins one point, then player_a wins the next four — the last of which
+    # is entered at 0-40 (from player_a's perspective as receiver), a break
+    # point that this point itself converts.
+    points = client.get(f"/replay/{DEMO_MATCH_ID}").json()["points"]
+    game_9_points = [p for p in points if p["game_no"] == 9]
+    last_point_no = game_9_points[-1]["point_no"]
+
+    response = client.post(
+        "/probability", json={"match_id": DEMO_MATCH_ID, "point_sequence": last_point_no}
+    )
+    assert response.json()["interpretation"]["break_point"] is True
+
+
 def test_probability_moves_toward_the_leader():
     """Sanity check: by the end of set 1 (won 6-4 by player_a), the quoted
     probability for player_a should be higher than at the very first point."""

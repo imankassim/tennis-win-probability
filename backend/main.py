@@ -1,13 +1,9 @@
-"""FastAPI application (Journey 5): /health, /replay/{match_id}, /probability.
+"""FastAPI application: /health, /matches, /replay/{match_id}, /probability.
 
 Reads real ingested data if COURTEDGE_DATA_DIR is set to a directory
 containing charting-*-matches.csv and charting-*-points-*.csv (see
 database/README.md); otherwise serves the synthetic demo fixture
 (backend/fixtures.py) so the app runs out of the box.
-
-break_point in the probability response is always False for now — flagging
-it correctly requires the within-game point tally, which is the match-state
-parser's job (Journey 6), not this API's.
 """
 
 from __future__ import annotations
@@ -17,11 +13,14 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend.fixtures import demo_repository_data
+from backend.match_state import compute_break_point
 from backend.probability import MODEL_VERSION, compute_quote
 from backend.repository import InMemoryMatchRepository, MatchRepository, load_from_csv
 from backend.schemas import (
+    MatchListResponse,
     MatchStateInterpretation,
     MatchSummarySchema,
     OutcomeSchema,
@@ -33,7 +32,33 @@ from backend.schemas import (
 
 app = FastAPI(title="CourtEdge API")
 
+# The dashboard (frontend/) runs on a different origin in development
+# (Next.js dev server vs uvicorn). Wide open for now since this is a
+# research prototype with no auth/session state; tighten before any real
+# deployment (Journey 20).
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 _request_ids = itertools.count(1)
+
+
+def _match_summary(match, repo: MatchRepository) -> MatchSummarySchema:
+    player_a = repo.get_player(match.player_a_id)
+    player_b = repo.get_player(match.player_b_id)
+    return MatchSummarySchema(
+        match_id=match.match_id,
+        tournament=match.tournament,
+        round=match.round,
+        surface=match.surface,
+        best_of=match.best_of,
+        match_date=match.match_date,
+        player_a=player_a.name if player_a else match.player_a_id,
+        player_b=player_b.name if player_b else match.player_b_id,
+    )
 
 
 def _build_repository() -> MatchRepository:
@@ -55,28 +80,32 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/matches", response_model=MatchListResponse)
+def list_matches(tournament: str | None = None, surface: str | None = None) -> MatchListResponse:
+    """Browse replayable matches (i.e. matches with points loaded), the
+    scenario-library/filters part of Journey 6. Filters are exact,
+    case-insensitive matches — no fuzzy search yet."""
+    matches = repository.list_matches()
+    if tournament:
+        matches = [m for m in matches if m.tournament.lower() == tournament.lower()]
+    if surface:
+        matches = [m for m in matches if m.surface.lower() == surface.lower()]
+    matches.sort(key=lambda m: m.match_date, reverse=True)
+    summaries = [_match_summary(m, repository) for m in matches]
+    return MatchListResponse(matches=summaries, total=len(summaries))
+
+
 @app.get("/replay/{match_id}", response_model=ReplayResponse)
 def get_replay(match_id: str) -> ReplayResponse:
     match = repository.get_match(match_id)
     if match is None:
         raise HTTPException(status_code=404, detail=f"No match found for {match_id!r}")
 
-    player_a = repository.get_player(match.player_a_id)
-    player_b = repository.get_player(match.player_b_id)
     points = repository.get_points(match_id)
     outcome = repository.get_outcome(match_id)
 
     return ReplayResponse(
-        match=MatchSummarySchema(
-            match_id=match.match_id,
-            tournament=match.tournament,
-            round=match.round,
-            surface=match.surface,
-            best_of=match.best_of,
-            match_date=match.match_date,
-            player_a=player_a.name if player_a else match.player_a_id,
-            player_b=player_b.name if player_b else match.player_b_id,
-        ),
+        match=_match_summary(match, repository),
         points=[
             PointSchema(
                 point_no=p.point_no,
@@ -111,6 +140,7 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
             detail=f"No point {request.point_sequence} recorded for match {request.match_id!r}",
         )
     point = matching[0]
+    break_point = compute_break_point(points, point)
 
     probability_a, price_a, price_b = compute_quote(
         sets_won_a=point.sets_won_a,
@@ -127,7 +157,7 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
             set=point.set_no,
             games=f"{point.games_won_a}-{point.games_won_b}",
             server=point.server,
-            break_point=False,
+            break_point=break_point,
         ),
         probability_player_a=probability_a,
         price_player_a=price_a,

@@ -22,6 +22,7 @@ class MatchRepository(Protocol):
     def get_player(self, player_id: str) -> Player | None: ...
     def get_points(self, match_id: str) -> list[Point]: ...
     def get_outcome(self, match_id: str) -> OutcomeLabel | None: ...
+    def list_matches(self) -> list[Match]: ...
 
 
 class InMemoryMatchRepository:
@@ -54,6 +55,12 @@ class InMemoryMatchRepository:
 
     def get_outcome(self, match_id: str) -> OutcomeLabel | None:
         return self._outcomes.get(match_id)
+
+    def list_matches(self) -> list[Match]:
+        """Only matches that actually have points loaded — a match with no
+        points isn't replayable. `load_from_csv` may parse thousands of
+        rows of match metadata against only a bounded sample of points."""
+        return [m for match_id, m in self._matches.items() if self._points.get(match_id)]
 
 
 def load_from_csv(matches_csv: Path, points_csv: Path) -> InMemoryMatchRepository:
