@@ -152,11 +152,10 @@ at real ingested data with `COURTEDGE_DATA_DIR` — see
 
 ## Project status
 
-**Journeys 1–8 are complete, in order.** Journey 10 (context features) was
+**Journeys 1–9 are complete, in order.** Journey 10 (context features) was
 built ahead of schedule by mistake between Journeys 6 and 7 — corrected
 here rather than hidden; the work itself is real and tested, just out of
-sequence. Journey 9 (Markov baseline) is next, then back to finishing
-Journey 10 (ranking).
+sequence. Finishing Journey 10's remaining scope (ranking) is next.
 
 Done so far:
 
@@ -179,8 +178,7 @@ Done so far:
 - A FastAPI backend (`backend/`) exposing `/health`, `GET /matches`,
   `/replay/{match_id}` and `/probability`, matching the documented
   response contract exactly, plus a real match-state parser for
-  break-point detection. Uses the score-leader heuristic as a stand-in
-  estimator until the Markov chain exists.
+  break-point detection.
 - The frontend is wired to it: `/matches` browses and filters real
   ingested matches, replayed through the same components as the scenario
   library, which stays separate (mock data) since it demonstrates page
@@ -196,14 +194,20 @@ Done so far:
   fallback/suspended) to a plain analytical file, not a database.
 - Journey 8 — evaluation (`evaluation/`): Brier score, log-loss and
   latency percentiles, plus a harness that scores any configuration
-  against every point of every match with a confirmed outcome. Real
-  result on 183 matches / 27,999 points: EXP2 clearly beats EXP1 (Brier
-  0.1831 vs 0.2500, log-loss 0.5515 vs 0.6931).
+  against every point of every match with a confirmed outcome.
+- Journey 9 — the Markov baseline (`pricing/markov/`): the recursive
+  point-to-match formulas (Klaassen & Magnus, 2003), serve-rate estimation
+  with Bayesian shrinkage (EXP10/11/13), now wired into `/probability` as
+  `markov_v1`, replacing the score-leader placeholder. Real result on the
+  same 183 matches / 27,999 points: EXP1 0.2500 Brier / 0.6931 log-loss,
+  EXP2 0.1831 / 0.5515, Markov 0.1829 / 0.5453 — beats EXP2, but only
+  marginally, a finding traced to 45% of sampled matches having a player
+  with zero prior serve history in our bounded ingestion sample (not a
+  flaw in the formulas, which are independently Monte-Carlo-verified) —
+  see [pricing/markov/README.md](pricing/markov/README.md).
 
-Next: **Journey 9 — the Markov baseline** (serve-rate estimation, the
-recursive point-to-match formula, tuning — measured with the same
-harness), then back to Journey 10's remaining scope (ranking) and Journey
-11 onward.
+Next: finishing **Journey 10** (ranking data, still unsourced) before
+**Journey 11** (the ML model).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
