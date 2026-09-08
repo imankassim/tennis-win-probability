@@ -129,10 +129,9 @@ courtedge/
 | [docs/REFERENCES.md](docs/REFERENCES.md) | Academic and technical sources behind the modelling approach. |
 | [docs/CourtEdge_Architecture_and_Task_Definition.docx](docs/CourtEdge_Architecture_and_Task_Definition.docx) | The original, full source specification this repository implements. |
 
-## Running the dashboard
+## Running it locally
 
-The dashboard is currently static (mock data only — there is no backend
-yet). To run it locally:
+The scenario library (`/`) works standalone on scripted mock data:
 
 ```bash
 cd frontend
@@ -140,12 +139,20 @@ npm install
 npm run dev
 ```
 
-Then open the printed local URL and pick one of the two scripted demo
-matches, one of which includes a rain-delay suspension.
+To also browse real matches (`/matches`), run the backend alongside it:
+
+```bash
+python -m uvicorn backend.main:app --reload
+```
+
+The backend serves a small synthetic demo match out of the box; point it
+at real ingested data with `COURTEDGE_DATA_DIR` — see
+[backend/README.md](backend/README.md) and
+[database/README.md](database/README.md).
 
 ## Project status
 
-**Journeys 1–5** are complete:
+**Journeys 1–6** are complete:
 
 - Repository scaffold, project charter, all architecture views, the
   decision records, the experiment register, data provenance rules and the
@@ -163,13 +170,18 @@ matches, one of which includes a rain-delay suspension.
   [decision 9](docs/decisions/9-match-charting-project-data-source.md)),
   run against real data: 183 confirmed match outcomes, 7 incomplete charts
   correctly quarantined instead of guessed at.
-- A FastAPI backend (`backend/`) exposing `/health`, `/replay/{match_id}`
-  and `/probability`, matching the documented response contract exactly.
-  Uses the score-leader heuristic as a stand-in estimator until the Markov
-  chain exists; the frontend isn't wired to it yet — that's next.
+- A FastAPI backend (`backend/`) exposing `/health`, `GET /matches`,
+  `/replay/{match_id}` and `/probability`, matching the documented
+  response contract exactly, plus a real match-state parser for
+  break-point detection. Uses the score-leader heuristic as a stand-in
+  estimator until the Markov chain exists.
+- The frontend is wired to it: `/matches` browses and filters real
+  ingested matches, replayed through the same components as the scenario
+  library, which stays separate (mock data) since it demonstrates page
+  states — suspension — a completed match archive can't produce.
 
-Next: **Journey 6 — replay behaviour** (connect the frontend to the real
-API, match detail, scenario library, filters).
+Next: **Journey 7 — context features** (deterministic ranking, form,
+surface and head-to-head extraction).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
