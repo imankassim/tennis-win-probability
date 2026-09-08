@@ -23,7 +23,7 @@ from backend.probability import compute_probability, load_artefacts
 from backend.repository import InMemoryMatchRepository, MatchRepository, load_from_csv
 from pricing.markov.serve_rate import COLD_START_SERVE_RATE, bulk_shrunk_serve_rates
 from pricing.ml.features import compute_match_context_features
-from trading_rules.rules import apply_trading_rules
+from trading_rules.rules import DEFAULT_MARGIN, WIDENED_MARGIN, apply_trading_rules
 from backend.schemas import (
     MatchListResponse,
     MatchStateInterpretation,
@@ -204,7 +204,8 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
         points_a=points_a,
         points_b=points_b,
     )
-    trading_result = apply_trading_rules(pricing_result.probability_a)
+    margin = WIDENED_MARGIN if pricing_result.widen_margin else DEFAULT_MARGIN
+    trading_result = apply_trading_rules(pricing_result.probability_a, margin=margin)
 
     response = ProbabilityResponse(
         probability_request_id=f"req_{next(_request_ids):x}",

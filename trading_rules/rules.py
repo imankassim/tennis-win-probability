@@ -17,6 +17,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 DEFAULT_MARGIN = 0.05
+# docs/architecture/deployment.md's fallback table: if the blend or
+# calibration layer fails after the ML estimate was already computed, the
+# response degrades to the raw Markov probability, but priced with extra
+# caution — a discarded, disagreeing ML estimate is more uncertainty than
+# a routine Markov-only quote (e.g. no promoted model at all) carries.
+# Not tuned against any data — a deliberate, documented safety margin,
+# not a fitted parameter.
+WIDENED_MARGIN = 0.10
 MIN_VALID_PRICE = 1.0
 # A sanity cap, not a real trading limit: a computed price this high means
 # something upstream is almost certainly wrong (a probability vanishingly

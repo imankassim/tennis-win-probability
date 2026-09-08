@@ -3,6 +3,7 @@ import pytest
 from trading_rules.rules import (
     DEFAULT_MARGIN,
     MAX_REASONABLE_PRICE,
+    WIDENED_MARGIN,
     apply_trading_rules,
     is_stale,
     price_from_probability,
@@ -13,6 +14,18 @@ def test_price_from_probability_applies_margin():
     # At p=0.5 with no margin, fair price is 2.0; a 5% margin shortens it.
     assert price_from_probability(0.5, margin=0.0) == 2.0
     assert price_from_probability(0.5, margin=0.05) < 2.0
+
+
+def test_widened_margin_produces_shorter_prices_than_the_default():
+    """The margin backend/probability.py requests when blend/calibration
+    fails after a successful ML estimate (docs/architecture/deployment.md's
+    "blend or calibration unavailable" row) — must be strictly more
+    conservative than the default, or widening it would be pointless."""
+    assert WIDENED_MARGIN > DEFAULT_MARGIN
+    default_result = apply_trading_rules(0.6, margin=DEFAULT_MARGIN)
+    widened_result = apply_trading_rules(0.6, margin=WIDENED_MARGIN)
+    assert widened_result.price_a < default_result.price_a
+    assert widened_result.price_b < default_result.price_b
 
 
 def test_apply_trading_rules_returns_valid_prices_for_a_normal_probability():
