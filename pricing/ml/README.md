@@ -7,9 +7,11 @@ Feature engineering and the machine-learned win-probability model
 
 Journey 11 (ML probability model) is complete: EXP20-24 evaluated on real
 data, EXP24 (LightGBM, state + context + momentum) is the leading
-candidate. Not yet wired into the live API — the logical architecture
-computes the Markov and ML estimates independently and blends them
-(Journey 12), rather than one replacing the other.
+candidate — computed independently alongside Markov and blended (Journey
+12), rather than one replacing the other. Wired into the live API as of
+Journey 17: `pricing/promote_model.py` trains this exact feature set and
+`backend/main.py` scores it at request time — see
+[pricing/README.md](../README.md).
 
 ## Structure
 

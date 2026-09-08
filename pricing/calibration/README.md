@@ -8,9 +8,9 @@ observed outcome frequencies.
 Journey 13 (calibration) is complete: EXP40-43 evaluated on real data.
 `calibration.py` — `NoCalibration`, `PlattCalibrator`,
 `IsotonicCalibrator`, `PhaseCalibrator` (a separate isotonic calibrator
-per `match_phase`, falling back to a global one for sparse phases). Not
-yet wired into the live API, same as the blend and ML layers it sits on
-top of.
+per `match_phase`, falling back to a global one for sparse phases). Wired
+into the live API as of Journey 17, same as the blend and ML layers it
+sits on top of — see [pricing/README.md](../README.md).
 
 ## Real evidence
 

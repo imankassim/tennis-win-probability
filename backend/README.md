@@ -12,16 +12,19 @@ itself was always correct and tested, just out of sequence; `player_rating.py`
 finishes Journey 10's remaining scope (ranking) with a self-computed Elo
 rating, since no external ranking feed was ever sourced.
 
-`/probability` now uses the Markov engine (`pricing/markov/`, model
-version `markov_v1`) as its estimator, replacing the score-leader
-heuristic placeholder from Journey 5. A real match-state parser
+`/probability` runs the full designed pipeline (Journey 17): Markov and
+ML estimates computed independently, blended at the promoted weight,
+phase-calibrated — `model_version="blend_v1_calibrated"` — whenever a
+promoted pipeline exists (`pricing/promote_model.py`, see
+[pricing/README.md](../pricing/README.md)), degrading gracefully to the
+Markov engine alone (`model_version="markov_v1"`, `fallback_used=true`)
+if none has been promoted yet. A real match-state parser
 (`match_state.py`) provides break-point detection and within-game score,
 both reconstructed from the already-stored raw points, no new fields
 needed. The response contract matches
 [docs/architecture/logical-architecture.md](../docs/architecture/logical-architecture.md)'s
-example response, so swapping the estimator again (ML, Journey 11)
-shouldn't change the API shape. CORS is wide open for now (research
-prototype, no auth) — tighten before any real deployment.
+example response exactly. CORS is wide open for now (research prototype,
+no auth) — tighten before any real deployment.
 
 The frontend (`frontend/src/lib/api.ts`) is wired to this API for real
 match browsing and replay; its own scripted scenario-library matches stay
@@ -39,22 +42,25 @@ match archive has no equivalent of.
   break point from the earlier points in the same game.
 - `context_features.py` — the player context service: recent form,
   surface record and head-to-head, computed from our own match archive
-  with a strict no-look-ahead cutoff.
+  with a strict no-look-ahead cutoff. Its first consumer was the ML
+  feature set (`pricing/ml/features.py`'s `compute_match_context_features`,
+  a bulk one-pass variant of the same idea); `main.py` builds that same
+  bulk cache at startup for live `/probability` requests, so a served
+  request scores the identical feature the model was trained on.
 - `player_rating.py` — a self-computed Elo rating (finishing Journey 10):
   no external ATP/WTA rankings feed was ever sourced, so this computes a
   standard Elo rating directly from our own match archive instead — same
   no-look-ahead discipline. Verified sensible against real data: top
   rated players are Sinner, Alcaraz, Djokovic, Federer, in that order.
-  Neither this nor `context_features.py` is wired into an endpoint yet —
-  their first consumer will be the ML feature set (Journey 11).
 - `event_log.py` — Journey 7 (instrumentation): logs one JSONL record per
   served quote (request ID, model version, latency, fallback/suspended)
   to `data/quote_log.jsonl` by default, or `COURTEDGE_QUOTE_LOG_PATH`.
   Journey 8's evaluation harness reads this file.
-- `probability.py` — computes a probability/price using the Markov engine
-  (`pricing/markov/`); the placeholder margin and lack of trading rules
-  are documented in the module. Serve rates are estimated per match and
-  cached (they don't change point to point) in `main.py`.
+- `probability.py` — orchestrates the full pipeline (Journey 17): Markov
+  and ML estimates, blend, phase calibration, if a promoted pipeline
+  exists (`pricing/promote_model.py`); Markov alone otherwise. Margin,
+  price bounds and suspension are `trading_rules/rules.py`'s job, applied
+  in `main.py` after this module returns its raw probability.
 - `schemas.py` — the Pydantic request/response models.
 - `main.py` — the FastAPI app and routes.
 

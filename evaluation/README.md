@@ -72,8 +72,9 @@ rather than evaluating the whole archive — see
 [pricing/ml/README.md](../pricing/ml/README.md) for the full table).
 The leading candidate (EXP24, LightGBM with state + context + momentum
 features) beats Markov by 15.1% lower Brier score, 15.7% lower log-loss —
-not yet wired into the live API, since the architecture blends the two
-estimates (Journey 12) rather than replacing one with the other.
+computed independently alongside Markov and blended (Journey 12) rather
+than replacing it, now wired into the live API as of Journey 17 (see
+[pricing/README.md](../pricing/README.md)).
 
 ## Real evidence (the blend, EXP30-33)
 

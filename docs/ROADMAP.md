@@ -113,9 +113,12 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–15 are complete.** Journey 10 (context features) was built
+**Journeys 1–17 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
+Journey 16 (optional extensions) is deliberately deferred — it's
+explicitly optional in the source spec itself — in favour of the
+non-optional Journeys 17-21, circling back only if time allows.
 
 Done so far:
 
@@ -208,9 +211,33 @@ Done so far:
   meaningfully close the gap versus Markov alone (0.2305 → 0.1984). See
   [trading_rules/README.md](../trading_rules/README.md).
 
-Next: **Journey 16** (optional extensions — shot-level/momentum features,
-a grounded explanation layer — separate advanced investigations, may be
-deferred).
+- Full API integration (`pricing/promote_model.py`, `pricing/run_promotion.py`,
+  `backend/probability.py`, `backend/main.py`): a deliberately manual,
+  human-run promotion script (per
+  [docs/architecture/charter.md](architecture/charter.md)'s "no automatic
+  model promotion") trains the EXP24 ML model on the chronologically older
+  85% of matches, fits the EXP43 phase calibrator on blended predictions
+  for the newer 15% (held out from the ML model's own training, so
+  calibration reflects genuine out-of-sample miscalibration), and bundles
+  everything — the model, calibrator, EXP33 blend weight, feature
+  columns — into one versioned artefact
+  (`docs/model_cards/artefacts/pricing_pipeline.joblib`, gitignored).
+  `/probability` now runs the full designed pipeline end-to-end (Markov +
+  ML computed independently → blend → phase calibration →
+  `trading_rules.apply_trading_rules`) whenever that artefact exists —
+  `model_version="blend_v1_calibrated"`, `fallback_used=false` — and
+  degrades gracefully to Markov-only (`model_version="markov_v1"`,
+  `fallback_used=true`) on a fresh clone before anyone has run the
+  promotion script, exactly the behaviour
+  [docs/architecture/logical-architecture.md](architecture/logical-architecture.md)'s
+  `fallback_used` flag documents. Verified against the real archive: 4,639
+  training matches, 818 held-out calibration matches, both the live and
+  fallback response shapes checked directly against a running server. See
+  [backend/README.md](../backend/README.md) and
+  [pricing/README.md](../pricing/README.md).
+
+Next: **Journey 18** (reliability — failure injection, sync and drift
+tests).
 
 ## Source
 

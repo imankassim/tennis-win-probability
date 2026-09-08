@@ -13,10 +13,9 @@ configuration. `meta_model.py` — `MetaModel` (a learned stacking
 combiner) and `predict_with_fallback()` — EXP34 was rejected (the learned
 combiner overfits and underperforms EXP33's simple tuned weight; see
 below), but the fallback logic is retained and ready regardless of which
-combiner is served. Not yet wired into the live API — the leading
-candidates (EXP24 ML, EXP33 blend, EXP43 calibration) wait for a
-deliberate decision to change what `/probability` serves, not an
-automatic promotion.
+combiner is served. Wired into the live API as of Journey 17, behind a
+deliberate, human-run promotion step rather than an automatic one — see
+[pricing/README.md](../README.md).
 
 ## Real evidence
 
