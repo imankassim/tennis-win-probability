@@ -26,15 +26,18 @@ their own empirical rate.
 ## Metrics
 
 This is the configuration actually evaluated and reported in
-[EXP11](EXP11-per-player-serve-rate.md)'s metrics table (Brier 0.1829,
-log-loss 0.5453 vs EXP2's 0.1831 / 0.5515) — EXP11 and EXP13 were
-evaluated together since a pure, unshrunk per-player rate isn't a usable
-configuration on its own (undefined for ~45% of matches in the sample).
+[EXP11](EXP11-per-player-serve-rate.md)'s metrics table (Brier 0.1839,
+log-loss 0.5579 on the full ingestion, vs EXP2's 0.1934 / 0.5737) —
+EXP11 and EXP13 were evaluated together since a pure, unshrunk
+per-player rate isn't a usable configuration on its own (undefined for
+10.6% of matches even after the larger ingestion, and 45% on the original
+small sample).
 
 ## Decision
 
 Retained. Directly addresses the sparse-data risk from the risk register
-with no observed downside. The shrinkage strength (`k=20`) is untuned —
-a genuine follow-up experiment would sweep `k` against held-out matches
-once the historical ingestion window is large enough for that comparison
-to be meaningful (see the follow-up noted in EXP11).
+with no observed downside, and the larger ingestion (see EXP11) confirms
+it scales sensibly as more real per-player data becomes available — the
+gap over EXP2 widened once fewer matches needed the tour-average
+fallback. The shrinkage strength (`k=20`) is still untuned — a genuine
+follow-up experiment would sweep `k` against held-out matches.

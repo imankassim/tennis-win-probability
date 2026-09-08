@@ -28,16 +28,14 @@ Journey 4 (data foundation) is complete:
   docstring), quarantining matches whose chart doesn't confirm a complete
   match.
 - `ingestion/run.py` — the ingestion entry point: parse, validate,
-  quarantine, report. Not yet wired to a live PostgreSQL connection — see
+  quarantine, report. Accepts multiple points files (e.g. one per decade)
+  and merges them. Not yet wired to a live PostgreSQL connection — see
   below.
 
 No SQL is executed against a real PostgreSQL database yet. `run.py`
-produces the same validated records a loader would insert, and has been
-run against real downloaded data (see
-[docs/data_sheets/data_provenance.md](../docs/data_sheets/data_provenance.md#ingestion-evidence-journey-4)
-for the results) — actually writing to PostgreSQL is a small remaining
-step once a target database is available, and is picked up again once the
-API (Journey 5) needs to read from it.
+produces the same validated records a loader would insert — actually
+writing to PostgreSQL is a small remaining step once a target database is
+available, and is picked up again once it's needed for real serving.
 
 ## Running the ingestion pipeline
 
@@ -46,7 +44,25 @@ provenance "no redistribution" rule). Download them yourself:
 
 ```bash
 curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-matches.csv
+curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-points-2010s.csv
 curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-points-2020s.csv
 
-python -m database.ingestion.run charting-m-matches.csv charting-m-points-2020s.csv
+python -m database.ingestion.run charting-m-matches.csv charting-m-points-2010s.csv charting-m-points-2020s.csv
 ```
+
+## Ingestion evidence
+
+Run against the full 2010s and 2020s Match Charting Project points files
+(904,513 points across 5,568 matches with points loaded):
+
+- 5,453 matches produced a confirmed, complete outcome label.
+- 115 matches were correctly quarantined as incomplete charts (the chart
+  stops before a set or the match is actually won) rather than given a
+  guessed outcome.
+- 36 match-level violations (malformed source rows, e.g. an unescaped
+  comma shifting every later column) were skipped and reported rather
+  than crashing the run.
+
+See [evaluation/README.md](../evaluation/README.md) and
+[pricing/markov/README.md](../pricing/markov/README.md) for what this
+data was then used to evaluate (EXP1 vs EXP2 vs the Markov baseline).

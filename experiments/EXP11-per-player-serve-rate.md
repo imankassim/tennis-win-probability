@@ -1,8 +1,8 @@
 # EXP11 — Per-player overall serve-win rate
 
-- Status: Retained (with a documented limitation)
+- Status: Retained
 - Depends on: EXP10
-- Date: 2026-09-08
+- Date: 2026-09-08 (updated same day, after a larger ingestion — see Metrics)
 
 ## Hypothesis
 
@@ -22,40 +22,37 @@ exactly the risk this experiment surfaced (see Metrics).
 
 ## Metrics
 
-Evaluated via `evaluation/evaluate_markov.py` (using the shrunk estimate,
-EXP13, since pure per-player rates are undefined for debut-in-sample
-players) against the same 183 matches / 27,999 points as EXP1/EXP2:
+First evaluated against a bounded ~3MB ingestion sample (183 matches /
+27,999 points): Markov beat EXP2 only marginally (Brier 0.1829 vs 0.1831).
+Per the "if it isn't [clearly beaten], that's worth investigating" note in
+EXP2's write-up, this was investigated rather than accepted at face value
+— traced to 45% of matches having a player with zero prior serve history
+in that small sample. Follow-up: ingested the full 2010s and 2020s
+Match Charting Project points files (904,513 points across 5,568 matches;
+run through the full ingestion pipeline including data-quality gates,
+5,453 matches produced a confirmed outcome — up from 27,999 points / 183
+matches) and re-ran the comparison on the 890,356 points belonging to
+those 5,453 matches:
 
 | Configuration | Brier score | Log-loss |
 |---|---|---|
 | EXP1 (always 50/50) | 0.2500 | 0.6931 |
-| EXP2 (score-leader heuristic) | 0.1831 | 0.5515 |
-| EXP11/13 (Markov, shrunk serve rates) | 0.1829 | 0.5453 |
+| EXP2 (score-leader heuristic) | 0.1934 | 0.5737 |
+| EXP11/13 (Markov, shrunk serve rates) | 0.1839 | 0.5579 |
 
-The Markov engine beats EXP2, but only marginally on Brier score (0.1829
-vs 0.1831) — log-loss improves more clearly (0.5453 vs 0.5515). Per the
-"if it isn't [clearly beaten], that's worth investigating" note in EXP2's
-own write-up, this was investigated rather than accepted at face value.
-
-**Finding:** the gap is explained by data volume, not the modelling
-approach. Checked directly: **85 of 190 matches (45%) have at least one
-player with zero prior serve history** in our bounded ingestion sample
-(a ~3MB slice — see `docs/data_sheets/data_provenance.md` — not the full
-archive), forcing heavy reliance on the tour-average fallback for nearly
-half the dataset. Median prior service points available where a player
-does have history: 152 — enough for a rough estimate, not a precise one.
-The recursive formulas themselves are independently verified correct
-(`tests/unit/test_markov_formulas.py`, including Monte Carlo
-cross-checks), so this is a data-coverage limitation, not a design flaw.
+With the larger archive, the zero-history rate dropped from 45% to 10.6%
+of matches, and the gap widened as hypothesised: Markov now beats EXP2 by
+4.9% on Brier score and 2.8% on log-loss — a real, credible margin, not
+the near-tie the small sample showed. (EXP2's own score moved too: 0.1934
+vs the small sample's 0.1831 — the larger, more varied archive, spanning
+Challenger and qualifying rounds as well as tour level, is a harder
+prediction task on average, which is exactly why a bigger, more
+representative evaluation set matters.)
 
 ## Decision
 
-Retained, wired into the API as the default estimator (replacing EXP2),
-because it does beat EXP2 on both metrics and represents the intended
-"credible tuned baseline" (gate G5) — a real, if modest, improvement, with
-a specific, explainable, addressable reason for why it isn't larger.
-**Follow-up (not yet done):** ingest a larger historical window (more of
-the Match Charting Project archive, not just the validation sample) and
-re-run this comparison — the hypothesis is that the gap widens
-substantially once most players have real prior-serve history instead of
-falling back to the tour average.
+Retained, wired into the API as the default estimator (replacing EXP2).
+The original marginal result led to a real, useful follow-up (a larger
+ingestion) rather than being accepted or dismissed at face value — the
+gap is now a credible, evidenced improvement over EXP2, consistent with
+gate G5's "is the analytic model a credible tuned baseline?".

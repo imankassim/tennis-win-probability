@@ -36,19 +36,30 @@ same data yet. Splitting starts to matter once something actually is
 
 ## Real evidence (EXP1 vs EXP2 vs Markov)
 
-Run against 183 real matches / 27,999 points (the same ingested sample
-used in Journey 4):
+Run against the full ingested archive: 5,568 matches / 904,513 points
+(the 2010s and 2020s Match Charting Project points files — see
+[database/README.md](../database/README.md#ingestion-evidence)), of which
+5,453 matches / 890,356 points produced a confirmed outcome through the
+full ingestion pipeline including data-quality gates:
 
 | Configuration | Brier score | Log-loss |
 |---|---|---|
 | EXP1 (always 50/50) | 0.2500 | 0.6931 |
-| EXP2 (score-leader heuristic) | 0.1831 | 0.5515 |
-| Markov (EXP11/13, shrunk serve rates) | 0.1829 | 0.5453 |
+| EXP2 (score-leader heuristic) | 0.1934 | 0.5737 |
+| Markov (EXP11/13, shrunk serve rates) | 0.1839 | 0.5579 |
 
-EXP2 clearly beats the floor (26.8% lower Brier, 20.4% lower log-loss than
-EXP1). The Markov engine beats EXP2 too, but only marginally on Brier
-score — investigated rather than accepted at face value, see
+EXP2 clearly beats the floor (22.6% lower Brier, 17.2% lower log-loss than
+EXP1). The Markov engine beats EXP2 by a real, credible margin too (4.9%
+lower Brier, 2.8% lower log-loss) — a first pass against a smaller,
+bounded sample (183 matches) showed only a marginal gap, investigated
+rather than accepted at face value: traced to 45% of that sample's
+matches having a player with zero prior serve history. Ingesting the full
+archive dropped that to 10.6% and widened the gap as hypothesised — see
 [experiments/EXP11-per-player-serve-rate.md](../experiments/EXP11-per-player-serve-rate.md)
-for the finding (45% of sampled matches have a player with zero prior
-serve history in our bounded ingestion sample) and
-[pricing/markov/README.md](../pricing/markov/README.md).
+and [pricing/markov/README.md](../pricing/markov/README.md).
+
+Getting the bulk evaluation to run at this scale also surfaced two real
+performance bugs in `pricing/markov/`, both fixed and covered by
+regression tests: an unbounded `lru_cache` causing garbage-collector
+slowdown, and unbounded recursion for historical advantage-set matches
+(pre-2022-era deciding sets with no tiebreak at 6-6).

@@ -54,20 +54,25 @@ full reasoning behind switching to the Match Charting Project instead.
 
 The ingestion pipeline (`database/ingestion/`) has been run against real
 Match Charting Project data — the men's matches file in full (7,532
-matches) and a bounded sample of the 2020s points file (~28,800 points
-across 190 matches, downloaded in chunks rather than committed, per rule
-4 above). Result:
+matches) and the full 2010s and 2020s points files (904,513 points across
+5,568 matches), downloaded fresh rather than committed, per rule 4 above.
+Result:
 
-- 183 matches produced a confirmed, complete outcome label.
-- 7 matches were correctly quarantined as incomplete charts (the chart
+- 5,453 matches produced a confirmed, complete outcome label.
+- 115 matches were correctly quarantined as incomplete charts (the chart
   stops before a set or the match is actually won) rather than given a
   guessed outcome.
-- 34 source rows failed to parse (a handful of matches-file rows have an
+- 36 source rows failed to parse (a handful of matches-file rows have an
   unescaped comma shifting every later column) and were skipped and
   reported rather than crashing the run.
 
-Run it yourself: download the two CSVs from the Match Charting Project,
-then `python -m database.ingestion.run <matches.csv> <points.csv>`.
+An initial pass against a smaller, bounded sample (~28,800 points across
+190 matches) is what this ingestion is scaled up from — see
+[evaluation/README.md](../../evaluation/README.md) for what that scale-up
+changed about the Markov-vs-heuristic evaluation result.
+
+Run it yourself: download the CSVs from the Match Charting Project, then
+`python -m database.ingestion.run <matches.csv> <points1.csv> [<points2.csv> ...]`.
 
 ## Source
 
