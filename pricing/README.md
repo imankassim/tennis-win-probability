@@ -18,13 +18,19 @@ together for serving.
 
 - `promote_model.py` — trains and packages the pipeline: the EXP24 ML
   model (fit on the chronologically older 85% of matches), the EXP43
-  phase calibrator (fit on blended predictions for the newer 15% — held
-  out from the ML model's own training, so it measures genuine
-  out-of-sample miscalibration, not the model's fit to its own training
-  set), and the EXP33 blend weight, bundled into a `PricingArtefacts`
-  dataclass and persisted via `joblib` to
+  phase calibrator (fit on half of the newest 15% — held out from the ML
+  model's own training), and the EXP33 blend weight, bundled into a
+  `PricingArtefacts` dataclass and persisted via `joblib` to
   `docs/model_cards/artefacts/pricing_pipeline.joblib` (gitignored — a
-  build product, not source). Deliberately **not** automatic — per
+  build product, not source). Also computes `calibration_brier`/
+  `_log_loss`/`_ece` (Journey 19's ops dashboard surfaces these) on the
+  *other* half of that 15% — a slice neither the ML model nor the
+  calibrator was fit on, so these are genuine out-of-sample quality
+  numbers, not the calibrator's fit to its own training data (scoring it
+  on its own fitting data would report near-perfect calibration by
+  construction — a real mistake caught while building this, since
+  isotonic regression fits its own training data closely). Deliberately
+  **not** automatic — per
   [docs/architecture/charter.md](../docs/architecture/charter.md)'s "no
   automatic retraining or model promotion without review", this is a
   script a person runs on purpose. Running it *is* the review: the
@@ -55,8 +61,12 @@ python -m pricing.run_promotion \
   data/raw/match_charting_project/charting-m-points-2020s-full.csv
 ```
 
-Run against the full archive: 4,639 training matches, 818 held-out
-calibration matches, ~40s end to end.
+Run against the full archive: 4,639 training matches, 409 calibration
+matches (half of the 818-match holdout — the other half is the quality
+evaluation slice), ~40s end to end. Real quality numbers from this run:
+Brier 0.1481, log-loss 0.4648, ECE 0.0252 — comparable in magnitude to
+EXP43's reported final-test numbers (0.1511 Brier, 0.0113 ECE), a useful
+sanity check given the different holdout methodology and size.
 
 ## How the live API uses this
 

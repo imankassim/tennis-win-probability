@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–18 are complete.** Journey 10 (context features) was built
+**Journeys 1–19 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 Journey 16 (optional extensions) is deliberately deferred — it's
@@ -260,8 +260,25 @@ Done so far:
   [docs/architecture/deployment.md](architecture/deployment.md#availability-and-fallback-paths)
   and [evaluation/README.md](../evaluation/README.md).
 
-Next: **Journey 19** (dashboards — quality, latency, errors and
-regressions).
+- Dashboards (`GET /ops/summary`, `frontend/src/app/ops/page.tsx`): a
+  monitoring view separate from the replay/pricing dashboard, covering
+  the journey's own "quality, latency, errors and regressions"
+  description. Latency (median/p95) and error rates (fallback/suspended,
+  by model version) come from the quote event log (Journey 7); quality
+  comes from the promoted pipeline's own calibration-time evaluation
+  (`PricingArtefacts.calibration_brier`/`_log_loss`/`_ece`, new fields
+  computed by `pricing/promote_model.py` — see its README for why this
+  needed a genuine three-way data split, not the two-way split Journey
+  17 originally used, to avoid reporting the calibrator's fit to its own
+  training data as if it were an honest quality number). Real numbers
+  from the full archive: Brier 0.1481, log-loss 0.4648, ECE 0.0252. Not a
+  live-quality metric — this system replays static historical data, so
+  there's no live feed of outcomes to score served quotes against. See
+  [backend/README.md](../backend/README.md) and
+  [frontend/README.md](../frontend/README.md).
+
+Next: **Journey 20** (deployment — containers, CI, monitoring and
+rollback).
 
 ## Source
 
