@@ -1,10 +1,11 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
 from database.models import Match, Point
 from pricing.markov.serve_rate import (
     DEFAULT_SHRINKAGE_STRENGTH,
+    bulk_shrunk_serve_rates,
     player_serve_rate,
     serve_rate_with_shrinkage,
     tour_average_serve_rate,
@@ -135,3 +136,55 @@ def test_shrinkage_converges_to_empirical_rate_with_zero_strength():
 
 def test_default_shrinkage_strength_is_positive():
     assert DEFAULT_SHRINKAGE_STRENGTH > 0
+
+
+def test_bulk_shrunk_serve_rates_matches_the_per_match_function():
+    # A handful of matches across several players and dates, deliberately
+    # out of chronological order in the input list — bulk_shrunk_serve_rates
+    # must sort internally, same as the per-match approach implicitly does
+    # via as_of_date filtering.
+    base = date(2026, 1, 1)
+    matches = [
+        _match("m3", base + timedelta(days=20), A, B),
+        _match("m1", base, A, B),
+        _match("m2", base + timedelta(days=10), B, C),
+        _match("m4", base + timedelta(days=30), C, A),
+    ]
+    points = {
+        "m1": [
+            _point("m1", 1, "player_a", "player_a"),
+            _point("m1", 2, "player_b", "player_a"),
+        ],
+        "m2": [
+            _point("m2", 1, "player_a", "player_b"),  # player_a role here = B
+            _point("m2", 2, "player_b", "player_b"),  # player_b role here = C
+        ],
+        "m3": [
+            _point("m3", 1, "player_a", "player_a"),
+            _point("m3", 2, "player_a", "player_b"),
+        ],
+        "m4": [
+            _point("m4", 1, "player_b", "player_a"),  # player_b role here = A
+        ],
+    }
+
+    # bulk_shrunk_serve_rates is meant as a fast equivalent of
+    # engine.estimate_match_serve_rates (which adds the cold-start
+    # fallback on top of serve_rate_with_shrinkage), not of
+    # serve_rate_with_shrinkage alone — that raises outright when there's
+    # no tour history yet (true for the very first match by date here).
+    from pricing.markov.engine import estimate_match_serve_rates
+
+    bulk = bulk_shrunk_serve_rates(matches, points)
+
+    for match in matches:
+        expected_a, expected_b = estimate_match_serve_rates(match, matches, points)
+        actual_a, actual_b = bulk[match.match_id]
+        assert actual_a == pytest.approx(expected_a), match.match_id
+        assert actual_b == pytest.approx(expected_b), match.match_id
+
+
+def test_bulk_shrunk_serve_rates_skips_matches_with_no_points():
+    matches = [_match("m1", date(2026, 1, 1), A, B)]
+    result = bulk_shrunk_serve_rates(matches, {})
+    assert result == {}

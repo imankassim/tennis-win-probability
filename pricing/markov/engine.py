@@ -9,12 +9,13 @@ from datetime import date
 
 from database.models import Match, Point
 from pricing.markov.formulas import prob_win_match
-from pricing.markov.serve_rate import serve_rate_with_shrinkage, tour_average_serve_rate
+from pricing.markov.serve_rate import (
+    COLD_START_SERVE_RATE,
+    serve_rate_with_shrinkage,
+    tour_average_serve_rate,
+)
 
-# Used only when there is no tour history at all before as_of_date (the
-# very first matches in the archive) — a reasonable tour-level serve rate,
-# not fitted to any data. Graceful degradation, not a silent zero.
-COLD_START_SERVE_RATE = 0.6
+__all__ = ["COLD_START_SERVE_RATE", "estimate_match_serve_rates", "markov_probability"]
 
 
 def estimate_match_serve_rates(
