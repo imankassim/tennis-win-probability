@@ -7,6 +7,9 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "pydantic",
+    "pandas",
+    "scikit-learn",
+    "lightgbm",
 ]
 
 [project.optional-dependencies]
