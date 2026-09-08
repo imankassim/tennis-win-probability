@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import itertools
 import os
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.event_log import log_quote
 from backend.fixtures import demo_repository_data
 from backend.match_state import compute_break_point
 from backend.probability import MODEL_VERSION, compute_quote
@@ -128,6 +130,7 @@ def get_replay(match_id: str) -> ReplayResponse:
 
 @app.post("/probability", response_model=ProbabilityResponse)
 def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
+    started_at = time.perf_counter()
     match = repository.get_match(request.match_id)
     if match is None:
         raise HTTPException(status_code=404, detail=f"No match found for {request.match_id!r}")
@@ -149,7 +152,7 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
         games_won_b=point.games_won_b,
     )
 
-    return ProbabilityResponse(
+    response = ProbabilityResponse(
         probability_request_id=f"req_{next(_request_ids):x}",
         match_id=request.match_id,
         point_sequence=request.point_sequence,
@@ -166,3 +169,6 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
         fallback_used=False,
         suspended=False,
     )
+    latency_ms = (time.perf_counter() - started_at) * 1000
+    log_quote(response, latency_ms=latency_ms)
+    return response
