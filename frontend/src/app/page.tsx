@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MatchSelector } from "@/components/MatchSelector";
 import { listMatches } from "@/lib/mockData";
 
@@ -18,6 +19,13 @@ export default function HomePage() {
           recommendation.
         </p>
       </header>
+
+      <div className="mb-8 flex items-center justify-between">
+        <h2 className="text-sm font-medium text-slate-300">Scenario library</h2>
+        <Link href="/matches" className="text-xs text-sky-400 hover:text-sky-300">
+          Browse real matches →
+        </Link>
+      </div>
       <MatchSelector matches={matches} />
     </div>
   );
