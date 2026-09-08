@@ -44,10 +44,10 @@ the leading digit(s) indicate the theme, not a strict run order.
 | [EXP32](EXP32-EXP33-blend.md) | Fixed-weight blend of Markov and ML | Fusion baseline | Rejected — worse than ML alone (retained as evidence) |
 | [EXP33](EXP32-EXP33-blend.md) | Validation-tuned weighted blend | Fusion alternative | **Retained — leading configuration** |
 | EXP34 | Stacked meta-model combining Markov output, ML output and features | Meta-learning candidate | Planned |
-| EXP40 | No calibration (raw blended probability) | Calibration baseline | Planned |
-| EXP41 | Platt scaling | Calibration candidate | Planned |
-| EXP42 | Isotonic regression | Calibration candidate | Planned |
-| EXP43 | Dynamic, phase-level calibration | Calibration candidate | Planned |
+| [EXP40](EXP40-EXP43-calibration.md) | No calibration (raw blended probability) | Calibration baseline | Retained (comparator) |
+| [EXP41](EXP40-EXP43-calibration.md) | Platt scaling | Calibration candidate | Rejected — worse than no calibration on every metric (retained as evidence) |
+| [EXP42](EXP40-EXP43-calibration.md) | Isotonic regression | Calibration candidate | Retained |
+| [EXP43](EXP40-EXP43-calibration.md) | Dynamic, phase-level calibration | Calibration candidate | **Retained — leading configuration** |
 | EXP50 | Shot-level and rally momentum features | Optional representation experiment | Planned |
 | EXP51 | Cross-sport Poisson extension (football goal model) | Optional generalisation experiment | Planned |
 

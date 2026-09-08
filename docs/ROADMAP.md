@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–12 are complete.** Journey 10 (context features) was built
+**Journeys 1–13 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 
@@ -181,9 +181,18 @@ Done so far:
   validation-tuned weight (EXP33, `markov_weight=0.15`) recovers a real,
   if modest, edge (0.7% lower Brier than ML alone). See
   [pricing/blend/README.md](../pricing/blend/README.md).
+- Calibration and trading rules (`pricing/calibration/`,
+  `trading_rules/`): EXP40-43 — isotonic regression clearly improves
+  calibration error over the raw blend, phase-level isotonic improves it
+  further (55% lower ECE), and Platt scaling (the "standard" method)
+  actually makes it worse — a genuine negative result, kept as evidence.
+  Trading rules (margin, price bounds, suspension) are wired into the
+  live API: `suspended` is now genuinely computed, not always false. See
+  [pricing/calibration/README.md](../pricing/calibration/README.md) and
+  [trading_rules/README.md](../trading_rules/README.md).
 
-Next: **Journey 13** (calibration and trading rules — margin, suspension,
-price bounds).
+Next: **Journey 14** (the learned meta-model — stacking Markov output, ML
+output and features, with fallback).
 
 ## Source
 

@@ -83,3 +83,14 @@ isn't automatically an improvement. Only a weight tuned on a validation
 set (never the final test set — EXP33, landing on mostly trusting ML)
 recovers a real, if modest, edge over ML alone. See
 [pricing/blend/README.md](../pricing/blend/README.md).
+
+## Real evidence (calibration, EXP40-43)
+
+Isotonic regression clearly improves calibration error (ECE) over the raw
+blend, and doing it per match phase (early/mid/deciding set) improves it
+further (55% lower ECE than no calibration). Platt scaling, the "standard"
+calibration method, makes things *worse* here on every metric — a genuine
+negative result, not a modelling mistake: the blend's raw output was
+already reasonably well-calibrated, and Platt's fixed logistic-shape
+correction distorted rather than fixed it. See
+[pricing/calibration/README.md](../pricing/calibration/README.md).
