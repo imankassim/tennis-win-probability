@@ -74,3 +74,12 @@ The leading candidate (EXP24, LightGBM with state + context + momentum
 features) beats Markov by 15.1% lower Brier score, 15.7% lower log-loss —
 not yet wired into the live API, since the architecture blends the two
 estimates (Journey 12) rather than replacing one with the other.
+
+## Real evidence (the blend, EXP30-33)
+
+Naively averaging the two estimates at a fixed 50/50 weight (EXP32) is
+*worse* than using ML alone — a concrete demonstration of why blending
+isn't automatically an improvement. Only a weight tuned on a validation
+set (never the final test set — EXP33, landing on mostly trusting ML)
+recovers a real, if modest, edge over ML alone. See
+[pricing/blend/README.md](../pricing/blend/README.md).

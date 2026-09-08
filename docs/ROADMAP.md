@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–11 are complete.** Journey 10 (context features) was built
+**Journeys 1–12 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 
@@ -175,7 +175,15 @@ Done so far:
   (Journey 12) rather than one replacing the other. See
   [pricing/ml/README.md](../pricing/ml/README.md).
 
-Next: **Journey 12** (the blend — combining the Markov and ML estimates).
+- The blend (`pricing/blend/`): EXP30-33 on the same held-out data. A
+  naive fixed 50/50 blend (EXP32) is *worse* than ML alone — a concrete
+  demonstration that blending isn't automatically an improvement. Only a
+  validation-tuned weight (EXP33, `markov_weight=0.15`) recovers a real,
+  if modest, edge (0.7% lower Brier than ML alone). See
+  [pricing/blend/README.md](../pricing/blend/README.md).
+
+Next: **Journey 13** (calibration and trading rules — margin, suspension,
+price bounds).
 
 ## Source
 
