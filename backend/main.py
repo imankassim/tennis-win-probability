@@ -19,9 +19,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.event_log import log_quote
 from backend.fixtures import demo_repository_data
 from backend.match_state import compute_break_point, game_score_before
-from backend.probability import MODEL_VERSION, compute_quote
+from backend.probability import MODEL_VERSION, compute_probability
 from backend.repository import InMemoryMatchRepository, MatchRepository, load_from_csv
 from pricing.markov.serve_rate import COLD_START_SERVE_RATE, bulk_shrunk_serve_rates
+from trading_rules.rules import apply_trading_rules
 from backend.schemas import (
     MatchListResponse,
     MatchStateInterpretation,
@@ -171,7 +172,7 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
     points_a, points_b = game_score_before(points, point)
     p_a_serve, p_b_serve = _serve_rates_for(match)
 
-    probability_a, price_a, price_b = compute_quote(
+    probability_a = compute_probability(
         p_a_serve_rate=p_a_serve,
         p_b_serve_rate=p_b_serve,
         best_of=match.best_of,
@@ -183,6 +184,7 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
         points_a=points_a,
         points_b=points_b,
     )
+    trading_result = apply_trading_rules(probability_a)
 
     response = ProbabilityResponse(
         probability_request_id=f"req_{next(_request_ids):x}",
@@ -194,12 +196,12 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
             server=point.server,
             break_point=break_point,
         ),
-        probability_player_a=probability_a,
-        price_player_a=price_a,
-        price_player_b=price_b,
+        probability_player_a=None if trading_result.suspended else probability_a,
+        price_player_a=trading_result.price_a,
+        price_player_b=trading_result.price_b,
         model_version=MODEL_VERSION,
         fallback_used=False,
-        suspended=False,
+        suspended=trading_result.suspended,
     )
     latency_ms = (time.perf_counter() - started_at) * 1000
     log_quote(response, latency_ms=latency_ms)
