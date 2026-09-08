@@ -5,6 +5,8 @@
 
 # Raw third-party data (see docs/data_sheets/data_provenance.md — not redistributed)
 data/raw/
+# Local quote event log (backend/event_log.py) — runtime output, not source
+data/quote_log.jsonl
 *.parquet
 *.duckdb
 
