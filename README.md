@@ -152,7 +152,7 @@ at real ingested data with `COURTEDGE_DATA_DIR` — see
 
 ## Project status
 
-**Journeys 1–6** are complete:
+**Journeys 1–7** are complete:
 
 - Repository scaffold, project charter, all architecture views, the
   decision records, the experiment register, data provenance rules and the
@@ -180,8 +180,13 @@ at real ingested data with `COURTEDGE_DATA_DIR` — see
   library, which stays separate (mock data) since it demonstrates page
   states — suspension — a completed match archive can't produce.
 
-Next: **Journey 7 — context features** (deterministic ranking, form,
-surface and head-to-head extraction).
+- Deterministic context features (`backend/context_features.py`): recent
+  form, surface record and head-to-head, computed entirely from our own
+  ingested match archive with a strict no-look-ahead cutoff. Player
+  ranking remains unsourced — deferred until the ML feature set needs it.
+
+Next: **Journey 8 — evaluation** (outcome labels are already in place;
+Brier score, log-loss and latency measurement come next).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
 stage decision gates each journey must pass before the next begins.
