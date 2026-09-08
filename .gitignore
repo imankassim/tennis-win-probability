@@ -23,6 +23,7 @@ __pycache__/
 .venv/
 venv/
 *.egg-info/
+.pytest_cache/
 
 # Model artefacts (tracked via the model registry, not git)
 docs/model_cards/artefacts/
