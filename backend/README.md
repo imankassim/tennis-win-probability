@@ -5,10 +5,10 @@ FastAPI application layer: `/health`, `GET /matches`,
 
 ## Status
 
-Journeys 5-6 (API, replay behaviour) are complete. `context_features.py`
-is Journey 10 content, built ahead of schedule by mistake — the module
-itself is correct and tested, but Journeys 7-9 (instrumentation,
-evaluation, Markov baseline) are being filled in before continuing past
+Journeys 5-7 (API, replay behaviour, instrumentation) are complete.
+`context_features.py` is Journey 10 content, built ahead of schedule by
+mistake — the module itself is correct and tested, but Journeys 8-9
+(evaluation, Markov baseline) are being filled in before continuing past
 Journey 10. Uses
 the score-leader heuristic (EXP2) as a stand-in estimator until the Markov
 chain (Journey 9) exists, and a real match-state parser
@@ -39,6 +39,10 @@ match archive has no equivalent of.
   own match archive with a strict no-look-ahead cutoff. Not yet wired
   into an endpoint — its first consumer will be the ML feature set
   (Journey 11).
+- `event_log.py` — Journey 7 (instrumentation): logs one JSONL record per
+  served quote (request ID, model version, latency, fallback/suspended)
+  to `data/quote_log.jsonl` by default, or `COURTEDGE_QUOTE_LOG_PATH`.
+  Journey 8's evaluation harness reads this file.
 - `probability.py` — computes a probability/price from the score-leader
   heuristic; the placeholder margin and lack of trading rules are
   documented in the module.

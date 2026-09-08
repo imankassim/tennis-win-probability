@@ -191,11 +191,14 @@ Done so far:
   head-to-head, computed entirely from our own ingested match archive with
   a strict no-look-ahead cutoff. Player ranking remains unsourced —
   deferred until the ML feature set needs it.
+- Journey 7 — instrumentation (`backend/event_log.py`): every served quote
+  is logged as a JSONL record (request ID, model version, latency,
+  fallback/suspended) to a plain analytical file, not a database — the
+  evidence Journey 8's evaluation harness reads.
 
-Next: **Journey 7 — instrumentation** (quote event logging; request IDs
-and model version are already in the `/probability` response), then
-**Journey 8 — evaluation** (Brier score, log-loss, latency measurement)
-and **Journey 9 — the Markov baseline**, before returning to Journey 10's
+Next: **Journey 8 — evaluation** (Brier score, log-loss, latency
+measurement using the outcome labels and quote log already in place), then
+**Journey 9 — the Markov baseline**, before returning to Journey 10's
 remaining scope (ranking) and Journey 11 onward.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan and the
