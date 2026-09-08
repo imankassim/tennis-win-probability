@@ -2,7 +2,13 @@ import math
 
 import pytest
 
-from evaluation.metrics import brier_score, log_loss, percentile
+from evaluation.metrics import (
+    brier_score,
+    expected_calibration_error,
+    log_loss,
+    percentile,
+    reliability_bins,
+)
 
 
 def test_brier_score_is_zero_for_perfect_predictions():
@@ -68,3 +74,38 @@ def test_percentile_rejects_out_of_range_pct():
 def test_percentile_rejects_empty_list():
     with pytest.raises(ValueError):
         percentile([], 50)
+
+
+def test_reliability_bins_groups_by_predicted_probability():
+    predictions = [0.05, 0.15, 0.95]
+    outcomes = [0.0, 1.0, 1.0]
+    bins = reliability_bins(predictions, outcomes, n_bins=10)
+    assert len(bins) == 3  # three distinct occupied bins
+    assert {b["count"] for b in bins} == {1}
+
+
+def test_reliability_bins_skips_empty_bins():
+    bins = reliability_bins([0.05, 0.06], [0.0, 1.0], n_bins=10)
+    assert len(bins) == 1
+    assert bins[0]["count"] == 2
+    assert bins[0]["observed_rate"] == 0.5
+
+
+def test_expected_calibration_error_is_zero_for_perfectly_calibrated_bins():
+    # Each bin's mean predicted probability exactly matches its observed rate.
+    predictions = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    outcomes = [1.0] + [0.0] * 9  # observed rate in this bin = 0.1
+    assert expected_calibration_error(predictions, outcomes, n_bins=10) == pytest.approx(0.0)
+
+
+def test_expected_calibration_error_is_positive_when_miscalibrated():
+    # Predicts 0.9 every time but only right half the time -> badly miscalibrated.
+    predictions = [0.9] * 10
+    outcomes = [1.0] * 5 + [0.0] * 5
+    ece = expected_calibration_error(predictions, outcomes, n_bins=10)
+    assert ece == pytest.approx(0.4)  # |0.9 - 0.5|
+
+
+def test_expected_calibration_error_rejects_empty_input():
+    with pytest.raises(ValueError):
+        expected_calibration_error([], [])

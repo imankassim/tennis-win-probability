@@ -50,3 +50,53 @@ def percentile(values: list[float], pct: float) -> float:
     ordered = sorted(values)
     index = max(0, math.ceil(pct / 100 * len(ordered)) - 1)
     return ordered[index]
+
+
+def reliability_bins(
+    predictions: list[float], outcomes: list[float], n_bins: int = 10
+) -> list[dict]:
+    """Buckets predictions into `n_bins` equal-width bins on [0, 1] and
+    returns, per non-empty bin: the mean predicted probability, the
+    observed outcome rate, and the bin's point count. A perfectly
+    calibrated model has mean_predicted == observed_rate in every bin —
+    this is the data a reliability diagram plots, and what
+    expected_calibration_error summarises into one number."""
+    if len(predictions) != len(outcomes):
+        raise ValueError("predictions and outcomes must be the same length")
+    if not predictions:
+        raise ValueError("cannot bin an empty set of predictions")
+
+    buckets: list[list[tuple[float, float]]] = [[] for _ in range(n_bins)]
+    for p, o in zip(predictions, outcomes):
+        index = min(int(p * n_bins), n_bins - 1)
+        buckets[index].append((p, o))
+
+    bins = []
+    for bucket in buckets:
+        if not bucket:
+            continue
+        preds = [p for p, _ in bucket]
+        obs = [o for _, o in bucket]
+        bins.append(
+            {
+                "mean_predicted": sum(preds) / len(preds),
+                "observed_rate": sum(obs) / len(obs),
+                "count": len(bucket),
+            }
+        )
+    return bins
+
+
+def expected_calibration_error(
+    predictions: list[float], outcomes: list[float], n_bins: int = 10
+) -> float:
+    """ECE: the count-weighted average gap between predicted probability
+    and observed outcome rate, across `n_bins` equal-width bins. 0 is
+    perfectly calibrated; there's no fixed "good" threshold the way
+    Brier/log-loss have natural comparators — it's read relative to other
+    configurations evaluated the same way."""
+    bins = reliability_bins(predictions, outcomes, n_bins)
+    total = sum(b["count"] for b in bins)
+    return sum(
+        b["count"] * abs(b["mean_predicted"] - b["observed_rate"]) for b in bins
+    ) / total
