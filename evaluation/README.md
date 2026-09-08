@@ -63,3 +63,14 @@ performance bugs in `pricing/markov/`, both fixed and covered by
 regression tests: an unbounded `lru_cache` causing garbage-collector
 slowdown, and unbounded recursion for historical advantage-set matches
 (pre-2022-era deciding sets with no tiebreak at 6-6).
+
+## Real evidence (Markov vs the ML candidates, EXP20-24)
+
+Every ML configuration beats the Markov comparator on the same test
+methodology (a chronological, match-level held-out split this time,
+rather than evaluating the whole archive — see
+[pricing/ml/README.md](../pricing/ml/README.md) for the full table).
+The leading candidate (EXP24, LightGBM with state + context + momentum
+features) beats Markov by 15.1% lower Brier score, 15.7% lower log-loss —
+not yet wired into the live API, since the architecture blends the two
+estimates (Journey 12) rather than replacing one with the other.
