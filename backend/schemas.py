@@ -70,3 +70,40 @@ class ProbabilityResponse(BaseModel):
     model_version: str
     fallback_used: bool
     suspended: bool
+
+
+class OpsLatencySummary(BaseModel):
+    n_quotes: int
+    median_ms: float | None
+    p95_ms: float | None
+
+
+class OpsErrorSummary(BaseModel):
+    fallback_count: int
+    fallback_rate: float
+    suspended_count: int
+    suspended_rate: float
+    model_version_counts: dict[str, int]
+
+
+class OpsModelSummary(BaseModel):
+    model_version: str
+    trained_at: str
+    n_training_matches: int
+    n_calibration_matches: int
+    calibration_brier: float
+    calibration_log_loss: float
+    calibration_ece: float
+
+
+class OpsSummaryResponse(BaseModel):
+    """Journey 19's dashboard, in API form: quality (the promoted model's
+    own calibration-time evaluation — this system replays static
+    historical data, so there's no live feed of outcomes to score served
+    quotes against), latency and errors (both from the quote event log,
+    Journey 7). `model` is null if no pipeline has been promoted yet
+    (backend/probability.py's Markov-only fallback mode)."""
+
+    latency: OpsLatencySummary
+    errors: OpsErrorSummary
+    model: OpsModelSummary | None

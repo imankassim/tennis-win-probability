@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from backend.event_log import read_quote_log
 from backend.fixtures import DEMO_MATCH_ID
 from backend.main import _artefacts, app
 from backend.probability import MARKOV_MODEL_VERSION
@@ -108,3 +109,43 @@ def test_probability_moves_toward_the_leader():
         "/probability", json={"match_id": DEMO_MATCH_ID, "point_sequence": 47}
     ).json()
     assert later["probability_player_a"] > first["probability_player_a"]
+
+
+def test_ops_summary_reflects_the_real_quote_log():
+    # Guarantee at least one quote exists, then compare the endpoint's
+    # aggregation against reading the same log directly — robust to
+    # however many quotes earlier tests in this module already logged,
+    # since the quote log (backend/event_log.py) is a real append-only
+    # file shared across the whole test session, not reset per test.
+    client.post("/probability", json={"match_id": DEMO_MATCH_ID, "point_sequence": 1})
+    records = read_quote_log()
+
+    response = client.get("/ops/summary")
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["latency"]["n_quotes"] == len(records)
+    assert body["latency"]["median_ms"] is not None
+    assert body["latency"]["p95_ms"] is not None
+
+    expected_fallback_count = sum(1 for r in records if r["fallback_used"])
+    expected_suspended_count = sum(1 for r in records if r["suspended"])
+    assert body["errors"]["fallback_count"] == expected_fallback_count
+    assert body["errors"]["suspended_count"] == expected_suspended_count
+    assert body["errors"]["fallback_rate"] == expected_fallback_count / len(records)
+
+    if _artefacts is None:
+        assert body["model"] is None
+    else:
+        assert body["model"]["model_version"] == _artefacts.model_version
+        assert body["model"]["calibration_brier"] == _artefacts.calibration_brier
+
+
+def test_ops_summary_handles_an_empty_log_without_error(tmp_path, monkeypatch):
+    monkeypatch.setenv("COURTEDGE_QUOTE_LOG_PATH", str(tmp_path / "empty.jsonl"))
+    response = client.get("/ops/summary")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["latency"] == {"n_quotes": 0, "median_ms": None, "p95_ms": None}
+    assert body["errors"]["fallback_count"] == 0
+    assert body["errors"]["fallback_rate"] == 0.0

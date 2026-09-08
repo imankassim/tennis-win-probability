@@ -1,16 +1,27 @@
 # backend
 
 FastAPI application layer: `/health`, `GET /matches`,
-`GET /replay/{match_id}`, `POST /probability`.
+`GET /replay/{match_id}`, `POST /probability`, `GET /ops/summary`.
 
 ## Status
 
 Journeys 5-10 (API, replay behaviour, instrumentation, evaluation, Markov
-baseline, context features) are complete. `context_features.py` was built
-ahead of schedule by mistake, between Journeys 6 and 7 — the module
-itself was always correct and tested, just out of sequence; `player_rating.py`
-finishes Journey 10's remaining scope (ranking) with a self-computed Elo
-rating, since no external ranking feed was ever sourced.
+baseline, context features) and Journey 19 (dashboards) are complete.
+`context_features.py` was built ahead of schedule by mistake, between
+Journeys 6 and 7 — the module itself was always correct and tested, just
+out of sequence; `player_rating.py` finishes Journey 10's remaining scope
+(ranking) with a self-computed Elo rating, since no external ranking feed
+was ever sourced.
+
+`GET /ops/summary` (Journey 19) is the monitoring dashboard's data
+source: latency (median/p95) and error rates (fallback/suspended) from
+the quote event log (Journey 7), plus the promoted pipeline's own
+calibration-time quality snapshot (`calibration_brier`/`_log_loss`/`_ece`
+on `PricingArtefacts`, computed by `pricing/promote_model.py` on a slice
+neither the ML model nor the calibrator was fit on) — `model: null` if
+nothing has been promoted yet. Not a live-quality metric: this system
+replays static historical data, so there's no live feed of outcomes to
+score served quotes against.
 
 `/probability` runs the full designed pipeline (Journey 17): Markov and
 ML estimates computed independently, blended at the promoted weight,
@@ -61,7 +72,8 @@ match archive has no equivalent of.
   exists (`pricing/promote_model.py`); Markov alone otherwise. Margin,
   price bounds and suspension are `trading_rules/rules.py`'s job, applied
   in `main.py` after this module returns its raw probability.
-- `schemas.py` — the Pydantic request/response models.
+- `schemas.py` — the Pydantic request/response models, including
+  `OpsSummaryResponse` (Journey 19).
 - `main.py` — the FastAPI app and routes.
 
 ## Running it

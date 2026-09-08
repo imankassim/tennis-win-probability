@@ -16,11 +16,12 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.event_log import log_quote
+from backend.event_log import log_quote, read_quote_log
 from backend.fixtures import demo_repository_data
 from backend.match_state import compute_break_point, game_score_before
 from backend.probability import compute_probability, load_artefacts
 from backend.repository import InMemoryMatchRepository, MatchRepository, load_from_csv
+from evaluation.metrics import percentile
 from pricing.markov.serve_rate import COLD_START_SERVE_RATE, bulk_shrunk_serve_rates
 from pricing.ml.features import compute_match_context_features
 from trading_rules.rules import DEFAULT_MARGIN, WIDENED_MARGIN, apply_trading_rules
@@ -28,6 +29,10 @@ from backend.schemas import (
     MatchListResponse,
     MatchStateInterpretation,
     MatchSummarySchema,
+    OpsErrorSummary,
+    OpsLatencySummary,
+    OpsModelSummary,
+    OpsSummaryResponse,
     OutcomeSchema,
     PointSchema,
     ProbabilityRequest,
@@ -121,6 +126,54 @@ def _serve_rates_for(match) -> tuple[float, float]:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/ops/summary", response_model=OpsSummaryResponse)
+def ops_summary() -> OpsSummaryResponse:
+    """Journey 19's monitoring dashboard, as data: latency and error
+    rates from every quote served since the log file was last cleared
+    (Journey 7's event log), plus the promoted pipeline's own
+    calibration-time quality snapshot (None if nothing has been
+    promoted — see backend/probability.py)."""
+    records = read_quote_log()
+    latencies = [r["latency_ms"] for r in records]
+    n = len(records)
+
+    fallback_count = sum(1 for r in records if r["fallback_used"])
+    suspended_count = sum(1 for r in records if r["suspended"])
+    model_version_counts: dict[str, int] = {}
+    for r in records:
+        model_version_counts[r["model_version"]] = model_version_counts.get(r["model_version"], 0) + 1
+
+    model_summary = (
+        OpsModelSummary(
+            model_version=_artefacts.model_version,
+            trained_at=_artefacts.trained_at,
+            n_training_matches=_artefacts.n_training_matches,
+            n_calibration_matches=_artefacts.n_calibration_matches,
+            calibration_brier=_artefacts.calibration_brier,
+            calibration_log_loss=_artefacts.calibration_log_loss,
+            calibration_ece=_artefacts.calibration_ece,
+        )
+        if _artefacts is not None
+        else None
+    )
+
+    return OpsSummaryResponse(
+        latency=OpsLatencySummary(
+            n_quotes=n,
+            median_ms=percentile(latencies, 50) if n else None,
+            p95_ms=percentile(latencies, 95) if n else None,
+        ),
+        errors=OpsErrorSummary(
+            fallback_count=fallback_count,
+            fallback_rate=fallback_count / n if n else 0.0,
+            suspended_count=suspended_count,
+            suspended_rate=suspended_count / n if n else 0.0,
+            model_version_counts=model_version_counts,
+        ),
+        model=model_summary,
+    )
 
 
 @app.get("/matches", response_model=MatchListResponse)
