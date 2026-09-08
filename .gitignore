@@ -7,6 +7,8 @@
 data/raw/
 # Local quote event log (backend/event_log.py) — runtime output, not source
 data/quote_log.jsonl
+# Scratch caches used during ad-hoc evaluation runs — regenerable, not source
+data/*.pkl
 *.parquet
 *.duckdb
 
