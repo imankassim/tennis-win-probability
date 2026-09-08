@@ -1,0 +1,29 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Raw third-party data (see docs/data_sheets/data_provenance.md — not redistributed)
+data/raw/
+*.parquet
+*.duckdb
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Model artefacts (tracked via the model registry, not git)
+docs/model_cards/artefacts/
+
+# OS / editor
+.DS_Store
+Thumbs.db
