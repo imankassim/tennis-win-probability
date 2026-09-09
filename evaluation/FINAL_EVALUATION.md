@@ -1,7 +1,9 @@
 # Final evaluation (Journey 21)
 
-Synthesises every held-out result gathered across this project's 44
-run experiments into one answer to the charter's own research question,
+Synthesises every held-out result gathered across this project's run
+experiments (EXP1 through EXP44 — not every number in that range was
+actually run; EXP12 and EXP14, for instance, remain planned) into one
+answer to the charter's own research question,
 rather than a new, disjoint evaluation invented just for this journey —
 see [docs/architecture/charter.md](../docs/architecture/charter.md) for
 why: the "final held-out test" this journey calls for is what
