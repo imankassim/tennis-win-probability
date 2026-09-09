@@ -8,7 +8,7 @@
 The primary research question asks whether a machine-learned model, blended
 with a transparent analytic baseline, improves on the baseline alone. That
 question is unanswerable without first establishing a credible, well-tuned
-baseline to improve on — and without one, any later ML result is
+baseline to improve on - and without one, any later ML result is
 unfalsifiable ("better than what?").
 
 ## Decision

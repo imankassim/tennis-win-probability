@@ -2,8 +2,8 @@
 
 A small Protocol rather than a direct database dependency, so the app can
 run against real ingested data or an in-memory fixture without the route
-handlers caring which. No live PostgreSQL connection is wired up yet — see
-database/README.md — so InMemoryMatchRepository is the only implementation
+handlers caring which. No live PostgreSQL connection is wired up yet - see
+database/README.md - so InMemoryMatchRepository is the only implementation
 today, built either from the demo fixture or from real ingested CSVs.
 """
 
@@ -59,7 +59,7 @@ class InMemoryMatchRepository:
         return self._outcomes.get(match_id)
 
     def list_matches(self) -> list[Match]:
-        """Only matches that actually have points loaded — a match with no
+        """Only matches that actually have points loaded - a match with no
         points isn't replayable. `load_from_csv` may parse thousands of
         rows of match metadata against only a bounded sample of points."""
         return [m for match_id, m in self._matches.items() if self._points.get(match_id)]
@@ -72,15 +72,15 @@ class InMemoryMatchRepository:
 
     def all_outcomes(self) -> dict[str, OutcomeLabel]:
         """For context-feature estimation (pricing/ml/features.py), the
-        same bulk-access shape as all_points_by_match — the ML context
+        same bulk-access shape as all_points_by_match - the ML context
         cache needs every match's confirmed outcome, not just one."""
         return self._outcomes
 
 
 def load_from_csv(matches_csv: Path, *points_csvs: Path) -> InMemoryMatchRepository:
     """Builds a repository from real, freshly-downloaded Match Charting
-    Project CSVs (see database/README.md) — not committed to the repo.
-    Accepts multiple points files (e.g. one per decade — real match_ids
+    Project CSVs (see database/README.md) - not committed to the repo.
+    Accepts multiple points files (e.g. one per decade - real match_ids
     never repeat across them), same as database/ingestion/run.py."""
     parsed_matches, _errors = parse_matches(matches_csv)
     matches = [m for m, _a, _b in parsed_matches]

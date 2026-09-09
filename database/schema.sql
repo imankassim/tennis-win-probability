@@ -1,13 +1,13 @@
 -- CourtEdge data foundation schema (Journey 4).
 --
 -- PostgreSQL is the transactional source of truth for matches, players,
--- points and outcome labels — see docs/architecture/data-architecture.md
+-- points and outcome labels - see docs/architecture/data-architecture.md
 -- and docs/decisions/3-postgres-source-of-truth-duckdb-feature-store.md.
 -- The feature-and-replay store (DuckDB/Parquet) is a separate, rebuildable
 -- copy derived from this schema, not defined here.
 --
 -- Quotes, quote events, experiments and model records are out of scope for
--- this schema — they belong to their own journeys (5, 9-11) and will get
+-- this schema - they belong to their own journeys (5, 9-11) and will get
 -- their own migration when built.
 
 CREATE TABLE players (
@@ -32,7 +32,7 @@ CREATE TABLE matches (
 
 -- One row per point played, in sequence. Deliberately stores the raw score
 -- state (sets/games won entering the point, and the point score string) as
--- recorded by the source, rather than a reinterpreted "games: '4-4'" view —
+-- recorded by the source, rather than a reinterpreted "games: '4-4'" view -
 -- that interpretation is the match-state parser's job (Journey 6).
 CREATE TABLE points (
     match_id TEXT NOT NULL REFERENCES matches (match_id),
@@ -52,7 +52,7 @@ CREATE TABLE points (
 -- The primary key above already enforces "unique and non-null match and
 -- point identifiers" and "no duplicate point records". A true
 -- monotonically-increasing check (no gaps, strictly sequential) is not
--- expressible as a plain constraint here — it's enforced at ingestion time
+-- expressible as a plain constraint here - it's enforced at ingestion time
 -- by database/quality_gates.py before rows ever reach this table.
 
 CREATE TABLE outcome_labels (

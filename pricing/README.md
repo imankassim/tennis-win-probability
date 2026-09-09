@@ -9,7 +9,7 @@ the promotion script that bundles them into one artefact for live serving
 
 Journeys 17 and 20 (full API integration; deployment/rollback) are
 complete. Each estimation layer was built and evaluated offline first,
-in its own sub-package — see [markov/README.md](markov/README.md),
+in its own sub-package - see [markov/README.md](markov/README.md),
 [ml/README.md](ml/README.md), [blend/README.md](blend/README.md),
 [calibration/README.md](calibration/README.md) for the real evidence
 behind each one. This README covers only the pieces that tie them
@@ -17,49 +17,49 @@ together for serving and operating them.
 
 ## Structure
 
-- `promote_model.py` — trains and packages the pipeline: the EXP24 ML
+- `promote_model.py` - trains and packages the pipeline: the EXP24 ML
   model (fit on the chronologically older 85% of matches), the EXP43
-  phase calibrator (fit on half of the newest 15% — held out from the ML
+  phase calibrator (fit on half of the newest 15% - held out from the ML
   model's own training), and the EXP33 blend weight, bundled into a
   `PricingArtefacts` dataclass and persisted via `joblib` to
-  `docs/model_cards/artefacts/pricing_pipeline.joblib` (gitignored — a
+  `docs/model_cards/artefacts/pricing_pipeline.joblib` (gitignored - a
   build product, not source). Also computes `calibration_brier`/
   `_log_loss`/`_ece` (Journey 19's ops dashboard surfaces these) on the
-  *other* half of that 15% — a slice neither the ML model nor the
+  *other* half of that 15% - a slice neither the ML model nor the
   calibrator was fit on, so these are genuine out-of-sample quality
   numbers, not the calibrator's fit to its own training data (scoring it
   on its own fitting data would report near-perfect calibration by
-  construction — a real mistake caught while building this, since
+  construction - a real mistake caught while building this, since
   isotonic regression fits its own training data closely). Deliberately
-  **not** automatic — per
+  **not** automatic - per
   [docs/architecture/charter.md](../docs/architecture/charter.md)'s "no
   automatic retraining or model promotion without review", this is a
   script a person runs on purpose. Running it *is* the review: the
   feature set, blend weight and calibration method it packages were
   already decided by experiments/EXP20-24, EXP32-33 and EXP40-43: this
   script doesn't re-derive them.
-- `run_promotion.py` — the CLI entry point (`python -m
+- `run_promotion.py` - the CLI entry point (`python -m
   pricing.run_promotion <matches.csv> <points1.csv> [...]`). Kept
   separate from `promote_model.py` deliberately: running
   `promote_model.py` directly with `python -m` would load it as
   `__main__`, and `joblib`/`pickle` locate a class by the module it's
-  reachable from in `sys.modules` — a `PricingArtefacts` pickled while
+  reachable from in `sys.modules` - a `PricingArtefacts` pickled while
   its own defining module was loaded as `__main__` can't be unpickled
   later by a normal `import pricing.promote_model` (e.g.
   `backend/main.py` at startup, in a different process, where the class
-  was never imported under the name `__main__`). This bit — running the
+  was never imported under the name `__main__`). This bit - running the
   training script directly, then failing to load the artefact from the
-  API process — is a real bug this project hit once, not a hypothetical
+  API process - is a real bug this project hit once, not a hypothetical
   one; splitting the CLI out fixes it structurally rather than needing
   everyone who runs the script to remember a workaround.
-- `registry.py` — the model registry (Journey 20; the source document's
+- `registry.py` - the model registry (Journey 20; the source document's
   own "Version - data split - features - metrics - approval status -
   rollback target" component). Every promotion appends one entry to
   `docs/model_cards/artefacts/registry.json`, marking it active and
-  every earlier entry superseded — exactly one version is ever active,
+  every earlier entry superseded - exactly one version is ever active,
   matching there being exactly one fixed filename
   `backend/probability.py` reads.
-- `rollback_model.py` — the CLI that switches which promoted version is
+- `rollback_model.py` - the CLI that switches which promoted version is
   active (`python -m pricing.rollback_model --list` /
   `... <version>`), without retraining anything. See "Rollback" below.
 
@@ -73,16 +73,16 @@ python -m pricing.run_promotion \
 ```
 
 Run against the full archive: 4,639 training matches, 409 calibration
-matches (half of the 818-match holdout — the other half is the quality
+matches (half of the 818-match holdout - the other half is the quality
 evaluation slice), ~40s end to end. Real quality numbers from this run:
-Brier 0.1481, log-loss 0.4648, ECE 0.0252 — comparable in magnitude to
+Brier 0.1481, log-loss 0.4648, ECE 0.0252 - comparable in magnitude to
 EXP43's reported final-test numbers (0.1511 Brier, 0.0113 ECE), a useful
 sanity check given the different holdout methodology and size.
 
 Every run keeps its artefact under
 `docs/model_cards/artefacts/versions/pricing_pipeline_<version>.joblib`
 (never overwritten) as well as at the fixed active-artefact path, and
-records itself in `registry.json` — see "Rollback" below.
+records itself in `registry.json` - see "Rollback" below.
 
 ## Rollback
 
@@ -91,13 +91,13 @@ python -m pricing.rollback_model --list        # every promoted version, with it
 python -m pricing.rollback_model <version>     # make one of them active again
 ```
 
-No retraining — a rollback copies an already-promoted version's file
+No retraining - a rollback copies an already-promoted version's file
 back over the active-artefact path and updates the registry, nothing
 more. Deliberately manual, the same as promotion itself: per
 [docs/architecture/governance.md](../docs/architecture/governance.md)'s
 "require review for model promotion," switching what's served is a
 reviewed action whether it's a new promotion or a rollback to an old
-one — never automatic.
+one - never automatic.
 
 ## How the live API uses this
 
@@ -105,16 +105,16 @@ one — never automatic.
 startup. For each `/probability` request it computes the Markov estimate
 and the ML estimate independently (state + context + within-match
 momentum, the same features `pricing/ml/features.py` builds for
-training — context features come from a bulk cache built once at startup
+training - context features come from a bulk cache built once at startup
 with the exact same `compute_match_context_features` function the
 promotion script trained against, so a live request scores the identical
 feature the model learned from), blends them at the promoted weight, and
-applies the promoted phase calibrator — `model_version` becomes the
+applies the promoted phase calibrator - `model_version` becomes the
 artefact's own version string (`blend_v1_calibrated`),
 `fallback_used=false`.
 
-If no artefact exists — a fresh clone, or before anyone has run the
-promotion script — the API degrades gracefully to the Markov engine
+If no artefact exists - a fresh clone, or before anyone has run the
+promotion script - the API degrades gracefully to the Markov engine
 alone: `model_version="markov_v1"`, `fallback_used=true`. This is the
 graceful-degradation behaviour
 [docs/architecture/logical-architecture.md](../docs/architecture/logical-architecture.md)'s

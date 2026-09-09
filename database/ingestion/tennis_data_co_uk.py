@@ -2,7 +2,7 @@
 
 Source: http://tennis-data.co.uk/alldata.php
 Used strictly as an evaluation benchmark (decision 8, decision on public
-data sources) — never as a serving-time feature, never treated as ground
+data sources) - never as a serving-time feature, never treated as ground
 truth of the "true" probability. See
 docs/data_sheets/data_provenance.md and
 trading_rules/value_detection.py's module docstring for the bounded,
@@ -10,7 +10,7 @@ research-only framing this feeds into.
 
 This module only parses the source file and matches its rows to our own
 archive by player name (tennis-data.co.uk has no shared match_id with the
-Match Charting Project) — it does not compute any probability or flag
+Match Charting Project) - it does not compute any probability or flag
 itself.
 """
 
@@ -26,7 +26,7 @@ import pandas as pd
 from database.models import Match
 
 # How close a tennis-data.co.uk row's date must be to one of our match's
-# recorded date to be considered the same match — the two sources don't
+# recorded date to be considered the same match - the two sources don't
 # always record identical calendar dates for a single tournament's
 # matches (e.g. tournament start date vs. the specific match's date).
 DATE_TOLERANCE_DAYS = 3
@@ -84,13 +84,13 @@ def match_market_odds_to_archive(
     market_rows: list[MarketOddsRow], matches: list[Match], players_by_id: dict[str, str]
 ) -> dict[str, tuple[float, float]]:
     """Matches market odds rows to our own archive by (surname pair, date
-    proximity). Returns {match_id: (odds_a, odds_b)} — odds for player_a
+    proximity). Returns {match_id: (odds_a, odds_b)} - odds for player_a
     and player_b as recorded in *our* Match, not the source's
     winner/loser framing (the outcome isn't known to a real bettor before
     the match, so orienting by our fixed player_a/player_b avoids
     accidentally encoding the result into which side "odds_a" is).
 
-    Deliberately not exhaustive — matches only what it can confirm via
+    Deliberately not exhaustive - matches only what it can confirm via
     both players' surnames and a close date; unmatched rows are simply
     absent from the result, not guessed at.
     """

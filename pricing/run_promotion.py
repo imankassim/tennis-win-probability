@@ -3,7 +3,7 @@
 Kept in a separate module deliberately: running `python -m
 pricing.promote_model` directly would load that module as `__main__`
 rather than `pricing.promote_model`, and joblib/pickle identifies a class
-by the module it's reachable from in `sys.modules` — a `PricingArtefacts`
+by the module it's reachable from in `sys.modules` - a `PricingArtefacts`
 pickled while its own defining module was loaded as `__main__` cannot be
 unpickled later by a normal `import pricing.promote_model` (e.g.
 backend/main.py at startup), because that import never registers the

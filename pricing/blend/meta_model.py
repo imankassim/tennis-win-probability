@@ -1,10 +1,10 @@
-"""The learned meta-model (Journey 14): EXP34 — stacks the Markov and ML
+"""The learned meta-model (Journey 14): EXP34 - stacks the Markov and ML
 outputs together with the raw features into one learned combiner, instead
 of the fixed-formula weighted average (pricing/blend/blend.py, Journey
 12). A stacking approach: a simple model (logistic regression, to avoid
 the meta-learner itself overfitting) reads both base estimates plus the
 score-state/context/momentum features, and can in principle learn things
-a fixed weight can't — e.g. "trust Markov more in the deciding set".
+a fixed weight can't - e.g. "trust Markov more in the deciding set".
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ def build_stacked_features(
 
 class MetaModel:
     """A thin wrapper so callers don't need to know it's logistic
-    regression internally — consistent with how pricing/ml/train.py
+    regression internally - consistent with how pricing/ml/train.py
     already wraps model_kind choices."""
 
     def __init__(self) -> None:
@@ -63,13 +63,13 @@ def predict_with_fallback(
     ml_p: float | None,
 ) -> tuple[float | None, bool]:
     """Returns (probability, fallback_used). The meta-model was trained
-    expecting both base estimates present — it has no grounds to
+    expecting both base estimates present - it has no grounds to
     extrapolate sensibly if one is missing, so a missing ML estimate
     falls back to Markov-only (the same graceful-degradation shape as
     docs/architecture/deployment.md's fallback table), and a missing
-    Markov estimate (which should never actually happen — it has no
+    Markov estimate (which should never actually happen - it has no
     upstream dependency that fails independently) falls back to the ML
-    estimate. Returns (None, True) only if both are missing — nothing to
+    estimate. Returns (None, True) only if both are missing - nothing to
     serve; the caller (trading_rules.apply_trading_rules) will suspend."""
     if ml_p is None and markov_p is None:
         return None, True

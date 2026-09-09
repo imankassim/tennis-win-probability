@@ -1,18 +1,18 @@
 # Runs the Next.js replay/pricing/ops dashboard (frontend/). Build
 # context is the frontend/ directory itself (see docker-compose.yml or
 # `docker build -f infrastructure/Dockerfile.frontend frontend`), not
-# the repo root — the app has no dependency on anything outside it.
+# the repo root - the app has no dependency on anything outside it.
 #
 # Uses next.config.ts's `output: "standalone"` (Next.js's own recommended
 # Docker pattern): the final image copies just the self-contained
 # .next/standalone bundle plus .next/static and public/, rather than the
-# full node_modules tree — smaller, and avoids an earlier, less-tested
+# full node_modules tree - smaller, and avoids an earlier, less-tested
 # hand-rolled approach that failed in CI (see git history) without a
 # clear enough error message to diagnose exactly which of several
 # plausible causes it was; standalone output is the well-tested path
 # instead of continuing to guess at the bespoke one.
 # NEXT_PUBLIC_* variables are inlined into the client bundle at build
-# time by Next.js, not read from the environment at container start —
+# time by Next.js, not read from the environment at container start -
 # setting one via `docker run -e` or compose's `environment:` on the
 # finished image has no effect. A build ARG is the only way to make it
 # configurable per build; docker-compose.yml passes it under `build.args`.

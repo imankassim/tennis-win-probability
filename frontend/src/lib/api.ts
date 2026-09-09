@@ -1,7 +1,7 @@
 // Client for the real backend (backend/main.py), added in Journey 6.
 //
 // The scripted demo matches (mockData.ts) still exist as a separate
-// "scenario library" — they demonstrate page states (suspended, stale)
+// "scenario library" - they demonstrate page states (suspended, stale)
 // that real historical data can't produce, since suspension is a live-feed
 // concept with no equivalent in a completed match archive. This module is
 // for browsing and replaying *real* matches through the actual API.
@@ -183,7 +183,7 @@ export async function getOpsSummary(): Promise<OpsSummary> {
 /**
  * Fetches a real match's full replay: the point list plus a probability
  * quote for every point. The backend has no bulk-quote endpoint yet, so
- * this issues one request per point in parallel — fine for a match-sized
+ * this issues one request per point in parallel - fine for a match-sized
  * point count on localhost, but a real optimisation candidate later.
  */
 export async function getRealMatchReplay(matchId: string): Promise<MatchReplay> {

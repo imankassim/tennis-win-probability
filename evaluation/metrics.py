@@ -1,5 +1,5 @@
 """Evaluation metrics (Journey 8): Brier score, log-loss, latency
-percentiles. Pure functions over plain lists — no dependency on any
+percentiles. Pure functions over plain lists - no dependency on any
 particular estimator, repository or database, so the same code evaluates
 EXP1, EXP2, and later the Markov/ML/blend configurations, per the
 "same evaluation framework across stages" principle.
@@ -41,7 +41,7 @@ def log_loss(predictions: list[float], outcomes: list[float]) -> float:
 
 
 def percentile(values: list[float], pct: float) -> float:
-    """Nearest-rank percentile (0-100). No interpolation — simple and
+    """Nearest-rank percentile (0-100). No interpolation - simple and
     sufficient for reporting p50/p95 latency; not a statistical estimator."""
     if not values:
         raise ValueError("cannot take a percentile of an empty list")
@@ -58,7 +58,7 @@ def reliability_bins(
     """Buckets predictions into `n_bins` equal-width bins on [0, 1] and
     returns, per non-empty bin: the mean predicted probability, the
     observed outcome rate, and the bin's point count. A perfectly
-    calibrated model has mean_predicted == observed_rate in every bin —
+    calibrated model has mean_predicted == observed_rate in every bin -
     this is the data a reliability diagram plots, and what
     expected_calibration_error summarises into one number."""
     if len(predictions) != len(outcomes):
@@ -93,7 +93,7 @@ def expected_calibration_error(
     """ECE: the count-weighted average gap between predicted probability
     and observed outcome rate, across `n_bins` equal-width bins. 0 is
     perfectly calibrated; there's no fixed "good" threshold the way
-    Brier/log-loss have natural comparators — it's read relative to other
+    Brier/log-loss have natural comparators - it's read relative to other
     configurations evaluated the same way."""
     bins = reliability_bins(predictions, outcomes, n_bins)
     total = sum(b["count"] for b in bins)

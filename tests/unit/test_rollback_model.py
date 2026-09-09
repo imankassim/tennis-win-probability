@@ -13,7 +13,7 @@ PLAYERS = ["p1", "p2", "p3", "p4"]
 
 def _tiny_artefacts():
     """A minimal but real PricingArtefacts, via the actual training path
-    (not hand-built fakes) — this test cares about rollback's file/registry
+    (not hand-built fakes) - this test cares about rollback's file/registry
     plumbing, not model quality, so a small archive is enough."""
     from datetime import date, timedelta
     import random

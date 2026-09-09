@@ -70,8 +70,8 @@ def test_markov_probability_matches_the_underlying_formula_directly():
 
 def test_markov_probability_respects_which_player_is_serving():
     # From a genuinely fresh 0-0 set, who serves first doesn't affect the
-    # outcome (verified independently by Monte Carlo simulation — a real
-    # property of alternating service, not a bug) — so this needs a
+    # outcome (verified independently by Monte Carlo simulation - a real
+    # property of alternating service, not a bug) - so this needs a
     # mid-match state to actually exercise server-dependence.
     p_a_serving = markov_probability(0.65, 0.55, 3, 0, 0, 3, 2, "player_a")
     p_b_serving = markov_probability(0.65, 0.55, 3, 0, 0, 3, 2, "player_b")

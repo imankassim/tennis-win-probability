@@ -3,7 +3,7 @@
 CourtEdge is an original in-play tennis probability and pricing research
 prototype, inspired by the type of real-time pricing systems used by sports
 betting companies. It is not a copy of any real bookmaker's product, brand
-or proprietary pricing feed, and it is **not** a real-money trading system —
+or proprietary pricing feed, and it is **not** a real-money trading system -
 see [Prototype boundary](#prototype-boundary).
 
 ## Research question
@@ -56,7 +56,7 @@ flowchart TD
     C["Probability estimation\nMarkov chain (analytic) + ML model (learned),\ncomputed independently"]
     D["Blend\nweighted combination or learned meta-model"]
     E["Calibration\nPlatt scaling / isotonic regression"]
-    F["Trading rules & risk controls\nmargin - price bounds - suspension - staleness\n(hard constraints — cannot be overridden)"]
+    F["Trading rules & risk controls\nmargin - price bounds - suspension - staleness\n(hard constraints - cannot be overridden)"]
     G["API response\nrequest ID - probability - price - model version - suspended flag"]
 
     A --> B
@@ -66,7 +66,7 @@ flowchart TD
 ```
 
 A failure in any advanced layer degrades to a simpler, honest method rather
-than a fabricated price — e.g. if the ML model is unavailable, the system
+than a fabricated price - e.g. if the ML model is unavailable, the system
 serves the Markov-only probability and marks `ml_fallback: true`; if trading
 rules themselves fail, pricing is suspended entirely. See
 [docs/architecture/deployment.md](docs/architecture/deployment.md) for the
@@ -78,7 +78,7 @@ labels; a **DuckDB/Parquet feature-and-replay store**, rebuilt from
 PostgreSQL, supports fast point-in-time feature computation. Model training
 and calibration fitting run entirely offline, on match-level (never
 point-level) splits, and serving loads only versioned artefacts from a model
-registry — training never happens inside a live request.
+registry - training never happens inside a live request.
 
 For the full set of views (system context, data architecture, offline
 training pipeline, deployment roles, security/governance) see
@@ -129,7 +129,7 @@ courtedge/
 | [docs/REFERENCES.md](docs/REFERENCES.md) | Academic and technical sources behind the modelling approach. |
 | [docs/CourtEdge_Architecture_and_Task_Definition.docx](docs/CourtEdge_Architecture_and_Task_Definition.docx) | The original, full source specification this repository implements. |
 | [docs/model_cards/blend_v1_calibrated.md](docs/model_cards/blend_v1_calibrated.md) | The served pipeline's model card: training data, feature schema, real evaluation numbers, caveats. |
-| [docs/ethics/assessment.md](docs/ethics/assessment.md) | Privacy, fairness, responsible-gambling and licensing review — including the gaps it found, not only what passed. |
+| [docs/ethics/assessment.md](docs/ethics/assessment.md) | Privacy, fairness, responsible-gambling and licensing review - including the gaps it found, not only what passed. |
 | [evaluation/FINAL_EVALUATION.md](evaluation/FINAL_EVALUATION.md) | The full evidence trail (EXP1 through EXP44) synthesised into one answer to the research question above. |
 
 ## Running it locally
@@ -149,14 +149,14 @@ python -m uvicorn backend.main:app --reload
 ```
 
 The backend serves a small synthetic demo match out of the box; point it
-at real ingested data with `COURTEDGE_DATA_DIR` — see
+at real ingested data with `COURTEDGE_DATA_DIR` - see
 [backend/README.md](backend/README.md) and
 [database/README.md](database/README.md).
 
 ### Full demonstration (real data, the promoted pipeline, both dashboards)
 
 ```bash
-# 1. Download the real archive (not committed — see database/README.md)
+# 1. Download the real archive (not committed - see database/README.md)
 curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-matches.csv
 curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-points-2010s.csv
 curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-points-2020s.csv
@@ -174,7 +174,7 @@ cd frontend && npm install && npm run dev
 
 Then open `/matches` to browse and replay real matches priced by the
 full blended, calibrated pipeline (`model_version=blend_v1_calibrated`
-in each response), and `/ops` for the monitoring dashboard — quote
+in each response), and `/ops` for the monitoring dashboard - quote
 latency, fallback/suspended rates, and the promoted model's own
 calibration-time quality numbers. `python -m pricing.rollback_model
 --list` shows every promoted version; see

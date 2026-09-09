@@ -1,7 +1,7 @@
 """Ingestion entry point: parse Match Charting Project CSVs, run the data
 quality gates, derive outcome labels, and report the result.
 
-This does NOT write to PostgreSQL yet — no live database is assumed to be
+This does NOT write to PostgreSQL yet - no live database is assumed to be
 available in every development environment. It produces the same validated
 records a loader would insert, plus a quarantine report, so the pipeline is
 fully exercisable and testable without a running database (consistent with
@@ -12,11 +12,11 @@ Usage:
     python -m database.ingestion.run <matches.csv> <points.csv> [<points2.csv> ...]
 
 Multiple points files are accepted (e.g. the Match Charting Project's
-separate per-decade files) and merged — real match_ids never repeat
+separate per-decade files) and merged - real match_ids never repeat
 across them, since each decade file only contains matches from that
 decade.
 
-The source CSVs are never committed to the repository — see
+The source CSVs are never committed to the repository - see
 docs/data_sheets/data_provenance.md. Download them yourself:
 https://github.com/JeffSackmann/tennis_MatchChartingProject
 """

@@ -11,7 +11,7 @@ export function MatchSelector({ matches }: { matches: MatchSummary[] }) {
             className="block rounded-lg border border-slate-800 bg-slate-900 p-4 transition hover:border-sky-700 hover:bg-slate-800/60"
           >
             <p className="text-xs uppercase tracking-wide text-slate-500">
-              {m.tournament} — {m.round}
+              {m.tournament} - {m.round}
             </p>
             <p className="mt-1 text-lg font-medium text-slate-100">
               {m.playerA} <span className="text-slate-500">vs</span> {m.playerB}

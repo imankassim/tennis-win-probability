@@ -17,11 +17,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      # No [build-system] is declared in pyproject.toml (deliberately —
+      # No [build-system] is declared in pyproject.toml (deliberately -
       # this repo is many top-level packages, not one installable
       # distribution), so dependencies are installed directly rather
       # than via `pip install .`, matching local dev (see
-      # backend/README.md and database/README.md — neither mentions an
+      # backend/README.md and database/README.md - neither mentions an
       # editable install). pyproject.toml stays the single source of
       # truth for the dependency list; this just reads it rather than
       # duplicating it in the workflow file.
@@ -71,7 +71,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # Not runnable in the primary dev environment this project was
-      # built in (no local Docker — see infrastructure/README.md), so
+      # built in (no local Docker - see infrastructure/README.md), so
       # this job is the only place these Dockerfiles are actually
       # verified to build and start, not just written and assumed
       # correct.

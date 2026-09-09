@@ -39,7 +39,7 @@ export interface PointEvent {
 }
 
 /**
- * One returned probability and price at one moment — the mock-data
+ * One returned probability and price at one moment - the mock-data
  * equivalent of the /probability response contract.
  *
  * `probabilityPlayerA` and prices are null while `suspended` is true,
@@ -69,7 +69,7 @@ export interface MatchReplay {
 
 export type PageState = "loading" | "success" | "error";
 
-/** Journey 19's monitoring dashboard, as data — see GET /ops/summary. */
+/** Journey 19's monitoring dashboard, as data - see GET /ops/summary. */
 export interface OpsSummary {
   latency: {
     nQuotes: number;

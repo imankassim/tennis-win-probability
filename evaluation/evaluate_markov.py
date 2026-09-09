@@ -10,7 +10,7 @@ to EXP1/EXP2's harness.py-based numbers.
 Uses bulk_shrunk_serve_rates rather than calling
 estimate_match_serve_rates once per match: the latter re-scans the whole
 prior archive for every match (fine for one live request, quadratic for
-bulk-evaluating thousands — this was measured directly and fixed, see
+bulk-evaluating thousands - this was measured directly and fixed, see
 pricing/markov/serve_rate.py's docstring).
 """
 

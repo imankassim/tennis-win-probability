@@ -1,11 +1,11 @@
 """Player strength rating (finishing Journey 10's remaining scope:
 "ranking").
 
-No external rankings feed has been found — the originally-named sources
+No external rankings feed has been found - the originally-named sources
 are gone (docs/data_sheets/data_provenance.md) and official ATP/WTA points
 aren't published anywhere with a confirmed non-commercial licence. Rather
 than another lengthy data-source hunt, this computes a standard Elo rating
-directly from our own ingested match archive — self-sufficient, and
+directly from our own ingested match archive - self-sufficient, and
 arguably more directly relevant to in-play prediction than official
 ranking points anyway (ATP points are shaped by tournament-category
 weighting and 52-week accounting, not pure recent head-to-head strength).
@@ -23,7 +23,7 @@ from datetime import date
 from database.models import Match, OutcomeLabel
 
 DEFAULT_RATING = 1500.0
-# Standard chess-Elo K-factor, untuned against this data — a genuine
+# Standard chess-Elo K-factor, untuned against this data - a genuine
 # follow-up experiment (sweeping K) once there's a held-out set to tune
 # against, same as EXP13's shrinkage strength.
 K_FACTOR = 32.0
@@ -38,7 +38,7 @@ def compute_rating_history(
 ) -> dict[str, list[tuple[date, float]]]:
     """One pass through every match with a confirmed outcome, in date
     order, updating both players' Elo ratings. Returns each player's
-    rating immediately after each of their matches, sorted by date —
+    rating immediately after each of their matches, sorted by date -
     the history `rating_as_of` looks up into."""
     ratings: dict[str, float] = defaultdict(lambda: DEFAULT_RATING)
     history: dict[str, list[tuple[date, float]]] = defaultdict(list)
@@ -68,7 +68,7 @@ def rating_as_of(
 ) -> float:
     """The player's rating from their most recent match strictly before
     as_of_date. DEFAULT_RATING if they have no such match (an untested
-    player, not a weak one — a neutral, not a punitive, default)."""
+    player, not a weak one - a neutral, not a punitive, default)."""
     player_history = history.get(player_id)
     if not player_history:
         return DEFAULT_RATING

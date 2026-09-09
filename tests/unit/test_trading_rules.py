@@ -19,7 +19,7 @@ def test_price_from_probability_applies_margin():
 def test_widened_margin_produces_shorter_prices_than_the_default():
     """The margin backend/probability.py requests when blend/calibration
     fails after a successful ML estimate (docs/architecture/deployment.md's
-    "blend or calibration unavailable" row) — must be strictly more
+    "blend or calibration unavailable" row) - must be strictly more
     conservative than the default, or widening it would be pointless."""
     assert WIDENED_MARGIN > DEFAULT_MARGIN
     default_result = apply_trading_rules(0.6, margin=DEFAULT_MARGIN)

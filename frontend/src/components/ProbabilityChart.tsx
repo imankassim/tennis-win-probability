@@ -7,7 +7,7 @@ const PAD = 28;
 /**
  * A small inline SVG line chart of player A's win probability over the
  * match so far. Suspended points (probability null) break the line rather
- * than interpolating across them — the chart must never imply a value
+ * than interpolating across them - the chart must never imply a value
  * that was never served.
  */
 export function ProbabilityChart({

@@ -1,4 +1,4 @@
-"""The recursive point-to-match Markov formulas (Klaassen & Magnus, 2003 —
+"""The recursive point-to-match Markov formulas (Klaassen & Magnus, 2003 -
 see docs/REFERENCES.md). Pure math: given each player's probability of
 winning a point on their own serve, compute the probability of winning a
 game, a tiebreak, a set, or the match, from any current score state.
@@ -7,7 +7,7 @@ Every function takes the state "entering" the next point (points/games/sets
 already completed), matching how state is stored elsewhere in this
 codebase (database/models.py's Point, match_state.py's game_score_before).
 
-No data, no I/O — serve-rate estimation (serve_rate.py) is a separate
+No data, no I/O - serve-rate estimation (serve_rate.py) is a separate
 concern, deliberately kept apart so this module can be tested purely on
 its mathematical properties (symmetry, monotonicity, known closed forms).
 """
@@ -18,10 +18,10 @@ from functools import lru_cache
 
 # Bounded, not unlimited: each unique (p_a, p_b) serve-rate pair produces
 # its own family of cache entries that are essentially single-use once a
-# match's evaluation moves on to a different pair — reused heavily within
+# match's evaluation moves on to a different pair - reused heavily within
 # one match's points, never again after. Measured directly: with an
 # unbounded cache, evaluating 2,000 real matches took 93s (vs 1s for 200
-# matches) — not because the math got slower, but because Python's
+# matches) - not because the math got slower, but because Python's
 # garbage collector re-scans an ever-growing cache on every cycle. A
 # bounded cache evicts old, no-longer-useful entries and keeps this
 # roughly linear in the number of points evaluated, whether serving one
@@ -39,7 +39,7 @@ def prob_win_game(p: float, a: int = 0, b: int = 0) -> float:
     if b >= 4 and b - a >= 2:
         return 0.0
     if a >= 3 and b >= 3:
-        # Beyond deuce, only the difference matters — collapse to one of
+        # Beyond deuce, only the difference matters - collapse to one of
         # three equivalent states so recursion terminates in O(1) steps
         # instead of following every possible deuce/advantage sequence.
         diff = a - b
@@ -50,7 +50,7 @@ def prob_win_game(p: float, a: int = 0, b: int = 0) -> float:
             # Advantage server: win outright, or fall back to deuce.
             deuce = prob_win_game(p, 3, 3)
             return p + (1 - p) * deuce
-        # diff == -1: advantage receiver — survive only by winning the
+        # diff == -1: advantage receiver - survive only by winning the
         # point back to deuce, then must win from deuce.
         deuce = prob_win_game(p, 3, 3)
         return p * deuce
@@ -59,7 +59,7 @@ def prob_win_game(p: float, a: int = 0, b: int = 0) -> float:
 
 def _tiebreak_server_is_a(point_number: int, a_serves_point_1: bool) -> bool:
     """Who serves tiebreak point `point_number` (1-indexed): server changes
-    after point 1, then every 2 points — the standard rotation
+    after point 1, then every 2 points - the standard rotation
     (1 | 2,3 | 4,5 | 6,7 | ...)."""
     if point_number == 1:
         return a_serves_point_1
@@ -75,7 +75,7 @@ def _tiebreak_server_is_a(point_number: int, a_serves_point_1: bool) -> bool:
 # here instead: past this many combined points, the remaining outcome is
 # treated as a coin flip. Reaching this deep (well past 20-20) has
 # vanishingly small probability in any realistic scenario, so the
-# truncation error is negligible — and it keeps this a plain, auditable
+# truncation error is negligible - and it keeps this a plain, auditable
 # recursion rather than an iterative approximation.
 _TIEBREAK_TRUNCATION_POINTS = 40
 
@@ -101,11 +101,11 @@ def prob_win_tiebreak(
     ) * prob_win_tiebreak(p_a, p_b, a, b + 1, a_serves_point_1)
 
 
-# Real historical data includes advantage sets (no tiebreak at 6-6 —
+# Real historical data includes advantage sets (no tiebreak at 6-6 -
 # standard at most tournaments' deciding sets until roughly 2022, and the
 # only format some older matches in the archive were ever played under),
 # which can in principle run indefinitely at 2-games-apiece parity, the
-# same unbounded-recursion shape as prob_win_tiebreak's — with no closed
+# same unbounded-recursion shape as prob_win_tiebreak's - with no closed
 # form, since which player serves each extra game keeps alternating.
 # Caught in practice: real ingested data past this journey's evaluation
 # sample hit a RecursionError from exactly this (a set past 6-6 with
@@ -173,7 +173,7 @@ def prob_win_match(
         p_a, p_b, games_a, games_b, a_serves_next, points_a, points_b
     )
     # The next set (if any) always starts 0-0 games, served by whoever is
-    # next in the alternation — approximated here as continuing from the
+    # next in the alternation - approximated here as continuing from the
     # server due up, which is exact when the just-finished set had an even
     # number of games (always true except after a tiebreak set, a known,
     # documented simplification).

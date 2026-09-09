@@ -25,7 +25,7 @@ class TestProbWinGame:
 
     def test_service_game_amplifies_a_point_advantage(self):
         # A server who wins points above 50% wins games at an even higher
-        # rate — the well-known amplification effect of game scoring.
+        # rate - the well-known amplification effect of game scoring.
         assert prob_win_game(0.6) > 0.6
 
     def test_a_realistic_point_win_rate_gives_a_plausible_hold_rate(self):
@@ -77,7 +77,7 @@ class TestProbWinSet:
     def test_who_serves_first_does_not_matter_from_a_fresh_set(self):
         # Verified independently by Monte Carlo simulation, not just this
         # recursion: from 0-0 games, alternating service means the set-win
-        # probability is identical whichever player serves game 1 — a real
+        # probability is identical whichever player serves game 1 - a real
         # property, not a bug. It does start to matter mid-set (see
         # test_better_server_wins_more_sets-style state-dependent cases).
         assert prob_win_set(0.6, 0.55, 0, 0, True) == prob_win_set(0.6, 0.55, 0, 0, False)
@@ -89,7 +89,7 @@ class TestProbWinSet:
         # Real historical data (pre-2022-era deciding sets played without
         # a tiebreak) can reach scores like 10-9 or deeper. This must
         # terminate (via truncation past a combined-games cap), not raise
-        # a RecursionError — caught from real ingested data.
+        # a RecursionError - caught from real ingested data.
         result = prob_win_set(0.55, 0.5, games_a=10, games_b=9, a_serves_next=True)
         assert 0.0 <= result <= 1.0
 

@@ -15,7 +15,7 @@ export default function HomePage() {
           probability and price.
         </p>
         <p className="mt-2 text-xs text-slate-600">
-          Research prototype only — not betting advice, not a staking
+          Research prototype only - not betting advice, not a staking
           recommendation.
         </p>
       </header>

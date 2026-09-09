@@ -4,7 +4,7 @@ Source: https://github.com/JeffSackmann/tennis_MatchChartingProject
 Licence: CC BY-NC-SA 4.0 (see docs/data_sheets/data_provenance.md).
 
 This module only *reads and transforms* the source CSVs into our domain
-records (database/models.py) — it never writes the raw files themselves
+records (database/models.py) - it never writes the raw files themselves
 into the repository (see the data provenance "no redistribution" rule) and
 never touches a database connection. Loading validated records into
 PostgreSQL is a separate, later step (see run.py).
@@ -35,11 +35,11 @@ def parse_matches(
     csv_path: Path,
 ) -> tuple[list[tuple[Match, Player, Player]], list[str]]:
     """Parses every row in a charting-*-matches.csv file into
-    (match, player_a, player_b) triples. player_a is always "Player 1" —
+    (match, player_a, player_b) triples. player_a is always "Player 1" -
     the player who served first, per the source's own convention.
 
     A malformed row (e.g. an unescaped comma in the source shifting every
-    later column) is skipped and reported rather than raised — one bad row
+    later column) is skipped and reported rather than raised - one bad row
     quarantining only itself, not the whole file, per the data
     architecture's quarantine-on-failure rule.
     """
@@ -90,7 +90,7 @@ def parse_points_by_match(
     match_id, restricted to `match_ids` (matches we have metadata for).
 
     Point.game_no comes from the source's "Gm#" column, which increments
-    exactly at game boundaries — see database/ingestion/outcomes.py for why
+    exactly at game boundaries - see database/ingestion/outcomes.py for why
     that matters for deriving who won each game without parsing score
     notation.
 

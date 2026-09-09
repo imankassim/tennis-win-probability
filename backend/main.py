@@ -76,7 +76,7 @@ def _build_repository() -> MatchRepository:
     if data_dir:
         directory = Path(data_dir)
         matches_csv = next(directory.glob("charting-*-matches.csv"))
-        # All matching points files, not just the first — the data
+        # All matching points files, not just the first - the data
         # directory may hold one per decade (or a smaller sample
         # alongside the full files); real match_ids never repeat across
         # them, same as database/ingestion/run.py.
@@ -89,11 +89,11 @@ def _build_repository() -> MatchRepository:
 repository: MatchRepository = _build_repository()
 
 # Serve rates only depend on a match's own date and the archive up to it,
-# not on which point is being priced — computed once per match, at
+# not on which point is being priced - computed once per match, at
 # startup, rather than lazily per request. Lazily calling
 # estimate_match_serve_rates on first use (this module's original
 # approach) re-scans the whole prior archive for whichever match happens
-# to be requested first — measured directly at this data's scale: ~750ms
+# to be requested first - measured directly at this data's scale: ~750ms
 # for a single match's first request against the full ~900K-point
 # archive, vs ~0.2ms once cached. bulk_shrunk_serve_rates computes every
 # match's rate in one archive pass up front instead (a few seconds at
@@ -107,14 +107,14 @@ _serve_rate_cache: dict[str, tuple[float, float]] = bulk_shrunk_serve_rates(
 # features (form/surface/h2h/Elo): computed once per match in one archive
 # pass at startup, not per request. Uses the exact same bulk function the
 # promotion script (pricing/promote_model.py) trained against, so a live
-# request scores the identical feature the model learned from — no
+# request scores the identical feature the model learned from - no
 # separate "live" reimplementation to drift out of sync.
 _context_cache: dict[str, dict[str, float]] = compute_match_context_features(
     repository.list_matches(), repository.all_outcomes()
 )
 
 # The promoted pipeline (Journey 17), if pricing/promote_model.py has been
-# run against this data. None on a fresh clone — compute_probability
+# run against this data. None on a fresh clone - compute_probability
 # degrades to Markov-only in that case (see backend/probability.py).
 _artefacts = load_artefacts()
 
@@ -134,7 +134,7 @@ def ops_summary() -> OpsSummaryResponse:
     rates from every quote served since the log file was last cleared
     (Journey 7's event log), plus the promoted pipeline's own
     calibration-time quality snapshot (None if nothing has been
-    promoted — see backend/probability.py)."""
+    promoted - see backend/probability.py)."""
     records = read_quote_log()
     latencies = [r["latency_ms"] for r in records]
     n = len(records)
@@ -180,7 +180,7 @@ def ops_summary() -> OpsSummaryResponse:
 def list_matches(tournament: str | None = None, surface: str | None = None) -> MatchListResponse:
     """Browse replayable matches (i.e. matches with points loaded), the
     scenario-library/filters part of Journey 6. Filters are exact,
-    case-insensitive matches — no fuzzy search yet."""
+    case-insensitive matches - no fuzzy search yet."""
     matches = repository.list_matches()
     if tournament:
         matches = [m for m in matches if m.tournament.lower() == tournament.lower()]

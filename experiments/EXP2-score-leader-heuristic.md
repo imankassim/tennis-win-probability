@@ -1,4 +1,4 @@
-# EXP2 — Current-score-leader heuristic
+# EXP2 - Current-score-leader heuristic
 
 - Status: Retained
 - Depends on: EXP1
@@ -15,7 +15,7 @@ history.
 `pricing/baselines/heuristics.py::score_leader_probability(sets_a, sets_b,
 games_a, games_b)`. A set lead returns 0.75/0.25; failing that, a game lead
 within the current set returns 0.6/0.4; a tie on both returns 0.5. Fixed,
-untuned constants — deliberately not fit to data, so it stays a primitive
+untuned constants - deliberately not fit to data, so it stays a primitive
 baseline rather than drifting into the Markov/ML territory.
 
 ## Metrics
@@ -38,14 +38,14 @@ symmetric between the two players.
 
 Retained as the second rung of the baseline floor, above EXP1 and below
 the Markov chain (Journey 9). It clearly beats EXP1, as expected; it is
-expected to be clearly beaten by the Markov baseline in turn — if it
+expected to be clearly beaten by the Markov baseline in turn - if it
 isn't, that would itself be a finding worth investigating before building
 anything more advanced.
 
 ## Known failures
 
 Recorded per the "primitive baselines, with failures recorded" journey
-exit criterion — these are exactly the target model scenarios (see
+exit criterion - these are exactly the target model scenarios (see
 `docs/architecture/charter.md`) this heuristic is expected to misprice:
 
 - **Ignores server.** Identical score lines get identical probabilities
@@ -59,5 +59,5 @@ exit criterion — these are exactly the target model scenarios (see
   regardless of how often such deficits are actually overcome, so it
   misprices deciding-set recovery.
 - **No player context.** Ranking, recent form and surface are invisible to
-  it, so it misprices a favourite trailing early against a big outsider —
+  it, so it misprices a favourite trailing early against a big outsider -
   the heuristic reads it exactly the same as any other early deficit.

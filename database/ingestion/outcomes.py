@@ -1,17 +1,17 @@
-"""Derive an outcome label from a match's points — without parsing score
+"""Derive an outcome label from a match's points - without parsing score
 notation.
 
 Full within-game score parsing (15/30/40/Ad, tiebreak points) is the
 match-state parser's job (Journey 6). This module deliberately avoids it
 and relies on a simpler, fully reliable signal instead: the source's `Gm#`
 column increments exactly at game boundaries, so the *last recorded point
-for a given Gm#* is, by definition, the point that won that game —
+for a given Gm#* is, by definition, the point that won that game -
 whatever the internal score notation says. Combined with the sets/games
 counts already in the data (state entering that final game), that is
 enough to confirm whether a match's final logged point also completed the
 match, without reconstructing the full score.
 
-If it doesn't — most commonly because the chart stops mid-match — the
+If it doesn't - most commonly because the chart stops mid-match - the
 match is quarantined rather than given a guessed outcome, per the data
 architecture's quarantine-on-failure rule.
 """

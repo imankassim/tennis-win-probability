@@ -12,24 +12,24 @@ Journey 5.
 
 ## Structure
 
-- `formulas.py` — the recursive `prob_win_game` / `prob_win_tiebreak` /
+- `formulas.py` - the recursive `prob_win_game` / `prob_win_tiebreak` /
   `prob_win_set` / `prob_win_match` formulas. Pure math, no data
   dependency; verified against known mathematical properties (symmetry,
-  the deuce closed form, and — via an independent Monte Carlo simulation —
+  the deuce closed form, and - via an independent Monte Carlo simulation -
   the fact that who serves first doesn't affect a fresh set's outcome).
   `prob_win_tiebreak` and `prob_win_set` are truncated past a combined
   score depth (documented in-module): neither has a closed form for an
   evenly-matched extended tiebreak or advantage set, so without a cap the
-  recursion is mathematically unbounded — caught for real from a
+  recursion is mathematically unbounded - caught for real from a
   `RecursionError` while bulk-evaluating real historical data.
-- `serve_rate.py` — EXP10 (tour average), EXP11 (per-player empirical
+- `serve_rate.py` - EXP10 (tour average), EXP11 (per-player empirical
   rate), EXP13 (Bayesian shrinkage toward the tour average, weighted by
   sample size), all computed from our own ingested match archive with
   strict no-look-ahead. `bulk_shrunk_serve_rates()` computes the same
   EXP13 values for every match in one archive pass (O(points), not
-  O(matches × archive size)) — the per-match function alone makes bulk
+  O(matches × archive size)) - the per-match function alone makes bulk
   evaluation quadratic.
-- `engine.py` — ties the two together: `estimate_match_serve_rates()` and
+- `engine.py` - ties the two together: `estimate_match_serve_rates()` and
   `markov_probability()`.
 
 ## Real evidence
@@ -47,7 +47,7 @@ data-quality gates:
 
 Beats EXP2 by a real, credible margin (4.9% lower Brier, 2.8% lower
 log-loss). A first pass against a smaller, bounded sample (183 matches)
-showed only a marginal gap — investigated rather than accepted at face
+showed only a marginal gap - investigated rather than accepted at face
 value (see [EXP11](../../experiments/EXP11-per-player-serve-rate.md) for
 the full finding): 45% of that sample's matches had a player with zero
 prior serve history, forcing heavy reliance on the tour-average fallback.

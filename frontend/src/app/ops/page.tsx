@@ -53,7 +53,7 @@ export default function OpsPage() {
         <h1 className="text-xl font-semibold text-slate-100">Operations dashboard</h1>
         <p className="mt-2 text-sm text-slate-400">
           Quality, latency and error rates for the served pricing pipeline
-          (Journey 19) — quality is the promoted model&apos;s own
+          (Journey 19) - quality is the promoted model&apos;s own
           calibration-time evaluation, not a live metric, since this
           system replays static historical data rather than a live feed.
         </p>
@@ -114,7 +114,7 @@ export default function OpsPage() {
             <h2 className="mb-3 text-sm font-medium text-slate-300">Promoted model quality</h2>
             {summary.model === null ? (
               <p className="text-sm text-slate-400">
-                No promoted pipeline found — serving Markov-only. Run{" "}
+                No promoted pipeline found - serving Markov-only. Run{" "}
                 <code>python -m pricing.run_promotion</code> to promote one.
               </p>
             ) : (

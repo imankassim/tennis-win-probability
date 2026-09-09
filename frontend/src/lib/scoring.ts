@@ -1,8 +1,8 @@
 // A minimal, honest tennis score-state machine used to build internally
 // consistent mock replay data for the dashboard shell (Journey 2).
 //
-// This is deliberately simplified — no lets, no exact tiebreak serve
-// rotation, tiebreaks collapsed to a single scripted point — because the
+// This is deliberately simplified - no lets, no exact tiebreak serve
+// rotation, tiebreaks collapsed to a single scripted point - because the
 // goal here is a believable, self-consistent point sequence to wire the UI
 // against, not a production match-state parser. The real match state
 // parser (logical architecture component B1) is built in Journey 6 against
@@ -17,7 +17,7 @@ interface GameScriptStep {
   server: Server;
   /** Ordered list of who wins each point within the game (or the single tiebreak-deciding point). */
   points: Server[];
-  /** True if 6-6 in games — this "game" represents a whole tiebreak, decided by its single point. */
+  /** True if 6-6 in games - this "game" represents a whole tiebreak, decided by its single point. */
   isTiebreak?: boolean;
   label?: string;
 }
@@ -32,7 +32,7 @@ export interface MatchScript {
 }
 
 /**
- * A deliberately crude score-differential heuristic — NOT the Markov or ML
+ * A deliberately crude score-differential heuristic - NOT the Markov or ML
  * engine built in Journeys 9 and 11. It exists only so the probability
  * chart and price ticker have something plausible to render against mock
  * data. Every quote it produces carries `modelVersion: "mock_placeholder_v0"`
@@ -154,7 +154,7 @@ export function buildMatchReplay(
   return { points, quotes };
 }
 
-/** A routine hold: the receiver wins `oppPoints` points (0, 1 or 2 — i.e. love/15/30) before the server closes it out. */
+/** A routine hold: the receiver wins `oppPoints` points (0, 1 or 2 - i.e. love/15/30) before the server closes it out. */
 export function hold(server: Server, oppPoints: 0 | 1 | 2 = 0, label?: string): GameScriptStep {
   const receiver = other(server);
   const points: Server[] = [

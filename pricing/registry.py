@@ -1,13 +1,13 @@
 """The model/configuration registry (Journey 20): every promoted pipeline
 is kept, not overwritten, so a promotion can be rolled back to a known
-prior version — the source document's own registry component ("Version -
+prior version - the source document's own registry component ("Version -
 data split - features - metrics - approval status - rollback target").
 
 `pricing/promote_model.py` writes one entry here per promotion, alongside
 the versioned artefact file it belongs to; `pricing/rollback_model.py`
 reads it to list versions and to switch which one is active. Promotion
 IS the human approval step (docs/architecture/governance.md's "require
-review for model promotion") — every entry here was therefore reviewed
+review for model promotion") - every entry here was therefore reviewed
 by whoever ran the promotion script; there is no separate unreviewed
 state to track.
 """
@@ -40,7 +40,7 @@ def _registry_path(directory: Path) -> Path:
 
 def load_registry(directory: Path) -> list[RegistryEntry]:
     """Every promoted version on record, oldest first. Empty if nothing
-    has ever been promoted on this checkout — not an error, the same
+    has ever been promoted on this checkout - not an error, the same
     "nothing here yet" case pricing/promote_model.py's artefact loading
     already treats as normal."""
     path = _registry_path(directory)
@@ -57,7 +57,7 @@ def _save_registry(directory: Path, entries: list[RegistryEntry]) -> None:
 
 def add_entry(directory: Path, entry: RegistryEntry) -> None:
     """Records a newly promoted version as active, marking every earlier
-    entry superseded — exactly one version is active at a time, matching
+    entry superseded - exactly one version is active at a time, matching
     there being exactly one file backend/probability.py's load_artefacts
     reads from."""
     entries = load_registry(directory)
@@ -67,7 +67,7 @@ def add_entry(directory: Path, entry: RegistryEntry) -> None:
 
 
 def set_active_version(directory: Path, version: str) -> RegistryEntry:
-    """Marks `version` active and every other entry superseded — the
+    """Marks `version` active and every other entry superseded - the
     rollback (or roll-forward) operation on the registry itself, separate
     from actually copying that version's artefact file into place
     (pricing/rollback_model.py does both together). Raises ValueError if

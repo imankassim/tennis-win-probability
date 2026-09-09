@@ -6,11 +6,11 @@ If a promoted pipeline exists (pricing/promote_model.py has been run,
 producing docs/model_cards/artefacts/pricing_pipeline.joblib), computes
 the Markov estimate and the ML estimate independently, blends them at the
 promoted weight (EXP33), and applies the promoted phase calibrator
-(EXP43) — `model_version` becomes the promoted bundle's own version
+(EXP43) - `model_version` becomes the promoted bundle's own version
 string (e.g. "blend_v1_calibrated"), `fallback_used=False`.
 
-If no artefact exists — a fresh clone, or before anyone has run the
-(deliberately manual, human-reviewed) promotion script — degrades to the
+If no artefact exists - a fresh clone, or before anyone has run the
+(deliberately manual, human-reviewed) promotion script - degrades to the
 Markov engine alone, `model_version="markov_v1"`, `fallback_used=True`.
 This is the graceful-degradation behaviour the architecture requires
 (docs/architecture/logical-architecture.md's `fallback_used` flag), not
@@ -19,13 +19,13 @@ an error path.
 Same degradation applies if the artefact exists but something in the
 ML/blend/calibration path fails at request time (a corrupted file, an
 incompatible scikit-learn/LightGBM version after an upgrade, a malformed
-feature row) — the non-functional requirement this project's source
+feature row) - the non-functional requirement this project's source
 document states explicitly: "a failure in the ML, blend or calibration
 layer must not prevent the Markov baseline from serving where it remains
 available" (Journey 18, reliability). Two failure points are
 distinguished, matching docs/architecture/deployment.md's fallback
 table: if the ML model itself fails, this serves Markov-only with the
-standard margin (the same as having no promoted artefact at all — a
+standard margin (the same as having no promoted artefact at all - a
 routine degraded mode, not a red flag on its own); if the ML estimate
 was obtained but blend or calibration then fails, this also serves
 Markov-only but flags `widen_margin=True` for the caller to apply
@@ -36,7 +36,7 @@ tests/unit/test_probability_reliability.py for the failure-injection
 tests covering both cases.
 
 Pricing (margin, price bounds, suspension) is trading_rules/rules.py's
-job, not this module's — this only returns the raw probability estimate.
+job, not this module's - this only returns the raw probability estimate.
 """
 
 from __future__ import annotations
@@ -60,7 +60,7 @@ MARKOV_MODEL_VERSION = "markov_v1"
 
 # Every context feature the promoted model was trained on, and what to
 # fall back to when a match has no entry in the context cache at all
-# (e.g. no confirmed outcome yet) — the same neutral defaults
+# (e.g. no confirmed outcome yet) - the same neutral defaults
 # compute_match_context_features itself uses for a debutant, so a
 # missing cache entry behaves exactly like a player with no history.
 _CONTEXT_DEFAULTS: dict[str, float] = {
@@ -80,7 +80,7 @@ class PricingResult:
     model_version: str
     fallback_used: bool
     # True only when a successfully-computed ML estimate had to be
-    # discarded because blend or calibration then failed — see this
+    # discarded because blend or calibration then failed - see this
     # module's docstring. The caller (backend/main.py) uses this to pass
     # trading_rules.WIDENED_MARGIN instead of the default margin.
     widen_margin: bool = False
@@ -91,7 +91,7 @@ def load_artefacts(directory: Path = DEFAULT_ARTEFACT_DIR) -> PricingArtefacts |
     run that script. None if no artefact file exists there, or if one
     exists but can't actually be loaded (a truncated/corrupted file from
     an interrupted write, or a pickle written by an incompatible library
-    version) — a load failure degrades the same way a missing file does
+    version) - a load failure degrades the same way a missing file does
     rather than crashing the whole API at startup (this is called once
     from a module-level global in backend/main.py), with a warning so the
     failure is still visible to whoever's operating the service."""
@@ -126,14 +126,14 @@ def build_feature_row(
     games_won_b: int,
     server: str,
 ) -> dict[str, float]:
-    """The exact feature row a live `/probability` request scores —
+    """The exact feature row a live `/probability` request scores -
     pulled out as its own function so a test can compare it directly
     against pricing/ml/features.py's `build_point_features` (the offline
     training path) for the same point, guarding against the two ever
     silently drifting apart (tests/unit/test_feature_sync.py, Journey
     18's "sync test"). `context` is this match's entry from the bulk
     context-feature cache (compute_match_context_features), or `{}` if
-    the match has no confirmed outcome yet — missing keys fall back to
+    the match has no confirmed outcome yet - missing keys fall back to
     _CONTEXT_DEFAULTS. `points_so_far` is this match's own points
     strictly before the one being priced (for the momentum feature)."""
     return {
@@ -165,7 +165,7 @@ def compute_probability(
 ) -> PricingResult:
     """`context` is this match's entry from the bulk context-feature cache
     (compute_match_context_features), or `{}` if the match has no
-    confirmed outcome yet — missing keys fall back to _CONTEXT_DEFAULTS.
+    confirmed outcome yet - missing keys fall back to _CONTEXT_DEFAULTS.
     `points_so_far` is this match's own points strictly before the one
     being priced (for the within-match momentum feature)."""
     markov_p = markov_probability(

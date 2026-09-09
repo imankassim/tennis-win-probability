@@ -1,7 +1,7 @@
-"""Quote event logging (Journey 7 — instrumentation).
+"""Quote event logging (Journey 7 - instrumentation).
 
 Combines the two related data-architecture entities into one record per
-served quote, rather than two separate files — practical for a
+served quote, rather than two separate files - practical for a
 prototype-scale analytical store, and exactly what
 docs/architecture/data-architecture.md allows ("Analytical store or files
 ... Not responsible for serving live probability requests directly"):
@@ -10,11 +10,11 @@ docs/architecture/data-architecture.md allows ("Analytical store or files
   point_sequence, model_version, latency, fallback_used.
 - "Quote event": event_id, type, probability_request_id, timestamp.
 
-No personal data is logged — only match/point/model identifiers and
+No personal data is logged - only match/point/model identifiers and
 timing, consistent with FR-05 ("quote and replay events can be recorded
 without collecting unnecessary personal data").
 
-The log is a plain append-only JSONL file — deliberately not a database,
+The log is a plain append-only JSONL file - deliberately not a database,
 matching the storage responsibility split (PostgreSQL is not responsible
 for quote logs; an "analytical store or files" is). Journey 8's evaluation
 harness reads this file directly.

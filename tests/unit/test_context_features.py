@@ -45,9 +45,9 @@ def test_recent_form_computes_win_rate_over_lookback():
 
 def test_recent_form_never_sees_matches_on_or_after_as_of_date():
     matches = [
-        _match("m1", date(2026, 1, 1), A, B),  # A loses — before cutoff, counts
-        _match("m2", date(2026, 1, 5), A, B),  # A wins — on cutoff date, must NOT count
-        _match("m3", date(2026, 1, 6), A, B),  # A wins — after cutoff, must NOT count
+        _match("m1", date(2026, 1, 1), A, B),  # A loses - before cutoff, counts
+        _match("m2", date(2026, 1, 5), A, B),  # A wins - on cutoff date, must NOT count
+        _match("m3", date(2026, 1, 6), A, B),  # A wins - after cutoff, must NOT count
     ]
     outcomes = {
         "m1": _win("m1", "player_b"),
@@ -81,7 +81,7 @@ def test_surface_record_filters_by_surface_and_excludes_unresolved():
     outcomes = {
         "m1": _win("m1", "player_a"),
         "m2": _win("m2", "player_a"),
-        # m3 has no outcome (e.g. quarantined as incomplete) — excluded
+        # m3 has no outcome (e.g. quarantined as incomplete) - excluded
     }
     wins, losses = surface_record(A, "clay", matches, outcomes, date(2026, 2, 1))
     assert (wins, losses) == (1, 0)

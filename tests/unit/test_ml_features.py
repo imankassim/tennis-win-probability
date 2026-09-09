@@ -57,7 +57,7 @@ def test_context_features_respect_no_look_ahead():
     ]
     outcomes = {"m1": _win("m1", "player_a"), "m2": _win("m2", "player_a")}
     ctx = compute_match_context_features(matches, outcomes)
-    # m1 is the first meeting — no history yet.
+    # m1 is the first meeting - no history yet.
     assert ctx["m1"]["form_a"] == 0.5
     assert ctx["m1"]["h2h_rate_a"] == 0.5
     # m2 sees m1's result: A won, so A's form/h2h/elo should all have moved up.
@@ -73,7 +73,7 @@ def test_context_features_track_surface_separately():
     ]
     outcomes = {"m1": _win("m1", "player_a"), "m2": _win("m2", "player_a")}
     ctx = compute_match_context_features(matches, outcomes)
-    # m2 is on a different surface from m1 — A's surface record there is still blank.
+    # m2 is on a different surface from m1 - A's surface record there is still blank.
     assert ctx["m2"]["surface_rate_a"] == 0.5
 
 

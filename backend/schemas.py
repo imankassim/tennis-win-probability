@@ -1,4 +1,4 @@
-"""Pydantic request/response models — the API's response contract, matching
+"""Pydantic request/response models - the API's response contract, matching
 docs/architecture/logical-architecture.md's example response."""
 
 from __future__ import annotations
@@ -98,7 +98,7 @@ class OpsModelSummary(BaseModel):
 
 class OpsSummaryResponse(BaseModel):
     """Journey 19's dashboard, in API form: quality (the promoted model's
-    own calibration-time evaluation — this system replays static
+    own calibration-time evaluation - this system replays static
     historical data, so there's no live feed of outcomes to score served
     quotes against), latency and errors (both from the quote event log,
     Journey 7). `model` is null if no pipeline has been promoted yet

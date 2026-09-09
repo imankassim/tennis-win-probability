@@ -10,15 +10,15 @@ There are now two data paths for replay, both rendered by the same
 `/replay/[matchId]` route and components, plus a separate operations
 view:
 
-- **Scenario library** (`/`) — two scripted mock matches
+- **Scenario library** (`/`) - two scripted mock matches
   (`src/lib/mockData.ts`) covering the target model scenarios: routine
   holds, break-point pressure against the favourite, a fight-back after
   dropping a set, a suspension/rain delay, and the resulting stale-quote
   data gap. Kept deliberately mock, since a completed historical match
   archive has no equivalent of a live suspension event. Probabilities here
   come from a crude placeholder heuristic tagged
-  `model_version: "mock_placeholder_v0"` — never the real engine.
-- **Real matches** (`/matches`) — fetched from the backend
+  `model_version: "mock_placeholder_v0"` - never the real engine.
+- **Real matches** (`/matches`) - fetched from the backend
   (`src/lib/api.ts`): `GET /matches` (with a surface filter) to browse,
   `GET /replay/{id}` plus one `POST /probability` per point to build the
   same `MatchReplay` shape the mock data uses, so no component needed to
@@ -27,28 +27,28 @@ view:
 
 `ReplayView` picks the path via `isScenarioLibraryMatch(matchId)`.
 
-- **Operations dashboard** (`/ops`) — `GET /ops/summary`: latency
+- **Operations dashboard** (`/ops`) - `GET /ops/summary`: latency
   (median/p95) and error rates (fallback/suspended) from every quote
   served since the backend's quote event log was last cleared, plus the
   promoted pipeline's own calibration-time quality snapshot (Brier,
-  log-loss, ECE) if one has been promoted — `null` otherwise, rendered as
-  "no promoted pipeline found." Not a live-quality metric — this system
+  log-loss, ECE) if one has been promoted - `null` otherwise, rendered as
+  "no promoted pipeline found." Not a live-quality metric - this system
   replays static historical data, so there's no live feed of outcomes to
   score served quotes against.
 
 ## Structure
 
-- `src/lib/types.ts` — shared types mirroring the API response contract.
-- `src/lib/scoring.ts` — a minimal tennis score-state machine plus the mock
+- `src/lib/types.ts` - shared types mirroring the API response contract.
+- `src/lib/scoring.ts` - a minimal tennis score-state machine plus the mock
   probability heuristic, used to build internally consistent scenario data.
-- `src/lib/mockData.ts` — the two scripted scenario-library matches.
-- `src/lib/api.ts` — the real backend client, adapting its snake_case JSON
+- `src/lib/mockData.ts` - the two scripted scenario-library matches.
+- `src/lib/api.ts` - the real backend client, adapting its snake_case JSON
   into the same shapes `mockData.ts` produces.
-- `src/components/` — `MatchSelector`, `PointTicker`, `ProbabilityChart`,
+- `src/components/` - `MatchSelector`, `PointTicker`, `ProbabilityChart`,
   `PriceTicker`, `ModelVersionBadge`, `PlaybackControls`, `StatusStates`
   (loading/error), and `ReplayView` which composes them and picks the data
   source.
-- `src/app/` — `/` (scenario library), `/matches` (real match browser),
+- `src/app/` - `/` (scenario library), `/matches` (real match browser),
   `/replay/[matchId]` (the replay view, shared by both), `/ops`
   (operations dashboard).
 
@@ -62,5 +62,5 @@ npm run lint
 npm run build
 ```
 
-To browse real matches, also run the backend — see
+To browse real matches, also run the backend - see
 [../backend/README.md](../backend/README.md).

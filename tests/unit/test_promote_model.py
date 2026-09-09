@@ -100,7 +100,7 @@ def test_train_and_promote_produces_a_complete_artefact_bundle():
     assert artefacts.blend_markov_weight == BLEND_MARKOV_WEIGHT
     assert artefacts.feature_columns == FEATURE_SETS["state_context_momentum"]
     # n_calibration_matches only counts the half of the 15% holdout the
-    # calibrator was actually fit on — the other half (never fit on by
+    # calibrator was actually fit on - the other half (never fit on by
     # anything) produced calibration_brier/_log_loss/_ece, so the two
     # numbers deliberately don't sum to the full archive size.
     assert artefacts.n_training_matches < 100
@@ -115,7 +115,7 @@ def test_promoted_model_predicts_probabilities_in_range():
     artefacts = _train_and_promote_from_data(matches, points_by_match, outcomes)
 
     # Exercise the ml model directly with a zeroed feature row of the
-    # right shape rather than hand-building a realistic one — this test
+    # right shape rather than hand-building a realistic one - this test
     # only checks the artefact is a usable, well-formed predictor.
     import pandas as pd
 

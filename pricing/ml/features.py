@@ -3,7 +3,7 @@
 
 Two feature groups, per the planned experiment catalogue:
 - **State features**: score state only (sets, games, points, server,
-  best_of) — always included, since even the weakest ML configuration
+  best_of) - always included, since even the weakest ML configuration
   (EXP20) needs a score state to condition on.
 - **Context features**: recent form, surface record, head-to-head, and
   Elo rating (EXP21+), plus within-match momentum (EXP24).
@@ -13,7 +13,7 @@ Context features are computed once per MATCH, not once per point:
 archive in date order (the same running-totals pattern as
 backend/player_rating.py and pricing/markov/serve_rate.py's bulk
 functions) rather than calling backend/context_features.py's per-match
-functions once per match, which would each rescan the archive — fine for
+functions once per match, which would each rescan the archive - fine for
 one live lookup, O(matches²) for building a training set. Momentum is a
 true within-match feature (this match's own recent points), computed
 directly while building the point-level rows, no archive scan needed.
@@ -34,7 +34,7 @@ from database.models import Match, OutcomeLabel, Point
 
 FORM_LOOKBACK = 10
 MOMENTUM_LOOKBACK = 10
-DEFAULT_FORM = 0.5  # neutral — "no prior data" is not "poor form"
+DEFAULT_FORM = 0.5  # neutral - "no prior data" is not "poor form"
 
 
 def compute_match_context_features(
@@ -106,7 +106,7 @@ def compute_match_context_features(
 
 def _momentum(recent_winners: list[str], side: str) -> float:
     """Fraction of the last MOMENTUM_LOOKBACK points won by `side` within
-    this match. DEFAULT_FORM (neutral) if there's no history yet — the
+    this match. DEFAULT_FORM (neutral) if there's no history yet - the
     very start of a match carries no momentum signal either way."""
     if not recent_winners:
         return DEFAULT_FORM
@@ -123,7 +123,7 @@ def build_point_features(
     """One row per point, from every match with a confirmed outcome.
     Always includes state + momentum features; context features are only
     meaningful once `match_context` (from compute_match_context_features)
-    is supplied — callers select feature subsets afterward (EXP20 vs
+    is supplied - callers select feature subsets afterward (EXP20 vs
     EXP21 etc.), this just builds the full superset once."""
     rows = []
     matches_by_id = {m.match_id: m for m in matches}

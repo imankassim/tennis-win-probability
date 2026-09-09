@@ -3,9 +3,9 @@
 feature values as the offline training path
 (pricing/ml/features.py's build_point_features) for the same point.
 
-These are two independent implementations — the offline path builds a
+These are two independent implementations - the offline path builds a
 whole training frame in one pass, the live path scores one point at a
-time from cached per-match context — kept in sync only by convention
+time from cached per-match context - kept in sync only by convention
 (matching constants, matching arithmetic), not by sharing a single
 function. Without a test like this, someone could edit one side's
 momentum window or context default and silently create training/serving
@@ -58,7 +58,7 @@ def _point(match_id, point_no, server, winner, sa, sb, ga, gb):
 
 def _archive():
     """Three matches so the third has real (non-default) context: prior
-    form, a surface record and a head-to-head history to draw on — a
+    form, a surface record and a head-to-head history to draw on - a
     debut-only archive would let every context feature pass this test
     trivially at its neutral default."""
     base = date(2026, 1, 1)

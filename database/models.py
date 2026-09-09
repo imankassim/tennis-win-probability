@@ -2,7 +2,7 @@
 
 These mirror the operational entities in
 docs/architecture/data-architecture.md. They are plain dataclasses, not ORM
-models — the schema they map onto lives in database/schema.sql, and nothing
+models - the schema they map onto lives in database/schema.sql, and nothing
 here assumes a particular database driver.
 """
 
@@ -41,7 +41,7 @@ class Point:
     server: str  # "player_a" | "player_b"
     point_winner: str  # "player_a" | "player_b"
     # Raw score state as recorded by the source, preserved rather than
-    # reinterpreted — the data-architecture Point entity explicitly allows
+    # reinterpreted - the data-architecture Point entity explicitly allows
     # this. Turning it into a clean "games: '4-4'"-style interpretation is
     # the match-state parser's job (Journey 6), not ingestion's.
     # All four *_won_* fields are the state entering this point (completed
@@ -57,13 +57,13 @@ class Point:
 class OutcomeLabel:
     match_id: str
     actual_winner: str  # "player_a" | "player_b"
-    final_score: str  # sets only, e.g. "3-1" — see outcomes.py
+    final_score: str  # sets only, e.g. "3-1" - see outcomes.py
 
 
 @dataclass(frozen=True)
 class QuarantinedMatch:
     """A match whose data failed a quality gate or couldn't be confirmed
-    complete — excluded from outcome labels rather than guessed at."""
+    complete - excluded from outcome labels rather than guessed at."""
 
     match_id: str
     reason: str

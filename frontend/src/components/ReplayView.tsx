@@ -12,7 +12,7 @@ import { PointTicker } from "./PointTicker";
 import { PlaybackControls } from "./PlaybackControls";
 
 const PLAY_INTERVAL_MS = 700;
-// Scenario-library matches use scripted mock data (see mockData.ts) — this
+// Scenario-library matches use scripted mock data (see mockData.ts) - this
 // delay exists purely so the loading state stays reachable and testable
 // now that real matches have their own, actually-asynchronous fetch.
 const SIMULATED_LOAD_MS = 400;
@@ -91,7 +91,7 @@ export function ReplayView({ matchId }: { matchId: string }) {
     <div className="space-y-4">
       <header>
         <p className="text-xs uppercase tracking-wide text-slate-500">
-          {replay.match.tournament} — {replay.match.round}
+          {replay.match.tournament} - {replay.match.round}
         </p>
         <h1 className="text-xl font-semibold text-slate-100">
           {replay.match.playerA} <span className="text-slate-500">vs</span>{" "}

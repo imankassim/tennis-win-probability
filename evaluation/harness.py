@@ -1,12 +1,12 @@
 """The evaluation harness (Journey 8): scores a probability function
 against confirmed match outcomes, using the same metrics module for any
-configuration — EXP1, EXP2, and later the Markov/ML/blend estimators.
+configuration - EXP1, EXP2, and later the Markov/ML/blend estimators.
 
 Not a train/test split yet: EXP1 and EXP2 are fixed, untuned heuristics
 with nothing to overfit, so evaluating on the full available dataset is
 fine. Match-level splitting (docs/architecture/offline-training-architecture.md's
 training controls) starts to matter once a configuration is actually
-fitted to data — from Journey 9's Markov parameter tuning onward.
+fitted to data - from Journey 9's Markov parameter tuning onward.
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ def evaluate_configuration(
 ) -> EvaluationResult:
     """Scores `probability_fn` at every point of every match that has a
     confirmed outcome. Matches without one (quarantined as incomplete) are
-    excluded, not guessed at — consistent with the quarantine-on-failure
+    excluded, not guessed at - consistent with the quarantine-on-failure
     rule."""
     matches_by_id = {m.match_id: m for m in matches}
     predictions: list[float] = []

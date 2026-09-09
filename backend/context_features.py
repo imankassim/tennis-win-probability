@@ -2,21 +2,21 @@
 deterministic ranking, recent form, surface and head-to-head extraction.
 
 Recent form, surface record and head-to-head are computed directly from
-our own ingested match archive (database/models.py Match + OutcomeLabel) —
+our own ingested match archive (database/models.py Match + OutcomeLabel) -
 no external source needed, since they're just aggregates over matches we
 already have. Player strength ("ranking") is NOT computed here: no
 external ranking feed was ever sourced (Player.current_rank/rank_points
-stay unpopulated — see docs/data_sheets/data_provenance.md), so
+stay unpopulated - see docs/data_sheets/data_provenance.md), so
 backend/player_rating.py computes a self-sufficient Elo rating from this
-same archive instead — a separate module since it needs its own
+same archive instead - a separate module since it needs its own
 sequential, whole-archive pass (a running rating per player) rather than
 a per-match aggregate like the functions here.
 
 Every function here takes `as_of_date` and strictly excludes matches on or
-after it — the "no look-ahead" training control (ADR 9's context, and
+after it - the "no look-ahead" training control (ADR 9's context, and
 docs/architecture/offline-training-architecture.md): a context feature for
 a match must never see that match's own result, or any later one. This is
-the same reason match_date uses a strict `<`, not `<=` — two matches on the
+the same reason match_date uses a strict `<`, not `<=` - two matches on the
 same recorded date have no reliable intra-day ordering in this data, so
 being strict is the safe default. This module is meant to be imported
 identically by the live API and by offline feature generation (Journey 11)
@@ -59,7 +59,7 @@ def recent_form(
 ) -> float | None:
     """Win rate over the player's last `lookback` completed matches before
     as_of_date. None if there are no prior completed matches (an unknown
-    quantity, not zero — do not silently treat a debutant as "in poor
+    quantity, not zero - do not silently treat a debutant as "in poor
     form")."""
     prior = sorted(
         _player_matches_before(player_id, matches, as_of_date), key=lambda m: m.match_date

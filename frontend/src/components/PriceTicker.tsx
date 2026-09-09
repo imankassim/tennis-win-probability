@@ -18,7 +18,7 @@ export function PriceTicker({
             Pricing suspended
           </p>
           <p className="mt-1 text-xs text-red-400">
-            No price is served while suspended — trading rules require a
+            No price is served while suspended - trading rules require a
             suspended state rather than a stale or guessed value.
           </p>
         </div>

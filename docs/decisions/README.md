@@ -16,6 +16,6 @@ One file per decision, named `<n>-<slug>.md` using plain sequential numbers
 ## Consequences
 ```
 
-An ADR is never edited to reverse a decision — a later decision that changes
+An ADR is never edited to reverse a decision - a later decision that changes
 course adds a new ADR and marks the old one superseded, so the history stays
 intact.

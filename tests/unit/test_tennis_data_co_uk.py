@@ -23,7 +23,7 @@ def test_matches_by_surname_and_close_date():
     players = {"p_a": "Frances Tiafoe", "p_b": "Alex De Minaur"}
     market_rows = [
         MarketOddsRow(
-            match_date=date(2026, 1, 6),  # 1 day off — within tolerance
+            match_date=date(2026, 1, 6),  # 1 day off - within tolerance
             winner_name="Tiafoe F.",
             loser_name="De Minaur A.",
             avg_odds_winner=1.5,

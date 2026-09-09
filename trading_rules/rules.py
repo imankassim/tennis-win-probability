@@ -2,12 +2,12 @@
 suspension/staleness checks.
 
 Per decision 7 (docs/decisions/7-trading-rules-as-hard-constraints.md):
-these are hard constraints, not soft signals — they cannot be overridden
+these are hard constraints, not soft signals - they cannot be overridden
 by a blend weight, a calibration adjustment, or a value-detection nudge,
 and this is the final gate before a probability response is returned. A
 failure anywhere upstream (a missing, invalid, or out-of-bounds
 probability) must produce a suspended quote here, never a fabricated
-price — the same principle backend/probability.py's margin logic
+price - the same principle backend/probability.py's margin logic
 followed as a placeholder from Journey 5 onward; this is its real home
 and its real implementation.
 """
@@ -20,9 +20,9 @@ DEFAULT_MARGIN = 0.05
 # docs/architecture/deployment.md's fallback table: if the blend or
 # calibration layer fails after the ML estimate was already computed, the
 # response degrades to the raw Markov probability, but priced with extra
-# caution — a discarded, disagreeing ML estimate is more uncertainty than
+# caution - a discarded, disagreeing ML estimate is more uncertainty than
 # a routine Markov-only quote (e.g. no promoted model at all) carries.
-# Not tuned against any data — a deliberate, documented safety margin,
+# Not tuned against any data - a deliberate, documented safety margin,
 # not a fitted parameter.
 WIDENED_MARGIN = 0.10
 MIN_VALID_PRICE = 1.0
@@ -30,7 +30,7 @@ MIN_VALID_PRICE = 1.0
 # something upstream is almost certainly wrong (a probability vanishingly
 # close to 0 or 1), not a plausible quote worth serving as-is.
 MAX_REASONABLE_PRICE = 1000.0
-# Meaningful once a live feed exists — this system replays static
+# Meaningful once a live feed exists - this system replays static
 # historical data today (docs/architecture/charter.md's "what will not be
 # built"), so nothing currently produces a data_age_seconds to check. Kept
 # as a tested, ready-to-wire pure function rather than left unbuilt.

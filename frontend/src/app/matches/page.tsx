@@ -38,7 +38,7 @@ export default function MatchesPage() {
         <h1 className="text-xl font-semibold text-slate-100">Browse real matches</h1>
         <p className="mt-2 text-sm text-slate-400">
           Real, ingested match data served by the CourtEdge API, priced by
-          the current placeholder estimator (the score-leader heuristic —
+          the current placeholder estimator (the score-leader heuristic -
           the Markov and ML engines haven&apos;t been built yet).
         </p>
       </header>
@@ -85,7 +85,7 @@ export default function MatchesPage() {
                 className="block rounded-lg border border-slate-800 bg-slate-900 p-4 transition hover:border-sky-700 hover:bg-slate-800/60"
               >
                 <p className="text-xs uppercase tracking-wide text-slate-500">
-                  {m.tournament} — {m.round}
+                  {m.tournament} - {m.round}
                 </p>
                 <p className="mt-1 text-lg font-medium text-slate-100">
                   {m.playerA} <span className="text-slate-500">vs</span> {m.playerB}

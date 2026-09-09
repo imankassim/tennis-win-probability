@@ -14,7 +14,7 @@ from pricing.blend.meta_model import (
 
 def _synthetic_stacked_dataset(n=500, seed=0):
     """Label is determined by ml_prediction (a strong signal); markov and
-    a noise feature are irrelevant — a well-fit meta-model should learn
+    a noise feature are irrelevant - a well-fit meta-model should learn
     to lean on ml_prediction."""
     rng = random.Random(seed)
     rows = []

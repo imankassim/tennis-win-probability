@@ -1,4 +1,4 @@
-"""Primitive baselines (EXP1, EXP2) — see experiments/REGISTER.md.
+"""Primitive baselines (EXP1, EXP2) - see experiments/REGISTER.md.
 
 These exist as the weak floor every later component (the Markov baseline,
 the ML model, the blend) must clear. They are deliberately not tuned or
@@ -13,17 +13,17 @@ states only.
 
 
 def always_fifty_fifty() -> float:
-    """EXP1 — ignores all match state and always returns 0.5.
+    """EXP1 - ignores all match state and always returns 0.5.
 
     Known failure: carries zero information. Never wrong on average across
-    a symmetric field, but never useful for a single match either — the
+    a symmetric field, but never useful for a single match either - the
     absolute floor.
     """
     return 0.5
 
 
 def score_leader_probability(sets_a: int, sets_b: int, games_a: int, games_b: int) -> float:
-    """EXP2 — whoever currently leads gets a fixed probability bump: a set
+    """EXP2 - whoever currently leads gets a fixed probability bump: a set
     lead is worth more than a game lead, and ties fall back to 0.5.
 
     Known failures (see docs/architecture/charter.md's target model

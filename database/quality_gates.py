@@ -1,6 +1,6 @@
 """Data quality gates (docs/architecture/data-architecture.md, section 8.3).
 
-Pure functions over already-parsed records — no database, no network — so
+Pure functions over already-parsed records - no database, no network - so
 they can be unit tested with small synthetic fixtures and reused
 identically whatever the ingestion source turns out to be next.
 
@@ -10,7 +10,7 @@ don't apply to match/player/point ingestion:
   suspended" belongs to the quote pipeline (Journey 5+).
 - "Model version tied to the source data snapshot" belongs to model
   training (Journey 9+).
-A third — "outcome labels consistent with the final recorded score" — is
+A third - "outcome labels consistent with the final recorded score" - is
 enforced by construction in outcomes.py: derive_outcome() only ever
 returns a label when it has confirmed the match-ending point, and
 quarantines the match otherwise.

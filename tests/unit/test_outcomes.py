@@ -52,7 +52,7 @@ def test_clean_straight_sets_win():
 
 def test_tiebreak_win_completes_set_and_match():
     # Player B already has 1 set. Second set reaches 6-6, and B wins the
-    # tiebreak game outright — that always completes the set, regardless
+    # tiebreak game outright - that always completes the set, regardless
     # of the internal tiebreak score, which derive_outcome never inspects.
     points = [
         _point(1, 12, "player_a", "player_b", sets_a=0, sets_b=1, games_a=6, games_b=6),

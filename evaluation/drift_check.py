@@ -5,7 +5,7 @@ distinct eras of the archive, or has it quietly overfit to one of them?
 The risk register (docs/architecture/risk_register.md) names this
 directly: "overfitting to a particular rule or equipment era... evaluate
 across multiple years and surfaces; monitor drift." This module makes
-that concrete and measured rather than only asserted — it scores the
+that concrete and measured rather than only asserted - it scores the
 promoted pipeline (unmodified, not refit) against the whole archive once,
 using the same no-look-ahead serve-rate and context-feature machinery
 live serving uses, then buckets the results by era for comparison.
@@ -14,7 +14,7 @@ Deliberately scores the FULL archive in one pass rather than splitting it
 into two archives and scoring each separately: bulk_shrunk_serve_rates
 and compute_match_context_features build running per-player history in
 date order, so scoring a later era in isolation would lose all the
-earlier era's history — not what live serving actually sees. Bucketing
+earlier era's history - not what live serving actually sees. Bucketing
 happens only after scoring, on match_date.
 """
 
@@ -54,7 +54,7 @@ def score_full_pipeline(
     """Scores the promoted pipeline's calibrated probability at every
     point of every match with a confirmed outcome. Same computation
     pricing/promote_model.py runs to fit the calibrator against a
-    held-out slice — here it scores (never fits) against whatever
+    held-out slice - here it scores (never fits) against whatever
     archive is passed in, so the same promoted model/calibrator can be
     checked against a different or wider slice than it was promoted on."""
     ctx = compute_match_context_features(matches, outcomes)
@@ -103,7 +103,7 @@ def split_by_era(
 ) -> tuple[EraMetrics, EraMetrics]:
     """Buckets an already-scored dataframe (from score_full_pipeline) into
     two eras by match_date and scores each independently. The split
-    happens after scoring, not before — see this module's docstring for
+    happens after scoring, not before - see this module's docstring for
     why scoring the eras separately would be wrong."""
     before = scored_df[scored_df["match_date"] < split_date]
     on_or_after = scored_df[scored_df["match_date"] >= split_date]

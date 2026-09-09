@@ -6,13 +6,13 @@ analysis only, without altering the served probability." Per decision 8
 and docs/architecture/risk_register.md's "market-odds benchmark
 limitations" row: market odds are de-vigged before any comparison and
 this is framed strictly as research, not as betting advice or a staking
-recommendation — nothing here computes a stake, a bankroll effect, or
+recommendation - nothing here computes a stake, a bankroll effect, or
 anything resembling betting guidance, and the flag never feeds back into
 the served probability.
 
 "Bounded" means two things, both enforced here: the reported edge is
-capped (an extreme edge almost always means a data problem — a bad match
-or a stale price — not a genuine 40-point mispricing), and the flag is a
+capped (an extreme edge almost always means a data problem - a bad match
+or a stale price - not a genuine 40-point mispricing), and the flag is a
 label, not a number to act on.
 """
 
@@ -21,13 +21,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # An edge past this is treated as a data-quality signal, not a genuine
-# opportunity — real closing-line mispricings this large are vanishingly
+# opportunity - real closing-line mispricings this large are vanishingly
 # rare; this size almost always means a bad player match or a stale/wrong
 # price got through. Capping, not clipping to zero, keeps the flag
 # informative about direction while refusing to imply "beat the market by
 # 40 points" is a real, actionable finding.
 MAX_REPORTED_EDGE = 0.15
-# Below this, don't flag at all — normal estimation noise between two
+# Below this, don't flag at all - normal estimation noise between two
 # independently-built probabilities, not a meaningful disagreement.
 FLAG_THRESHOLD = 0.05
 
@@ -57,7 +57,7 @@ def devig_odds(odds_a: float, odds_b: float) -> tuple[float, float]:
 def compute_value_flag(model_probability: float, odds_a: float, odds_b: float) -> ValueFlag:
     """Compares a model probability for player A against the de-vigged
     market-implied probability for the same side. Never called from the
-    live pricing path — this is an offline/research comparison only (see
+    live pricing path - this is an offline/research comparison only (see
     the module docstring)."""
     market_probability_a, _ = devig_odds(odds_a, odds_b)
     raw_edge = model_probability - market_probability_a

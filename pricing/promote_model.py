@@ -1,12 +1,12 @@
 """Trains and persists the full pricing pipeline for live serving
 (Journey 17): the ML model (EXP24's feature set), the phase-level
-calibrator (EXP43), and the blend weight (EXP33) — bundled into one
+calibrator (EXP43), and the blend weight (EXP33) - bundled into one
 versioned artefact backend/main.py loads at startup.
 
 Deliberately NOT automatic: per docs/architecture/governance.md, model
 promotion requires human review, so this is a script someone runs on
 purpose, not something that fires on a schedule or a data change.
-Running it is the review — the evidence behind these choices (the
+Running it is the review - the evidence behind these choices (the
 feature set, the blend weight, the calibration method) already exists in
 experiments/EXP20-24, EXP32-33 and EXP40-43; this script doesn't
 re-derive them, it packages the already-decided configuration.
@@ -18,10 +18,10 @@ _log_loss/_ece, surfaced by Journey 19's ops dashboard) on the later
 half. A genuine three-way split, not two: scoring the calibrator on the
 same data it was fit on would report near-perfect calibration by
 construction (isotonic regression fits its own training data closely),
-not a real out-of-sample estimate — the same reasoning EXP40-43's
+not a real out-of-sample estimate - the same reasoning EXP40-43's
 validation-half / final-test-half split already used, applied here too.
 
-Run it via pricing/run_promotion.py, not this module directly — see that
+Run it via pricing/run_promotion.py, not this module directly - see that
 file's docstring for why the CLI entry point has to live in a separate
 module from the PricingArtefacts class it pickles.
 
@@ -63,7 +63,7 @@ VERSIONS_SUBDIR = "versions"
 @dataclass(frozen=True)
 class PricingArtefacts:
     # A filesystem-safe id for this promotion (Journey 20's model
-    # registry) — distinct from trained_at (a full ISO timestamp, kept
+    # registry) - distinct from trained_at (a full ISO timestamp, kept
     # for display) because ISO timestamps contain colons, which several
     # filesystems (including the one this project actually runs on)
     # reject in filenames.
@@ -75,17 +75,17 @@ class PricingArtefacts:
     feature_columns: list[str]
     trained_at: str
     n_training_matches: int
-    # Matches the calibrator was FIT on — half of the 15% holdout; the
+    # Matches the calibrator was FIT on - half of the 15% holdout; the
     # other half (never seen by the calibrator) produced calibration_brier
     # /_log_loss/_ece below, so this count and those metrics deliberately
     # come from two different, disjoint slices.
     n_calibration_matches: int
     # The calibrated pipeline's accuracy/calibration on a slice neither
-    # the ML model nor the calibrator was fit on, at promotion time — a
+    # the ML model nor the calibrator was fit on, at promotion time - a
     # genuine out-of-sample "quality" snapshot (Journey 19's ops
     # dashboard surfaces these), computed the same way EXP40-43 were
     # evaluated (a validation half fits, a separate final-test half
-    # scores). Not a live metric — this system has no live feed of
+    # scores). Not a live metric - this system has no live feed of
     # outcomes to score served quotes against (see
     # docs/architecture/charter.md's "what will not be built").
     calibration_brier: float
@@ -125,9 +125,9 @@ def _blend_predictions_and_phases(
     serve_rates: dict[str, tuple[float, float]],
 ) -> tuple[list[float], list[str]]:
     """Markov + ML computed independently, then blended, for every row of
-    `df` — the same computation the live API performs per-request, run
+    `df` - the same computation the live API performs per-request, run
     here in bulk. bulk_shrunk_serve_rates (passed in, computed once for
-    the whole archive) avoids re-scanning it per match — already learned
+    the whole archive) avoids re-scanning it per match - already learned
     that lesson once this session, see pricing/markov/serve_rate.py."""
     ml_preds = ml_model.predict_proba(df[feature_columns])[:, 1].tolist()
     blend_preds = []
@@ -151,7 +151,7 @@ def _train_and_promote_from_data(matches, points_by_match, outcomes) -> PricingA
 
     fit_df, holdout_df = match_level_split(df, test_fraction=CALIBRATION_HOLDOUT_FRACTION)
     # The 15% holdout splits again, in half by date: the calibrator fits
-    # on the earlier half and reports quality on the later half — never
+    # on the earlier half and reports quality on the later half - never
     # scored on its own fitting data (see this module's docstring).
     calibration_fit_df, quality_eval_df = match_level_split(holdout_df, test_fraction=0.5)
 
@@ -191,7 +191,7 @@ def _train_and_promote_from_data(matches, points_by_match, outcomes) -> PricingA
 
 
 def save_artefacts(artefacts: PricingArtefacts, directory: Path = DEFAULT_ARTEFACT_DIR) -> None:
-    """Writes the versioned artefact (kept permanently, for rollback —
+    """Writes the versioned artefact (kept permanently, for rollback -
     see pricing/registry.py and pricing/rollback_model.py), makes it the
     active one (the fixed filename backend/probability.py's
     load_artefacts reads), and records the promotion in the registry."""

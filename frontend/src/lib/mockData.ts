@@ -1,8 +1,8 @@
-// Mock replay data for the dashboard shell (Journey 2 — first visible
+// Mock replay data for the dashboard shell (Journey 2 - first visible
 // dashboard). No backend exists yet (that's Journey 5), so this stands in
 // for the /replay and /probability endpoints. Probabilities are computed by
-// a deliberately crude placeholder heuristic (see scoring.ts) — never the
-// real Markov/ML engine — and every quote is labelled `mock_placeholder_v0`
+// a deliberately crude placeholder heuristic (see scoring.ts) - never the
+// real Markov/ML engine - and every quote is labelled `mock_placeholder_v0`
 // so that is never ambiguous.
 //
 // The two scripted matches are built to walk through the target model
@@ -43,7 +43,7 @@ const script001: MatchScript = {
   bestOf: 3,
   sets: [
     {
-      // Set 1 — Player A (the favourite) trails early and drops the set:
+      // Set 1 - Player A (the favourite) trails early and drops the set:
       // "Favourite under early pressure" target scenario.
       games: [
         hold("player_a"),
@@ -59,7 +59,7 @@ const script001: MatchScript = {
       ],
     },
     {
-      // Set 2 — Player A saves a break point under pressure and closes it out:
+      // Set 2 - Player A saves a break point under pressure and closes it out:
       // "Break-point pressure" target scenario.
       games: [
         hold("player_a"),
@@ -81,7 +81,7 @@ const script001: MatchScript = {
       ],
     },
     {
-      // Set 3 — the decider: "Deciding-set recovery" target scenario.
+      // Set 3 - the decider: "Deciding-set recovery" target scenario.
       games: [
         hold("player_a"),
         hold("player_b"),
@@ -153,7 +153,7 @@ function buildDemoM002(): MatchReplay {
 
   // Splice in the rain delay: the point labelled "Rain delay called" is the
   // last point before suspension. Insert an extra, suspended quote right
-  // after it (same point, a re-issued quote — no ball has been played, the
+  // after it (same point, a re-issued quote - no ball has been played, the
   // system is just reporting the suspended state), then mark the first
   // quote after resumption as stale (the data-gap target scenario: the
   // point event resumes before the pricing pipeline has caught up).
@@ -192,7 +192,7 @@ export function isScenarioLibraryMatch(matchId: string): boolean {
   return matchId in REPLAYS;
 }
 
-/** Returns null for an unknown match ID — the dashboard's error-state trigger. */
+/** Returns null for an unknown match ID - the dashboard's error-state trigger. */
 export function getMatchReplay(matchId: string): MatchReplay | null {
   const build = REPLAYS[matchId];
   return build ? build() : null;

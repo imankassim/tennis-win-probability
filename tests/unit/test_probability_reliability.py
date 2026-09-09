@@ -1,7 +1,7 @@
 """Failure-injection tests (Journey 18): the non-functional requirement
-this project's source document states explicitly — "a failure in the ML,
+this project's source document states explicitly - "a failure in the ML,
 blend or calibration layer must not prevent the Markov baseline from
-serving where it remains available" — exercised directly rather than
+serving where it remains available" - exercised directly rather than
 just asserted in a docstring.
 """
 
@@ -105,12 +105,12 @@ def test_working_pipeline_uses_the_promoted_model_version():
 
 def test_ml_model_failure_falls_back_to_markov_without_widening_margin():
     """The ML model raising (a bad feature row, a version-incompatible
-    pickle, anything) must not prevent Markov from serving — the
+    pickle, anything) must not prevent Markov from serving - the
     reliability requirement this journey exists to verify. Matches
     docs/architecture/deployment.md's "ML model unavailable" row: plain
     Markov-only, not the widened-margin treatment (that row is reserved
     for when blend/calibration discards an ML estimate that already
-    succeeded — see the next test)."""
+    succeeded - see the next test)."""
     markov_only = _compute(artefacts=None)
     with pytest.warns(UserWarning, match="ML model failed"):
         result = _compute(_artefacts(_RaisingModel(), _WorkingCalibrator()))
@@ -123,7 +123,7 @@ def test_ml_model_failure_falls_back_to_markov_without_widening_margin():
 def test_calibrator_failure_falls_back_to_markov_with_a_widened_margin():
     """Matches docs/architecture/deployment.md's "blend or calibration
     unavailable" row exactly: Markov-only, but with widen_margin=True so
-    the caller prices more cautiously — a successfully-computed ML
+    the caller prices more cautiously - a successfully-computed ML
     estimate was discarded here, unlike the plain ML-failure case."""
     markov_only = _compute(artefacts=None)
     with pytest.warns(UserWarning, match="Blend/calibration failed"):

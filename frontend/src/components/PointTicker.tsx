@@ -7,7 +7,7 @@ function describePoint(point: PointEvent, match: MatchSummary): string {
   const winnerName = point.pointWinner === "player_a" ? match.playerA : match.playerB;
   if (point.label) return point.label;
   const bp = point.interpretation.breakPoint ? " (break point)" : "";
-  return `Set ${point.setNo}, ${point.interpretation.games} — ${winnerName} wins the point${bp}`;
+  return `Set ${point.setNo}, ${point.interpretation.games} - ${winnerName} wins the point${bp}`;
 }
 
 export function PointTicker({

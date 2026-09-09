@@ -3,8 +3,8 @@ increasing feature sets, on a match-level train/test split.
 
 Match-level, never point-level (docs/architecture/offline-training-architecture.md's
 training controls: "a model that has seen the middle of a match must never
-have seen its ending"). The split is chronological — the most recent
-matches held out as the test set — rather than a random match-level split,
+have seen its ending"). The split is chronological - the most recent
+matches held out as the test set - rather than a random match-level split,
 closer to the documented control ("hold out an entire final set of
 tournaments as the test set") than a shuffled split would be, and it means
 no test-set match's outcome could possibly have informed feature
@@ -45,7 +45,7 @@ class MlEvaluationResult:
 def match_level_split(
     df: pd.DataFrame, test_fraction: float = 0.2
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Splits by match_id, ordered by match_date — the most recent
+    """Splits by match_id, ordered by match_date - the most recent
     `test_fraction` of matches become the test set. Never splits a single
     match's points across both sides."""
     match_dates = df.groupby("match_id")["match_date"].first().sort_values()

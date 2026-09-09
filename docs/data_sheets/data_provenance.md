@@ -9,8 +9,8 @@ quality gates and by the governance architecture.
 | Source | Content | Licence / terms | Use in CourtEdge |
 |---|---|---|---|
 | Jeff Sackmann, [`tennis_MatchChartingProject`](https://github.com/JeffSackmann/tennis_MatchChartingProject) GitHub repository | Crowdsourced, shot-by-shot point-by-point data and match metadata for charted ATP/WTA matches | CC BY-NC-SA 4.0 (non-commercial), stated in the repo's README | Primary source for matches, players, points and outcome labels. See [decision 9](../decisions/9-match-charting-project-data-source.md) for why this replaced `tennis_slam_pointbypoint`. |
-| ATP/WTA rankings | Player ranking history | Not yet sourced | Still deferred — Journey 7 built recent-form, surface-record and head-to-head context features entirely from our own ingested match archive (no external source needed for those). Only `current_rank`/`rank_points` remain unpopulated; sourced when the ML feature set (Journey 10-11) actually needs them. |
-| [tennis-data.co.uk](http://tennis-data.co.uk/alldata.php) | Historical ATP/WTA match results and closing odds (yearly `.xlsx` files, one per tour) | Published for personal / non-commercial research use | Evaluation benchmark only — for de-vigged comparison and the bounded, research-only value-detection layer (Journey 15). Never used as an input feature and never treated as ground truth. Uses the `AvgW`/`AvgL` columns (the average closing odds across bookmakers), not any single bookmaker's price. |
+| ATP/WTA rankings | Player ranking history | Not yet sourced | Still deferred - Journey 7 built recent-form, surface-record and head-to-head context features entirely from our own ingested match archive (no external source needed for those). Only `current_rank`/`rank_points` remain unpopulated; sourced when the ML feature set (Journey 10-11) actually needs them. |
+| [tennis-data.co.uk](http://tennis-data.co.uk/alldata.php) | Historical ATP/WTA match results and closing odds (yearly `.xlsx` files, one per tour) | Published for personal / non-commercial research use | Evaluation benchmark only - for de-vigged comparison and the bounded, research-only value-detection layer (Journey 15). Never used as an input feature and never treated as ground truth. Uses the `AvgW`/`AvgL` columns (the average closing odds across bookmakers), not any single bookmaker's price. |
 
 ### A note on the originally-named sources
 
@@ -19,7 +19,7 @@ The architecture document originally named `tennis_atp`, `tennis_wta` and
 starting Journey 4, all three had been removed from GitHub (confirmed via
 the GitHub API returning 404). The Wayback Machine shows `tennis_atp` was
 still present as of March 2026, and that its README did state the CC
-BY-NC-SA 4.0 licence this document already claimed — so the provenance
+BY-NC-SA 4.0 licence this document already claimed - so the provenance
 claim for that data was accurate for as long as it was reachable, but it
 is no longer available as a live source. See
 [decision 9](../decisions/9-match-charting-project-data-source.md) for the
@@ -53,7 +53,7 @@ full reasoning behind switching to the Match Charting Project instead.
 ## Ingestion evidence (Journey 4)
 
 The ingestion pipeline (`database/ingestion/`) has been run against real
-Match Charting Project data — the men's matches file in full (7,532
+Match Charting Project data - the men's matches file in full (7,532
 matches) and the full 2010s and 2020s points files (904,513 points across
 5,568 matches), downloaded fresh rather than committed, per rule 4 above.
 Result:
@@ -67,7 +67,7 @@ Result:
   reported rather than crashing the run.
 
 An initial pass against a smaller, bounded sample (~28,800 points across
-190 matches) is what this ingestion is scaled up from — see
+190 matches) is what this ingestion is scaled up from - see
 [evaluation/README.md](../../evaluation/README.md) for what that scale-up
 changed about the Markov-vs-heuristic evaluation result.
 

@@ -1,4 +1,4 @@
-# EXP21 — Logistic regression with player/context features added
+# EXP21 - Logistic regression with player/context features added
 
 - Status: Retained
 - Depends on: EXP20
@@ -7,7 +7,7 @@
 ## Hypothesis
 
 Adding player context (recent form, surface record, head-to-head, Elo
-rating — `pricing/ml/features.py::compute_match_context_features`) should
+rating - `pricing/ml/features.py::compute_match_context_features`) should
 meaningfully beat state-only (EXP20), since it's exactly the information
 Markov and EXP20 alike are blind to.
 
@@ -32,13 +32,13 @@ three decimal places.
 | EXP21 (logistic, state + context) | 0.1597 | 0.4796 |
 
 Beats EXP20 by a clear margin (8.4% lower Brier) and Markov by 13.2%
-lower Brier / 14.0% lower log-loss — context features roughly double the
+lower Brier / 14.0% lower log-loss - context features roughly double the
 improvement state-only learning gave on its own.
 
 ## Decision
 
 Retained. The representation comparison against EXP23 (the same feature
-set on LightGBM instead) is the more interesting result here — see
+set on LightGBM instead) is the more interesting result here - see
 EXP23's write-up: a linear model captures almost all of the benefit these
 context features offer, which says the state→context→outcome
 relationship is largely simple/linear, not that context doesn't matter.

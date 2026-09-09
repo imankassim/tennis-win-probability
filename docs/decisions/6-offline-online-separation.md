@@ -30,6 +30,6 @@ fits during a request.
   traffic.
 - Requires the feature-generation code to be shared, versioned, and
   identical between the offline training pipeline and the online serving
-  path, to avoid train/serve skew — enforced by the training control
+  path, to avoid train/serve skew - enforced by the training control
   "version feature-generation logic and use the same code in training and
   serving".

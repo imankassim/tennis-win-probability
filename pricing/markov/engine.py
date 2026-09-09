@@ -1,5 +1,5 @@
 """Ties the recursive formulas (formulas.py) to serve-rate estimation
-(serve_rate.py) into a single "Markov chain" probability engine — the
+(serve_rate.py) into a single "Markov chain" probability engine - the
 EXP10/EXP11/EXP13 analytic baseline, journey 9's main deliverable.
 """
 
@@ -24,7 +24,7 @@ def estimate_match_serve_rates(
     points_by_match: dict[str, list[Point]],
 ) -> tuple[float, float]:
     """(player_a serve rate, player_b serve rate), each shrunk toward the
-    tour average (EXP13), as of this match's own date — no look-ahead."""
+    tour average (EXP13), as of this match's own date - no look-ahead."""
     try:
         tour_average_serve_rate(matches, points_by_match, match.match_date)
     except ValueError:

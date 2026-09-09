@@ -33,7 +33,7 @@ def test_game_score_before_only_counts_earlier_points_in_the_same_game():
         _point(1, 1, "player_a", "player_b"),
         _point(2, 1, "player_a", "player_b"),
         _point(3, 1, "player_a", "player_b"),
-        _point(4, 2, "player_b", "player_a"),  # different game — should not count
+        _point(4, 2, "player_b", "player_a"),  # different game - should not count
     ]
     target = _point(4, 1, "player_a", "player_a")  # hypothetical 4th point of game 1
     won_a, won_b = game_score_before(points, target)

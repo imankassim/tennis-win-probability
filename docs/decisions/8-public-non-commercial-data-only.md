@@ -9,7 +9,7 @@ CourtEdge is a portfolio/research prototype, not a licensed product. Using
 a paid or restricted-licence feed (e.g. a live regulated odds feed) would
 create legal and licensing exposure disproportionate to a learning project,
 and would blur the line between "research prototype" and "something that
-looks like it's plugged into a real market" — a framing risk flagged
+looks like it's plugged into a real market" - a framing risk flagged
 explicitly in the governance architecture.
 
 ## Decision
@@ -18,7 +18,7 @@ Ingest only data with confirmed, recorded provenance and a non-commercial
 licence: the Sackmann point-by-point/ATP/WTA repositories (CC BY-NC-SA) and
 tennis-data.co.uk historical odds. Market odds are used exclusively as an
 offline evaluation benchmark and for the bounded, research-only
-value-detection layer — never as a live serving-time feature, and never
+value-detection layer - never as a live serving-time feature, and never
 treated as ground truth of the "true" probability.
 
 ## Consequences

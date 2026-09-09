@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CourtEdge",
   description:
-    "CourtEdge — an in-play tennis probability and pricing research prototype. Not betting advice.",
+    "CourtEdge - an in-play tennis probability and pricing research prototype. Not betting advice.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

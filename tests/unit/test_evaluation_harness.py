@@ -57,7 +57,7 @@ def test_evaluate_configuration_excludes_matches_without_a_confirmed_outcome():
     matches = [_match("m1"), _match("m2")]
     points_by_match = {
         "m1": [_point("m1", 1)],
-        "m2": [_point("m2", 1)],  # no outcome for m2 — should be excluded
+        "m2": [_point("m2", 1)],  # no outcome for m2 - should be excluded
     }
     outcomes = {"m1": OutcomeLabel(match_id="m1", actual_winner="player_a", final_score="2-0")}
 

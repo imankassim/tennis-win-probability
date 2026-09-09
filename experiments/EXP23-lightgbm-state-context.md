@@ -1,4 +1,4 @@
-# EXP23 — XGBoost/LightGBM classifier, state and context features
+# EXP23 - XGBoost/LightGBM classifier, state and context features
 
 - Status: Retained
 - Depends on: EXP21, EXP22
@@ -25,11 +25,11 @@ regression. Same train/test split.
 | EXP23 (LightGBM, state + context) | 0.1596 | 0.4790 |
 
 **Finding, not the expected one:** EXP23 barely beats EXP21 (a 0.0001
-Brier difference — noise-level, not a real gap). The hypothesis that
+Brier difference - noise-level, not a real gap). The hypothesis that
 trees would extract materially more from the context features than a
 linear model was not confirmed. Read together with EXP22 (trees only
 edge out logistic on state-only by 1.0%), the pattern is that **model
-family matters far less here than which features are included** — the
+family matters far less here than which features are included** - the
 state→context→outcome relationship this data expresses is close to
 linear, at least with the features built so far. This is a genuine
 negative-ish result, kept rather than glossed over: it doesn't mean
@@ -41,5 +41,5 @@ not, on this evidence, where the accuracy gains are coming from.
 
 Retained as the direct comparator for EXP24. The representation
 comparison result (family matters little; features matter a lot) is
-itself useful evidence for where to spend effort next — more/better
+itself useful evidence for where to spend effort next - more/better
 features over a fancier model, all else equal.

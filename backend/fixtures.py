@@ -1,4 +1,4 @@
-"""A small, synthetic demo match — not real data, used only so the API has
+"""A small, synthetic demo match - not real data, used only so the API has
 something to serve without requiring a real ingested dataset (see
 database/README.md for loading real data instead). Mirrors the same
 "clearly labelled, never confused with real data" approach as

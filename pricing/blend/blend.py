@@ -1,6 +1,6 @@
 """Combines the Markov and ML estimates (Journey 12): EXP30-33.
 
-Deliberately the simplest possible combination — a weighted average — not
+Deliberately the simplest possible combination - a weighted average - not
 a learned meta-model (that's EXP34/Journey 14). The weight-tuning search
 (`tune_weight`) is a separate function from the combination formula
 itself so the formula stays trivially testable on its own.
@@ -27,7 +27,7 @@ def tune_weight(
     step: float = 0.05,
 ) -> tuple[float, float]:
     """EXP33: sweeps markov_weight from 0.0 to 1.0 on a validation set
-    (never the final test set — that would leak the tuning decision into
+    (never the final test set - that would leak the tuning decision into
     the reported result) and returns (best_weight, its_brier_score)."""
     if len(markov_predictions) != len(ml_predictions) or len(markov_predictions) != len(
         actuals

@@ -1,9 +1,9 @@
 """Calibration methods (Journey 13): EXP40-43. Maps a raw (blended)
-probability onto empirically observed outcome frequencies — the last
+probability onto empirically observed outcome frequencies - the last
 learned step before trading_rules/ applies margin and bounds.
 
 All calibrators share the same tiny interface (fit, predict) so
-evaluation code doesn't need to know which one it's holding — including
+evaluation code doesn't need to know which one it's holding - including
 NoCalibration (EXP40), the "do nothing" baseline every other method is
 compared against, the same role EXP1 plays for the whole project.
 """
@@ -29,7 +29,7 @@ class NoCalibration:
 
 class PlattCalibrator:
     """EXP41: fits a logistic regression on the raw probability as its
-    single feature — the classic Platt scaling recipe."""
+    single feature - the classic Platt scaling recipe."""
 
     def __init__(self) -> None:
         self._model = LogisticRegression()
@@ -45,7 +45,7 @@ class PlattCalibrator:
 
 
 class IsotonicCalibrator:
-    """EXP42: a monotonic, non-parametric mapping — more flexible than
+    """EXP42: a monotonic, non-parametric mapping - more flexible than
     Platt's fixed logistic shape, at the cost of needing more data to fit
     reliably."""
 
@@ -61,7 +61,7 @@ class IsotonicCalibrator:
 
 
 def match_phase(set_no: int, best_of: int) -> str:
-    """A simple three-way split — early / mid / deciding — coarse enough
+    """A simple three-way split - early / mid / deciding - coarse enough
     that each phase still gets enough data to calibrate against."""
     if best_of == 5:
         if set_no <= 2:
@@ -80,7 +80,7 @@ def match_phase(set_no: int, best_of: int) -> str:
 class PhaseCalibrator:
     """EXP43: a separate IsotonicCalibrator per match phase
     (match_phase), falling back to one global calibrator for any phase
-    that doesn't have enough data to fit its own reliably — matching the
+    that doesn't have enough data to fit its own reliably - matching the
     charter's "error broken down by match phase" evaluation measure with
     an actual calibration response to it, not just a reporting split."""
 

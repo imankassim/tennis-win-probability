@@ -70,7 +70,7 @@ def test_tour_average_raises_when_no_prior_data():
 def test_tour_average_respects_no_look_ahead():
     matches = [
         _match("m1", date(2026, 1, 1), A, B),  # before cutoff
-        _match("m2", date(2026, 1, 10), A, B),  # after cutoff — must not count
+        _match("m2", date(2026, 1, 10), A, B),  # after cutoff - must not count
     ]
     points = {
         "m1": [_point("m1", 1, "player_a", "player_a")],  # 1/1 win
@@ -89,7 +89,7 @@ def test_player_serve_rate_only_counts_that_players_own_serves():
         "m1": [
             _point("m1", 1, "player_a", "player_a"),  # A serves, A wins
             _point("m1", 2, "player_a", "player_b"),  # A serves, A loses
-            _point("m1", 3, "player_b", "player_b"),  # B serves — not A's data
+            _point("m1", 3, "player_b", "player_b"),  # B serves - not A's data
         ]
     }
     assert player_serve_rate(A, matches, points, date(2026, 2, 1)) == 0.5
@@ -140,7 +140,7 @@ def test_default_shrinkage_strength_is_positive():
 
 def test_bulk_shrunk_serve_rates_matches_the_per_match_function():
     # A handful of matches across several players and dates, deliberately
-    # out of chronological order in the input list — bulk_shrunk_serve_rates
+    # out of chronological order in the input list - bulk_shrunk_serve_rates
     # must sort internally, same as the per-match approach implicitly does
     # via as_of_date filtering.
     base = date(2026, 1, 1)
@@ -171,7 +171,7 @@ def test_bulk_shrunk_serve_rates_matches_the_per_match_function():
     # bulk_shrunk_serve_rates is meant as a fast equivalent of
     # engine.estimate_match_serve_rates (which adds the cold-start
     # fallback on top of serve_rate_with_shrinkage), not of
-    # serve_rate_with_shrinkage alone — that raises outright when there's
+    # serve_rate_with_shrinkage alone - that raises outright when there's
     # no tour history yet (true for the very first match by date here).
     from pricing.markov.engine import estimate_match_serve_rates
 

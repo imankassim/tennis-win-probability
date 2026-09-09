@@ -1,13 +1,13 @@
-# Secrets — never commit
+# Secrets - never commit
 .env
 .env.*
 !.env.example
 
-# Raw third-party data (see docs/data_sheets/data_provenance.md — not redistributed)
+# Raw third-party data (see docs/data_sheets/data_provenance.md - not redistributed)
 data/raw/
-# Local quote event log (backend/event_log.py) — runtime output, not source
+# Local quote event log (backend/event_log.py) - runtime output, not source
 data/quote_log.jsonl
-# Scratch caches used during ad-hoc evaluation runs — regenerable, not source
+# Scratch caches used during ad-hoc evaluation runs - regenerable, not source
 data/*.pkl
 *.parquet
 *.duckdb

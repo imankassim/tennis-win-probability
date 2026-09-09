@@ -9,7 +9,7 @@ from pricing.ml.train import match_level_split, train_and_evaluate
 def _synthetic_dataset(n_matches=20, points_per_match=10, seed=0):
     """A small, deterministic dataset where the label is strongly
     predictable from `sets_a` alone, so a fitted model should score
-    clearly better than chance — a sanity check on the training
+    clearly better than chance - a sanity check on the training
     machinery, not a claim about real accuracy."""
     import random
 

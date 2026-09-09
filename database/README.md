@@ -1,7 +1,7 @@
 # database
 
 PostgreSQL schema and ingestion for matches, players, points and outcome
-labels — the transactional source of truth (see
+labels - the transactional source of truth (see
 [docs/architecture/data-architecture.md](../docs/architecture/data-architecture.md)
 and
 [decision 3](../docs/decisions/3-postgres-source-of-truth-duckdb-feature-store.md)).
@@ -10,36 +10,36 @@ and
 
 Journey 4 (data foundation) is complete:
 
-- `schema.sql` — the PostgreSQL DDL for `players`, `matches`, `points` and
+- `schema.sql` - the PostgreSQL DDL for `players`, `matches`, `points` and
   `outcome_labels`.
-- `models.py` — plain dataclasses for the same four entities, independent
+- `models.py` - plain dataclasses for the same four entities, independent
   of any database driver.
-- `quality_gates.py` — the data quality gates from
+- `quality_gates.py` - the data quality gates from
   docs/architecture/data-architecture.md, as pure functions.
-- `ingestion/match_charting_project.py` — parses the
+- `ingestion/match_charting_project.py` - parses the
   [Match Charting Project](https://github.com/JeffSackmann/tennis_MatchChartingProject)
   source CSVs (see
   [decision 9](../docs/decisions/9-match-charting-project-data-source.md)
   for why this source) into the domain models above. Malformed source rows
-  are skipped and reported, not raised — one bad row shouldn't fail the
+  are skipped and reported, not raised - one bad row shouldn't fail the
   whole ingestion run.
-- `ingestion/outcomes.py` — derives the match winner and final score from
+- `ingestion/outcomes.py` - derives the match winner and final score from
   a match's points, without parsing score notation (see the module
   docstring), quarantining matches whose chart doesn't confirm a complete
   match.
-- `ingestion/tennis_data_co_uk.py` — parses tennis-data.co.uk's yearly
+- `ingestion/tennis_data_co_uk.py` - parses tennis-data.co.uk's yearly
   odds files and matches them to our own archive by player surname and
   date proximity (no shared match_id between the two sources). Evaluation
-  benchmark only — see
+  benchmark only - see
   [trading_rules/README.md](../trading_rules/README.md) for the Journey
   15 value-detection backtest this feeds.
-- `ingestion/run.py` — the ingestion entry point: parse, validate,
+- `ingestion/run.py` - the ingestion entry point: parse, validate,
   quarantine, report. Accepts multiple points files (e.g. one per decade)
-  and merges them. Not yet wired to a live PostgreSQL connection — see
+  and merges them. Not yet wired to a live PostgreSQL connection - see
   below.
 
 No SQL is executed against a real PostgreSQL database yet. `run.py`
-produces the same validated records a loader would insert — actually
+produces the same validated records a loader would insert - actually
 writing to PostgreSQL is a small remaining step once a target database is
 available, and is picked up again once it's needed for real serving.
 

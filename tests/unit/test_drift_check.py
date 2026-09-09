@@ -12,7 +12,7 @@ SPLIT_DATE = date(2024, 7, 1)  # midpoint of the synthetic archive's ~360-day sp
 
 
 class _ConstantModel:
-    """Always predicts 0.6 for player_a — a fake standing in for LightGBM
+    """Always predicts 0.6 for player_a - a fake standing in for LightGBM
     so this test exercises score_full_pipeline's wiring, not a real
     model's accuracy."""
 
