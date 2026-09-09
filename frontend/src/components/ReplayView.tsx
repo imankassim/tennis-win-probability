@@ -23,6 +23,16 @@ export function ReplayView({ matchId }: { matchId: string }) {
   const [replay, setReplay] = useState<MatchReplay | null>(null);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  // Distinguishes "this match ID doesn't exist" (a lookup miss - the
+  // API/mockData genuinely has nothing for it) from "the request itself
+  // failed" (the backend is unreachable, or a fetch inside it errored) -
+  // ErrorState renders different, accurate copy for each. Before the
+  // scenario library depended on the backend too (it now scores every
+  // scripted point via POST /probability/preview), only the second case
+  // could actually happen for real matches; conflating the two under one
+  // generic "no match found" message became misleading once a genuine
+  // network/backend failure could happen on the scenario library too.
+  const [errorReason, setErrorReason] = useState<"not_found" | "unavailable">("not_found");
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +41,7 @@ export function ReplayView({ matchId }: { matchId: string }) {
       if (cancelled) return;
       if (!data) {
         setReplay(null);
+        setErrorReason("not_found");
         setPageState("error");
         return;
       }
@@ -39,11 +50,18 @@ export function ReplayView({ matchId }: { matchId: string }) {
       setPageState("success");
     };
 
+    const onFailed = () => {
+      if (cancelled) return;
+      setReplay(null);
+      setErrorReason("unavailable");
+      setPageState("error");
+    };
+
     const fetchReplay = isScenarioLibraryMatch(matchId)
       ? getMatchReplay(matchId)
       : getRealMatchReplay(matchId);
 
-    fetchReplay.then((data) => onLoaded(data)).catch(() => onLoaded(null));
+    fetchReplay.then((data) => onLoaded(data)).catch(onFailed);
     return () => {
       cancelled = true;
     };
@@ -69,7 +87,9 @@ export function ReplayView({ matchId }: { matchId: string }) {
   }, [isPlaying, replay]);
 
   if (pageState === "loading") return <LoadingState />;
-  if (pageState === "error" || !replay) return <ErrorState matchId={matchId} />;
+  if (pageState === "error" || !replay) {
+    return <ErrorState matchId={matchId} reason={errorReason} />;
+  }
 
   const currentQuote = replay.quotes[quoteIndex];
   const visibleQuotes = replay.quotes.slice(0, quoteIndex + 1);

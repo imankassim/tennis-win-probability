@@ -143,6 +143,16 @@ export function ProbabilityChart({
         )}
       </svg>
 
+      {hasMarkov && !hasMl && (
+        <p className="mt-2 text-[11px] text-amber-400">
+          No promoted model on this server, so the Markov and served lines
+          are identical (mostly hidden under each other above) - there&apos;s
+          no ML estimate to compare against yet. Run{" "}
+          <code className="text-amber-300">python -m pricing.run_promotion</code>{" "}
+          to see all three lines.
+        </p>
+      )}
+
       {(hasMarkov || hasMl) && (
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400">
           {series.map((s) => (
