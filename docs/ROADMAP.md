@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–19 are complete.** Journey 10 (context features) was built
+**Journeys 1–20 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 Journey 16 (optional extensions) is deliberately deferred — it's
@@ -277,10 +277,35 @@ Done so far:
   [backend/README.md](../backend/README.md) and
   [frontend/README.md](../frontend/README.md).
 
-Next: **Journey 20** (deployment — containers, CI, monitoring and
-rollback).
+- Deployment (`infrastructure/`, `.github/workflows/ci.yml`,
+  `pricing/registry.py`, `pricing/rollback_model.py`): containers, CI,
+  monitoring and rollback, the journey's own four-word description.
+  **Containers**: `Dockerfile.backend` and `Dockerfile.frontend`, plus a
+  `docker-compose.yml` wiring them together — no local Docker is
+  available in this project's dev environment (verified, not assumed),
+  so these were written by inspection and verified for real by CI's
+  `docker-build` job on GitHub's hosted runners instead, which builds
+  both images and smoke-tests the backend one against `/health`.
+  **CI** (`.github/workflows/ci.yml`): backend tests, frontend lint plus
+  build, and the Docker build/smoke-test, on every push and PR to
+  `main` — a single source of truth for the dependency list
+  (`pyproject.toml`, read via `tomllib` rather than duplicated in the
+  workflow). **Monitoring**: the same container health check plus
+  Journey 19's `/ops/summary` dashboard. **Rollback**: a real model
+  registry — every `pricing/promote_model.py` run now keeps its
+  artefact under a version-stamped filename (never overwritten) and
+  records itself in `docs/model_cards/artefacts/registry.json`;
+  `pricing/rollback_model.py --list` / `<version>` switches which one is
+  active without retraining, deliberately manual like promotion itself
+  (docs/architecture/governance.md's "require review for model
+  promotion" applies the same way to un-promoting). See
+  [infrastructure/README.md](../infrastructure/README.md) and
+  [pricing/README.md](../pricing/README.md).
+
+Next: **Journey 21** (final evaluation — held-out test, model card, data
+sheet, ethics review).
 
 ## Source
 
 Derived from `docs/CourtEdge_Architecture_and_Task_Definition.docx`,
-sections 12, 13, 15, 17, 18 and 19.
+sections 12, 13, 15, 17, 18, 19 and 20.

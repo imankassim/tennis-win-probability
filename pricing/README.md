@@ -2,17 +2,18 @@
 
 Every probability-estimation layer (Markov, ML, blend, calibration) plus
 the promotion script that bundles them into one artefact for live serving
-(Journey 17).
+(Journey 17) and the model registry that makes a promotion reversible
+(Journey 20).
 
 ## Status
 
-Journey 17 (full API integration) is complete. Each layer was built and
-evaluated offline first, in its own sub-package — see
-[markov/README.md](markov/README.md), [ml/README.md](ml/README.md),
-[blend/README.md](blend/README.md),
+Journeys 17 and 20 (full API integration; deployment/rollback) are
+complete. Each estimation layer was built and evaluated offline first,
+in its own sub-package — see [markov/README.md](markov/README.md),
+[ml/README.md](ml/README.md), [blend/README.md](blend/README.md),
 [calibration/README.md](calibration/README.md) for the real evidence
-behind each one. This README covers only the piece that ties them
-together for serving.
+behind each one. This README covers only the pieces that tie them
+together for serving and operating them.
 
 ## Structure
 
@@ -51,6 +52,16 @@ together for serving.
   API process — is a real bug this project hit once, not a hypothetical
   one; splitting the CLI out fixes it structurally rather than needing
   everyone who runs the script to remember a workaround.
+- `registry.py` — the model registry (Journey 20; the source document's
+  own "Version - data split - features - metrics - approval status -
+  rollback target" component). Every promotion appends one entry to
+  `docs/model_cards/artefacts/registry.json`, marking it active and
+  every earlier entry superseded — exactly one version is ever active,
+  matching there being exactly one fixed filename
+  `backend/probability.py` reads.
+- `rollback_model.py` — the CLI that switches which promoted version is
+  active (`python -m pricing.rollback_model --list` /
+  `... <version>`), without retraining anything. See "Rollback" below.
 
 ## Running the promotion
 
@@ -67,6 +78,26 @@ evaluation slice), ~40s end to end. Real quality numbers from this run:
 Brier 0.1481, log-loss 0.4648, ECE 0.0252 — comparable in magnitude to
 EXP43's reported final-test numbers (0.1511 Brier, 0.0113 ECE), a useful
 sanity check given the different holdout methodology and size.
+
+Every run keeps its artefact under
+`docs/model_cards/artefacts/versions/pricing_pipeline_<version>.joblib`
+(never overwritten) as well as at the fixed active-artefact path, and
+records itself in `registry.json` — see "Rollback" below.
+
+## Rollback
+
+```bash
+python -m pricing.rollback_model --list        # every promoted version, with its quality numbers
+python -m pricing.rollback_model <version>     # make one of them active again
+```
+
+No retraining — a rollback copies an already-promoted version's file
+back over the active-artefact path and updates the registry, nothing
+more. Deliberately manual, the same as promotion itself: per
+[docs/architecture/governance.md](../docs/architecture/governance.md)'s
+"require review for model promotion," switching what's served is a
+reviewed action whether it's a new promotion or a rollback to an old
+one — never automatic.
 
 ## How the live API uses this
 
