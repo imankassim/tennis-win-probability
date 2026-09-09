@@ -59,6 +59,17 @@ export interface ProbabilityQuote {
   suspended: boolean;
   /** True when this quote is older than the current point (data-gap scenario). */
   stale?: boolean;
+  /**
+   * The Markov (analytic formula) and ML (learned model) estimates
+   * computed independently, before they're combined into
+   * probabilityPlayerA - so the chart can show each one as its own
+   * line, not just the final blended/calibrated result. Undefined for
+   * the scenario library's scripted mock data, which has no real
+   * blend behind it; markovProbabilityA is always present for real
+   * matches, mlProbabilityA only once a pipeline has been promoted.
+   */
+  markovProbabilityA?: number;
+  mlProbabilityA?: number | null;
 }
 
 export interface MatchReplay {

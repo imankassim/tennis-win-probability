@@ -19,6 +19,8 @@ def _response():
         model_version="test",
         fallback_used=False,
         suspended=False,
+        markov_probability_a=0.5,
+        ml_probability_a=None,
     )
 
 

@@ -56,6 +56,13 @@ def test_probability_for_a_known_point():
     assert body["suspended"] is False
     # A request ID should be present and distinct across requests.
     assert body["probability_request_id"]
+    # The Markov estimate is always present; the ML one only once a
+    # pipeline has actually been promoted on this checkout.
+    assert 0 <= body["markov_probability_a"] <= 1
+    if _artefacts is None:
+        assert body["ml_probability_a"] is None
+    else:
+        assert 0 <= body["ml_probability_a"] <= 1
 
 
 def test_probability_for_unknown_match_is_404():

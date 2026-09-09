@@ -276,6 +276,8 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
         model_version=pricing_result.model_version,
         fallback_used=pricing_result.fallback_used,
         suspended=trading_result.suspended,
+        markov_probability_a=pricing_result.markov_probability_a,
+        ml_probability_a=pricing_result.ml_probability_a,
     )
     latency_ms = (time.perf_counter() - started_at) * 1000
     log_quote(response, latency_ms=latency_ms)

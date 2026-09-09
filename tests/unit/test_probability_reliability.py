@@ -94,6 +94,11 @@ def test_no_artefacts_degrades_to_markov_only():
     assert result.fallback_used is True
     assert result.widen_margin is False
     assert 0.0 <= result.probability_a <= 1.0
+    # No ML estimate was ever attempted, but the Markov one is still
+    # exposed - here it's identical to the served probability, since
+    # there was nothing to blend it with.
+    assert result.markov_probability_a == result.probability_a
+    assert result.ml_probability_a is None
 
 
 def test_working_pipeline_uses_the_promoted_model_version():
@@ -101,6 +106,15 @@ def test_working_pipeline_uses_the_promoted_model_version():
     assert result.model_version == "blend_v1_calibrated"
     assert result.fallback_used is False
     assert result.widen_margin is False
+    # Both raw estimates are exposed alongside the final served value -
+    # the whole point of markov_probability_a/ml_probability_a existing
+    # (docs/ethics/assessment.md's explainability gap).
+    assert 0.0 <= result.markov_probability_a <= 1.0
+    assert result.ml_probability_a == pytest.approx(0.6)  # _WorkingModel's fixed prediction
+    # The final served value went through blend + calibration, so it
+    # shouldn't just equal either raw input.
+    assert result.probability_a != result.markov_probability_a
+    assert result.probability_a != result.ml_probability_a
 
 
 def test_ml_model_failure_falls_back_to_markov_without_widening_margin():
@@ -118,6 +132,9 @@ def test_ml_model_failure_falls_back_to_markov_without_widening_margin():
     assert result.fallback_used is True
     assert result.widen_margin is False
     assert result.probability_a == markov_only.probability_a
+    # The ML model never produced a value at all here.
+    assert result.markov_probability_a == result.probability_a
+    assert result.ml_probability_a is None
 
 
 def test_calibrator_failure_falls_back_to_markov_with_a_widened_margin():
@@ -132,6 +149,11 @@ def test_calibrator_failure_falls_back_to_markov_with_a_widened_margin():
     assert result.fallback_used is True
     assert result.widen_margin is True
     assert result.probability_a == markov_only.probability_a
+    # Unlike the ML-failure case, the ML model DID succeed here before
+    # blend/calibration failed - that real prediction is still exposed,
+    # even though it wasn't used in the (Markov-only) served value.
+    assert result.markov_probability_a == result.probability_a
+    assert result.ml_probability_a == pytest.approx(0.6)
 
 
 def test_load_artefacts_returns_none_when_no_file_exists(tmp_path):

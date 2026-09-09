@@ -84,6 +84,20 @@ class PricingResult:
     # module's docstring. The caller (backend/main.py) uses this to pass
     # trading_rules.WIDENED_MARGIN instead of the default margin.
     widen_margin: bool = False
+    # The Markov and ML estimates computed independently, before any
+    # blend/calibration - surfaced so the API response (and the
+    # dashboard's probability chart) can show the "math formula" and the
+    # "learned model" as separate lines, not just their combined output.
+    # Closes docs/ethics/assessment.md's recorded explainability gap
+    # (the Markov/ML contribution split wasn't exposed in served
+    # output). markov_probability_a is always available - the Markov
+    # engine has no failure mode of its own. ml_probability_a is None
+    # whenever no ML estimate was obtained at all (no promoted artefact,
+    # or the ML model itself failed) - still populated if blend or
+    # calibration failed AFTER a successful ML prediction, since that
+    # number is real and worth showing even though it wasn't served.
+    markov_probability_a: float = 0.0
+    ml_probability_a: float | None = None
 
 
 def load_artefacts(directory: Path = DEFAULT_ARTEFACT_DIR) -> PricingArtefacts | None:
@@ -182,7 +196,9 @@ def compute_probability(
     )
 
     if artefacts is None:
-        return PricingResult(markov_p, MARKOV_MODEL_VERSION, fallback_used=True)
+        return PricingResult(
+            markov_p, MARKOV_MODEL_VERSION, fallback_used=True, markov_probability_a=markov_p
+        )
 
     try:
         row = build_feature_row(
@@ -192,7 +208,9 @@ def compute_probability(
         ml_p = float(artefacts.ml_model.predict_proba(x)[:, 1][0])
     except Exception as exc:  # noqa: BLE001 - the ML layer must never take Markov down with it
         warnings.warn(f"ML model failed, falling back to Markov: {exc}", stacklevel=2)
-        return PricingResult(markov_p, MARKOV_MODEL_VERSION, fallback_used=True)
+        return PricingResult(
+            markov_p, MARKOV_MODEL_VERSION, fallback_used=True, markov_probability_a=markov_p
+        )
 
     try:
         blended = blend_probability(markov_p, ml_p, artefacts.blend_markov_weight)
@@ -204,6 +222,19 @@ def compute_probability(
             f"falling back to Markov with a widened margin: {exc}",
             stacklevel=2,
         )
-        return PricingResult(markov_p, MARKOV_MODEL_VERSION, fallback_used=True, widen_margin=True)
+        return PricingResult(
+            markov_p,
+            MARKOV_MODEL_VERSION,
+            fallback_used=True,
+            widen_margin=True,
+            markov_probability_a=markov_p,
+            ml_probability_a=ml_p,
+        )
 
-    return PricingResult(calibrated, artefacts.model_version, fallback_used=False)
+    return PricingResult(
+        calibrated,
+        artefacts.model_version,
+        fallback_used=False,
+        markov_probability_a=markov_p,
+        ml_probability_a=ml_p,
+    )

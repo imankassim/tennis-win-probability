@@ -89,6 +89,8 @@ interface ApiProbabilityResponse {
   model_version: string;
   fallback_used: boolean;
   suspended: boolean;
+  markov_probability_a: number;
+  ml_probability_a: number | null;
 }
 
 function adaptMatchSummary(m: ApiMatchSummary): MatchSummary {
@@ -145,6 +147,8 @@ async function fetchProbability(
     modelVersion: q.model_version,
     fallbackUsed: q.fallback_used,
     suspended: q.suspended,
+    markovProbabilityA: q.markov_probability_a,
+    mlProbabilityA: q.ml_probability_a,
   };
 }
 

@@ -71,7 +71,11 @@ match archive has no equivalent of.
   and ML estimates, blend, phase calibration, if a promoted pipeline
   exists (`pricing/promote_model.py`); Markov alone otherwise. Margin,
   price bounds and suspension are `trading_rules/rules.py`'s job, applied
-  in `main.py` after this module returns its raw probability.
+  in `main.py` after this module returns its raw probability. The Markov
+  and ML estimates are also returned independently (`markov_probability_a`,
+  `ml_probability_a` on `ProbabilityResponse`), not just their combined
+  result - the dashboard's probability chart plots all three so a viewer
+  can see why the served number moved, not just what it is.
 - `schemas.py` - the Pydantic request/response models, including
   `OpsSummaryResponse` (Journey 19).
 - `main.py` - the FastAPI app and routes.

@@ -70,6 +70,15 @@ class ProbabilityResponse(BaseModel):
     model_version: str
     fallback_used: bool
     suspended: bool
+    # The Markov (analytic) and ML (learned) estimates computed
+    # independently, before blend/calibration - so the dashboard can show
+    # both alongside the final served probability, not just the combined
+    # result (backend/probability.py's PricingResult). Unlike
+    # probability_player_a, these stay populated even while suspended:
+    # they're diagnostic/explanatory, not a served price, so showing them
+    # doesn't imply a tradeable value the way a price would.
+    markov_probability_a: float
+    ml_probability_a: float | None
 
 
 class OpsLatencySummary(BaseModel):

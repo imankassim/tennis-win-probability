@@ -16,6 +16,8 @@ def _response(**overrides):
         model_version="score_leader_heuristic_v0",
         fallback_used=False,
         suspended=False,
+        markov_probability_a=0.55,
+        ml_probability_a=0.62,
     )
     defaults.update(overrides)
     return ProbabilityResponse(**defaults)

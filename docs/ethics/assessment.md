@@ -24,19 +24,20 @@ never a player's or viewer's identity beyond the match/player IDs already
 public in the source archive. This matches FR-05
 ([charter.md](../architecture/charter.md)) directly.
 
-**Gap found, not hidden**: `docs/architecture/governance.md`'s
+**Gap found, then closed.** `docs/architecture/governance.md`'s
 "Explainability" control calls for exposing "the Markov versus ML
-contribution split" in served output. The live `/probability` response
-(`backend/schemas.py`'s `ProbabilityResponse`) returns only the final
-blended, calibrated probability - not the two components separately.
-`calibration_brier`/`_log_loss`/`_ece` (Journey 19) partly serve the
-"retain calibration diagnostics" half of the same control, but the
-contribution-split half isn't implemented. Recorded here rather than
-silently left off the audit; a reasonable follow-up would add
-`markov_probability`/`ml_probability` fields to the response, but that
-changes a response contract other tests and the frontend depend on, so
-it's noted rather than made as a late, rushed change during this
-evaluation journey.
+contribution split" in served output. This was missing when this
+assessment was first written; the live `/probability` response
+(`backend/schemas.py`'s `ProbabilityResponse`) now includes
+`markov_probability_a` and `ml_probability_a` alongside the final
+blended, calibrated `probability_player_a` - the two raw estimates
+computed independently, before they're combined. The replay dashboard's
+probability chart (`frontend/src/components/ProbabilityChart.tsx`) plots
+all three as separate lines with a legend, so a viewer can see not just
+the served number but why it moved (e.g. the two estimators disagreeing,
+one pulling the served line toward it). Together with
+`calibration_brier`/`_log_loss`/`_ece` (Journey 19), both halves of this
+control are now met.
 
 ## Fairness and representation
 
@@ -114,7 +115,7 @@ needing tightening before any real deployment.
 | Access | Not applicable yet - single-environment prototype, no deployed multi-tenant access to separate |
 | Secrets | Met - none committed, none needed |
 | Auditability | Met - request ID, model version, latency, fallback all logged (Journey 7) |
-| Explainability | **Partially met** - calibration diagnostics retained; Markov/ML contribution split not exposed in served output (gap recorded above) |
+| Explainability | Met - calibration diagnostics retained, and the Markov/ML contribution split is now exposed in served output and plotted on the dashboard (see above) |
 | Human review | Met - model promotion and rollback are both deliberately manual (Journeys 17, 20) |
 | Responsible framing | Met - no betting-advice framing anywhere; safer-gambling signpost deferred until public deployment, per governance.md's own conditional wording |
 | Release approval | Met by scope - no real deployment against a live feed exists or is planned |
