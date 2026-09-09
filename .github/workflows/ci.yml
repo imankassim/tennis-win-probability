@@ -67,6 +67,12 @@ jobs:
   docker-build:
     name: Docker image build and smoke test
     runs-on: ubuntu-latest
+    # Needed for the temporary "Publish build log for debugging" step
+    # below, which pushes to a debug branch — the repo's default
+    # workflow token permissions are read-only, so without this the
+    # push silently fails with no visible error beyond "step failed".
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
