@@ -93,4 +93,15 @@ jobs:
           exit 1
 
       - name: Build frontend image
-        run: docker build -f infrastructure/Dockerfile.frontend -t courtedge-frontend frontend
+        run: |
+          set +e
+          docker build --progress=plain -f infrastructure/Dockerfile.frontend -t courtedge-frontend frontend > /tmp/frontend-build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            echo '## Frontend image build failed' >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -c 60000 /tmp/frontend-build.log >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          cat /tmp/frontend-build.log
+          exit $code
