@@ -1,0 +1,47 @@
+# Local/dev-oriented compose file (see docs/architecture/deployment.md's
+# "local vs cloud role" table) — runs the two services this project
+# actually has a live implementation for. No postgres service: despite
+# decision 3 naming PostgreSQL as the eventual source of truth,
+# database/README.md is explicit that nothing in this codebase executes
+# SQL against a real database yet (ingestion produces validated records,
+# not database writes) — adding an unused postgres container here would
+# be ceremony, not a real dependency.
+#
+# Run from the repository root: docker compose -f infrastructure/docker-compose.yml up
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Uncomment and point at a real downloaded archive (see
+      # database/README.md) to serve real matches instead of the demo
+      # fixture. Must match the mounted volume path below.
+      # - COURTEDGE_DATA_DIR=/data/archive
+      - COURTEDGE_QUOTE_LOG_PATH=/data/quote_log.jsonl
+    volumes:
+      # Real ingested archive (see database/README.md) — optional; the
+      # app runs the demo fixture without it.
+      - ../data/raw/match_charting_project:/data/archive:ro
+      # The promoted pipeline (pricing/run_promotion.py), if one exists
+      # on the host — optional; the app degrades to Markov-only without
+      # it (see backend/probability.py).
+      - ../docs/model_cards/artefacts:/app/docs/model_cards/artefacts
+      # Quote event log persists on the host across container restarts.
+      - courtedge-data:/data
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../infrastructure/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  courtedge-data:

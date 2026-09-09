@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # No [build-system] is declared in pyproject.toml (deliberately —
+      # this repo is many top-level packages, not one installable
+      # distribution), so dependencies are installed directly rather
+      # than via `pip install .`, matching local dev (see
+      # backend/README.md and database/README.md — neither mentions an
+      # editable install). pyproject.toml stays the single source of
+      # truth for the dependency list; this just reads it rather than
+      # duplicating it in the workflow file.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -c "
+          import tomllib
+          with open('pyproject.toml', 'rb') as f:
+              data = tomllib.load(f)
+          deps = data['project']['dependencies'] + data['project']['optional-dependencies']['dev']
+          print('\n'.join(deps))
+          " > requirements.txt
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest -v
+
+  frontend:
+    name: Frontend build and lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  docker-build:
+    name: Docker image build and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Not runnable in the primary dev environment this project was
+      # built in (no local Docker — see infrastructure/README.md), so
+      # this job is the only place these Dockerfiles are actually
+      # verified to build and start, not just written and assumed
+      # correct.
+      - name: Build backend image
+        run: docker build -f infrastructure/Dockerfile.backend -t courtedge-backend .
+
+      - name: Smoke test backend image
+        run: |
+          docker run -d --name courtedge-backend -p 8000:8000 courtedge-backend
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:8000/health; then
+              echo "backend healthy"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "backend never became healthy"
+          docker logs courtedge-backend
+          exit 1
+
+      - name: Build frontend image
+        run: docker build -f infrastructure/Dockerfile.frontend -t courtedge-frontend frontend

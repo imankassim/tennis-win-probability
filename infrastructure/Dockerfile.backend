@@ -1,0 +1,29 @@
+# Runs the FastAPI application (backend/main.py). Builds and boots with
+# the demo fixture out of the box (no COURTEDGE_DATA_DIR, no promoted
+# artefact) — a real deployment mounts real ingested data at
+# /data/archive and a promoted pipeline at /app/docs/model_cards/artefacts
+# as volumes, neither baked into the image (see infrastructure/README.md
+# for why the artefact deliberately isn't COPYed in here).
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Read the dependency list from pyproject.toml itself (dev extras
+# excluded — pytest/httpx have no place in a serving image) rather than
+# duplicating it here, the same reasoning
+# .github/workflows/ci.yml's backend job uses.
+COPY pyproject.toml ./
+RUN python -c "\
+import tomllib; \
+data = tomllib.load(open('pyproject.toml', 'rb')); \
+print('\n'.join(data['project']['dependencies']))" > requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY backend/ backend/
+COPY database/ database/
+COPY pricing/ pricing/
+COPY trading_rules/ trading_rules/
+COPY evaluation/ evaluation/
+
+EXPOSE 8000
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
