@@ -16,7 +16,7 @@ interface Series {
 const FINAL_SERIES: Series = {
   key: "final",
   label: "Served (blend + calibration)",
-  color: "#38bdf8",
+  color: "#a3e635", // tennis-ball lime (Tailwind lime-400) - the site's primary accent
   strokeWidth: 2.5,
   getValue: (q) => q.probabilityPlayerA,
 };

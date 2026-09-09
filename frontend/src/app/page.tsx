@@ -23,10 +23,10 @@ export default function HomePage() {
       <div className="mb-8 flex items-center justify-between">
         <h2 className="text-sm font-medium text-slate-300">Scenario library</h2>
         <div className="flex gap-4">
-          <Link href="/matches" className="text-xs text-sky-400 hover:text-sky-300">
+          <Link href="/matches" className="text-xs text-lime-400 hover:text-lime-300">
             Browse real matches →
           </Link>
-          <Link href="/ops" className="text-xs text-sky-400 hover:text-sky-300">
+          <Link href="/ops" className="text-xs text-lime-400 hover:text-lime-300">
             Ops dashboard →
           </Link>
         </div>

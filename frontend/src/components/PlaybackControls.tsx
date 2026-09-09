@@ -48,7 +48,7 @@ export function PlaybackControls({
         value={index}
         onChange={(e) => onChange(Number(e.target.value))}
         aria-label="Scrub through the match replay"
-        className="flex-1 accent-sky-400"
+        className="flex-1 accent-lime-400"
       />
       <span className="w-16 shrink-0 text-right font-mono text-xs text-slate-400">
         {index + 1} / {max + 1}
