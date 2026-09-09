@@ -53,6 +53,7 @@ class _WorkingCalibrator:
 
 def _artefacts(ml_model, calibrator) -> PricingArtefacts:
     return PricingArtefacts(
+        version="20260101T000000Z",
         model_version="blend_v1_calibrated",
         ml_model=ml_model,
         calibrator=calibrator,

@@ -48,6 +48,7 @@ from pricing.markov.engine import markov_probability
 from pricing.markov.serve_rate import bulk_shrunk_serve_rates
 from pricing.ml.features import build_point_features, compute_match_context_features
 from pricing.ml.train import FEATURE_SETS, match_level_split
+from pricing.registry import RegistryEntry, add_entry
 
 MODEL_VERSION = "blend_v1_calibrated"
 BLEND_MARKOV_WEIGHT = 0.15  # EXP33's tuned weight
@@ -56,10 +57,17 @@ CALIBRATION_HOLDOUT_FRACTION = 0.15
 # .gitignore, alongside where the model card (Journey 17) lives.
 DEFAULT_ARTEFACT_DIR = Path("docs/model_cards/artefacts")
 ARTEFACT_FILENAME = "pricing_pipeline.joblib"
+VERSIONS_SUBDIR = "versions"
 
 
 @dataclass(frozen=True)
 class PricingArtefacts:
+    # A filesystem-safe id for this promotion (Journey 20's model
+    # registry) — distinct from trained_at (a full ISO timestamp, kept
+    # for display) because ISO timestamps contain colons, which several
+    # filesystems (including the one this project actually runs on)
+    # reject in filenames.
+    version: str
     model_version: str
     ml_model: LGBMClassifier
     calibrator: PhaseCalibrator
@@ -165,13 +173,15 @@ def _train_and_promote_from_data(matches, points_by_match, outcomes) -> PricingA
     calibrated_quality_preds = calibrator.predict(quality_preds, quality_phases)
     quality_labels = quality_eval_df["label"].tolist()
 
+    now = datetime.now(timezone.utc)
     return PricingArtefacts(
+        version=now.strftime("%Y%m%dT%H%M%SZ"),
         model_version=MODEL_VERSION,
         ml_model=ml_model,
         calibrator=calibrator,
         blend_markov_weight=BLEND_MARKOV_WEIGHT,
         feature_columns=feature_columns,
-        trained_at=datetime.now(timezone.utc).isoformat(),
+        trained_at=now.isoformat(),
         n_training_matches=fit_df["match_id"].nunique(),
         n_calibration_matches=calibration_fit_df["match_id"].nunique(),
         calibration_brier=brier_score(calibrated_quality_preds, quality_labels),
@@ -181,5 +191,29 @@ def _train_and_promote_from_data(matches, points_by_match, outcomes) -> PricingA
 
 
 def save_artefacts(artefacts: PricingArtefacts, directory: Path = DEFAULT_ARTEFACT_DIR) -> None:
+    """Writes the versioned artefact (kept permanently, for rollback —
+    see pricing/registry.py and pricing/rollback_model.py), makes it the
+    active one (the fixed filename backend/probability.py's
+    load_artefacts reads), and records the promotion in the registry."""
     directory.mkdir(parents=True, exist_ok=True)
+    versions_dir = directory / VERSIONS_SUBDIR
+    versions_dir.mkdir(parents=True, exist_ok=True)
+
+    versioned_path = versions_dir / f"pricing_pipeline_{artefacts.version}.joblib"
+    joblib.dump(artefacts, versioned_path)
     joblib.dump(artefacts, directory / ARTEFACT_FILENAME)
+
+    add_entry(
+        directory,
+        RegistryEntry(
+            version=artefacts.version,
+            model_version=artefacts.model_version,
+            trained_at=artefacts.trained_at,
+            n_training_matches=artefacts.n_training_matches,
+            n_calibration_matches=artefacts.n_calibration_matches,
+            calibration_brier=artefacts.calibration_brier,
+            calibration_log_loss=artefacts.calibration_log_loss,
+            calibration_ece=artefacts.calibration_ece,
+            active=True,
+        ),
+    )

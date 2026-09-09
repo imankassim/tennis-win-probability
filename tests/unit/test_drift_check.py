@@ -28,6 +28,7 @@ class _PassthroughCalibrator:
 
 def _artefacts() -> PricingArtefacts:
     return PricingArtefacts(
+        version="20260101T000000Z",
         model_version="blend_v1_calibrated",
         ml_model=_ConstantModel(),
         calibrator=_PassthroughCalibrator(),

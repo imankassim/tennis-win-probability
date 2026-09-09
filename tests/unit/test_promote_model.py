@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import date, timedelta
 
 import joblib
@@ -11,6 +12,7 @@ from pricing.promote_model import (
     _train_and_promote_from_data,
     save_artefacts,
 )
+from pricing.registry import load_registry
 
 # Two-player pool alternating roles across matches so both sides of every
 # match_id have real prior serve/context history to draw on (matches
@@ -93,6 +95,7 @@ def test_train_and_promote_produces_a_complete_artefact_bundle():
     artefacts = _train_and_promote_from_data(matches, points_by_match, outcomes)
 
     assert isinstance(artefacts, PricingArtefacts)
+    assert artefacts.version
     assert artefacts.model_version == MODEL_VERSION
     assert artefacts.blend_markov_weight == BLEND_MARKOV_WEIGHT
     assert artefacts.feature_columns == FEATURE_SETS["state_context_momentum"]
@@ -134,3 +137,38 @@ def test_save_and_load_artefacts_round_trips(tmp_path):
     assert loaded.model_version == artefacts.model_version
     assert loaded.feature_columns == artefacts.feature_columns
     assert loaded.trained_at == artefacts.trained_at
+
+
+def test_save_artefacts_keeps_a_versioned_copy_and_registers_it(tmp_path):
+    matches, points_by_match, outcomes = _synthetic_archive()
+    artefacts = _train_and_promote_from_data(matches, points_by_match, outcomes)
+
+    save_artefacts(artefacts, directory=tmp_path)
+
+    versioned_path = tmp_path / "versions" / f"pricing_pipeline_{artefacts.version}.joblib"
+    assert versioned_path.exists()
+    assert joblib.load(versioned_path).version == artefacts.version
+
+    entries = load_registry(tmp_path)
+    assert len(entries) == 1
+    assert entries[0].version == artefacts.version
+    assert entries[0].active is True
+
+
+def test_save_artefacts_twice_keeps_both_versions_with_only_the_newest_active(tmp_path):
+    matches, points_by_match, outcomes = _synthetic_archive()
+    artefacts = _train_and_promote_from_data(matches, points_by_match, outcomes)
+
+    first = replace(artefacts, version="v1")
+    second = replace(artefacts, version="v2")
+    save_artefacts(first, directory=tmp_path)
+    save_artefacts(second, directory=tmp_path)
+
+    assert (tmp_path / "versions" / "pricing_pipeline_v1.joblib").exists()
+    assert (tmp_path / "versions" / "pricing_pipeline_v2.joblib").exists()
+    # The fixed active filename always reflects the most recently saved version.
+    assert joblib.load(tmp_path / "pricing_pipeline.joblib").version == "v2"
+
+    entries = {e.version: e for e in load_registry(tmp_path)}
+    assert entries["v1"].active is False
+    assert entries["v2"].active is True
