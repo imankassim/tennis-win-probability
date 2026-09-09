@@ -8,6 +8,17 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# LightGBM's Linux wheel dynamically links against libgomp (the OpenMP
+# runtime) but doesn't bundle it — python:3.12-slim doesn't ship it
+# either, so `import lightgbm` (pulled in transitively by
+# backend/probability.py at startup, even in Markov-only fallback mode)
+# fails with "libgomp.so.1: cannot open shared object file" without
+# this. A real failure this project hit, not a hypothetical one: caught
+# by CI's docker-build smoke test actually starting the container and
+# polling /health, not by inspection.
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Read the dependency list from pyproject.toml itself (dev extras
 # excluded — pytest/httpx have no place in a serving image) rather than
 # duplicating it here, the same reasoning
