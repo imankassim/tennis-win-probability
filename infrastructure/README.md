@@ -31,10 +31,16 @@ trusting this README alone.
   automatic model promotion": an image that silently bundled whichever
   artefact happened to be on disk at build time would defeat the point
   of promotion being a deliberate, human-reviewed step.
-- `Dockerfile.frontend` — the Next.js dashboard. Two-stage build (no
-  `output: "standalone"` in `next.config.ts`, so the final stage copies
-  `node_modules` rather than a pruned standalone bundle — simpler, at
-  the cost of a larger image).
+- `Dockerfile.frontend` — the Next.js dashboard. Two-stage build using
+  `next.config.ts`'s `output: "standalone"` (Next's own recommended
+  Docker pattern) — the final image copies just the self-contained
+  `.next/standalone` bundle plus `.next/static` and `public/`, not the
+  full `node_modules` tree. An earlier hand-rolled non-standalone version
+  failed CI's docker-build job without a clear enough error to diagnose
+  which of several plausible causes it was (no local Docker to
+  reproduce against — see the limitation noted above); switching to the
+  well-tested standalone pattern was more productive than continuing to
+  guess at the bespoke one.
 - `docker-compose.yml` — wires both together for local use. No postgres
   service: despite [decision
   3](../docs/decisions/3-postgres-source-of-truth-duckdb-feature-store.md)

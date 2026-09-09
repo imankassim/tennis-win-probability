@@ -2,7 +2,23 @@
 # context is the frontend/ directory itself (see docker-compose.yml or
 # `docker build -f infrastructure/Dockerfile.frontend frontend`), not
 # the repo root — the app has no dependency on anything outside it.
+#
+# Uses next.config.ts's `output: "standalone"` (Next.js's own recommended
+# Docker pattern): the final image copies just the self-contained
+# .next/standalone bundle plus .next/static and public/, rather than the
+# full node_modules tree — smaller, and avoids an earlier, less-tested
+# hand-rolled approach that failed in CI (see git history) without a
+# clear enough error message to diagnose exactly which of several
+# plausible causes it was; standalone output is the well-tested path
+# instead of continuing to guess at the bespoke one.
+# NEXT_PUBLIC_* variables are inlined into the client bundle at build
+# time by Next.js, not read from the environment at container start —
+# setting one via `docker run -e` or compose's `environment:` on the
+# finished image has no effect. A build ARG is the only way to make it
+# configurable per build; docker-compose.yml passes it under `build.args`.
 FROM node:24-slim AS builder
+ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -12,10 +28,9 @@ RUN npm run build
 FROM node:24-slim
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /app/package.json /app/package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
