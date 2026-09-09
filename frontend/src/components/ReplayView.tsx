@@ -12,10 +12,6 @@ import { PointTicker } from "./PointTicker";
 import { PlaybackControls } from "./PlaybackControls";
 
 const PLAY_INTERVAL_MS = 700;
-// Scenario-library matches use scripted mock data (see mockData.ts) - this
-// delay exists purely so the loading state stays reachable and testable
-// now that real matches have their own, actually-asynchronous fetch.
-const SIMULATED_LOAD_MS = 400;
 
 /**
  * Renders one match's replay. The parent mounts this with `key={matchId}`
@@ -43,17 +39,11 @@ export function ReplayView({ matchId }: { matchId: string }) {
       setPageState("success");
     };
 
-    if (isScenarioLibraryMatch(matchId)) {
-      const timer = setTimeout(() => onLoaded(getMatchReplay(matchId)), SIMULATED_LOAD_MS);
-      return () => {
-        cancelled = true;
-        clearTimeout(timer);
-      };
-    }
+    const fetchReplay = isScenarioLibraryMatch(matchId)
+      ? getMatchReplay(matchId)
+      : getRealMatchReplay(matchId);
 
-    getRealMatchReplay(matchId)
-      .then((data) => onLoaded(data))
-      .catch(() => onLoaded(null));
+    fetchReplay.then((data) => onLoaded(data)).catch(() => onLoaded(null));
     return () => {
       cancelled = true;
     };

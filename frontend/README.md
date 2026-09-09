@@ -10,20 +10,23 @@ There are now two data paths for replay, both rendered by the same
 `/replay/[matchId]` route and components, plus a separate operations
 view:
 
-- **Scenario library** (`/`) - two scripted mock matches
-  (`src/lib/mockData.ts`) covering the target model scenarios: routine
-  holds, break-point pressure against the favourite, a fight-back after
-  dropping a set, a suspension/rain delay, and the resulting stale-quote
-  data gap. Kept deliberately mock, since a completed historical match
-  archive has no equivalent of a live suspension event. Probabilities here
-  come from a crude placeholder heuristic tagged
-  `model_version: "mock_placeholder_v0"` - never the real engine.
+- **Scenario library** (`/`) - two scripted matches (`src/lib/mockData.ts`)
+  covering the target model scenarios: routine holds, break-point
+  pressure against the favourite, a fight-back after dropping a set, a
+  suspension/rain delay, and the resulting stale-quote data gap. The
+  *point sequence* is hand-scripted, since a completed historical match
+  archive has no equivalent of an on-demand live suspension event - but
+  every point's probability is real model output, not a fabricated
+  heuristic: `src/lib/scoring.ts` scores each scripted point through
+  `POST /probability/preview` (the real Markov + ML + blend + calibration
+  pipeline, scored against a hypothetical state rather than a real
+  match_id). Requires the backend to be running.
 - **Real matches** (`/matches`) - fetched from the backend
   (`src/lib/api.ts`): `GET /matches` (with a surface filter) to browse,
   `GET /replay/{id}` plus one `POST /probability` per point to build the
-  same `MatchReplay` shape the mock data uses, so no component needed to
-  change. Uses `NEXT_PUBLIC_API_BASE_URL` (see `.env.example`), defaulting
-  to `http://localhost:8000`.
+  same `MatchReplay` shape the scenario library produces, so no component
+  needed to change. Uses `NEXT_PUBLIC_API_BASE_URL` (see `.env.example`),
+  defaulting to `http://localhost:8000`.
 
 `ReplayView` picks the path via `isScenarioLibraryMatch(matchId)`.
 
@@ -39,11 +42,14 @@ view:
 ## Structure
 
 - `src/lib/types.ts` - shared types mirroring the API response contract.
-- `src/lib/scoring.ts` - a minimal tennis score-state machine plus the mock
-  probability heuristic, used to build internally consistent scenario data.
+- `src/lib/scoring.ts` - a minimal tennis score-state machine that expands
+  a scripted match into a point sequence, then scores every point via
+  `previewProbability` (`api.ts`) - real model output for a hand-scripted
+  point sequence.
 - `src/lib/mockData.ts` - the two scripted scenario-library matches.
-- `src/lib/api.ts` - the real backend client, adapting its snake_case JSON
-  into the same shapes `mockData.ts` produces.
+- `src/lib/api.ts` - the real backend client: `listRealMatches`,
+  `getRealMatchReplay`, `getOpsSummary`, and `previewProbability` (used by
+  `scoring.ts` for the scenario library, not just real matches).
 - `src/components/` - `MatchSelector`, `PointTicker`, `ProbabilityChart`,
   `PriceTicker`, `ModelVersionBadge`, `PlaybackControls`, `StatusStates`
   (loading/error), and `ReplayView` which composes them and picks the data
@@ -61,6 +67,12 @@ npm run dev      # http://localhost:3000 (or the next free port)
 npm run lint
 npm run build
 ```
+
+The backend needs to be running for every page, including the scenario
+library (`/`) - its probabilities come from `POST /probability/preview`,
+not a client-side placeholder. See
+[backend/README.md](../backend/README.md) for `python -m uvicorn
+backend.main:app --reload`.
 
 To browse real matches, also run the backend - see
 [../backend/README.md](../backend/README.md).

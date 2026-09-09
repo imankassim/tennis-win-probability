@@ -1,15 +1,16 @@
-// Mock replay data for the dashboard shell (Journey 2 - first visible
-// dashboard). No backend exists yet (that's Journey 5), so this stands in
-// for the /replay and /probability endpoints. Probabilities are computed by
-// a deliberately crude placeholder heuristic (see scoring.ts) - never the
-// real Markov/ML engine - and every quote is labelled `mock_placeholder_v0`
-// so that is never ambiguous.
+// Scripted scenario-library replay data (Journey 2 - first visible
+// dashboard). The point sequences below are hand-scripted to walk through
+// the target model scenarios from docs/architecture/charter.md: routine
+// holds, break-point pressure against the favourite, a fight-back after
+// dropping a set, a suspension (rain delay), and a stale quote after the
+// resulting data gap - none of that needs a real archived match, since a
+// completed archive can't produce a live suspension/data-gap event on
+// demand (see docs/architecture/deployment.md).
 //
-// The two scripted matches are built to walk through the target model
-// scenarios from docs/architecture/charter.md: routine holds, break-point
-// pressure against the favourite, a fight-back after dropping a set,
-// a suspension (rain delay), and a stale quote after the resulting data
-// gap.
+// The probabilities themselves are real, though: buildMatchReplay (see
+// scoring.ts) scores every scripted point through the actual backend
+// pipeline (POST /probability/preview), the same Markov + ML + blend +
+// calibration real matches use. Requires the backend to be running.
 
 import { brk, buildMatchReplay, game, hold } from "./scoring";
 import type { MatchScript } from "./scoring";
@@ -143,13 +144,13 @@ const script002: MatchScript = {
   ],
 };
 
-function buildDemoM001(): MatchReplay {
-  const { points, quotes } = buildMatchReplay("demo_m001", script001);
+async function buildDemoM001(): Promise<MatchReplay> {
+  const { points, quotes } = await buildMatchReplay("demo_m001", script001);
   return { match: MATCH_SUMMARIES[0], points, quotes };
 }
 
-function buildDemoM002(): MatchReplay {
-  const { points, quotes } = buildMatchReplay("demo_m002", script002);
+async function buildDemoM002(): Promise<MatchReplay> {
+  const { points, quotes } = await buildMatchReplay("demo_m002", script002);
 
   // Splice in the rain delay: the point labelled "Rain delay called" is the
   // last point before suspension. Insert an extra, suspended quote right
@@ -177,7 +178,7 @@ function buildDemoM002(): MatchReplay {
   return { match: MATCH_SUMMARIES[1], points, quotes };
 }
 
-const REPLAYS: Record<string, () => MatchReplay> = {
+const REPLAYS: Record<string, () => Promise<MatchReplay>> = {
   demo_m001: buildDemoM001,
   demo_m002: buildDemoM002,
 };
@@ -193,7 +194,7 @@ export function isScenarioLibraryMatch(matchId: string): boolean {
 }
 
 /** Returns null for an unknown match ID - the dashboard's error-state trigger. */
-export function getMatchReplay(matchId: string): MatchReplay | null {
+export function getMatchReplay(matchId: string): Promise<MatchReplay | null> {
   const build = REPLAYS[matchId];
-  return build ? build() : null;
+  return build ? build() : Promise.resolve(null);
 }

@@ -134,18 +134,19 @@ courtedge/
 
 ## Running it locally
 
-The scenario library (`/`) works standalone on scripted mock data:
+Every page, including the scripted scenario library (`/`), scores its
+probabilities through the real backend pipeline (`POST
+/probability/preview` for the scenario library's hand-scripted points,
+`POST /probability` for real matches) - so run both:
 
 ```bash
+# terminal 1
+python -m uvicorn backend.main:app --reload
+
+# terminal 2
 cd frontend
 npm install
 npm run dev
-```
-
-To also browse real matches (`/matches`), run the backend alongside it:
-
-```bash
-python -m uvicorn backend.main:app --reload
 ```
 
 The backend serves a small synthetic demo match out of the box; point it

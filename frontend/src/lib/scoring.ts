@@ -1,13 +1,25 @@
-// A minimal, honest tennis score-state machine used to build internally
-// consistent mock replay data for the dashboard shell (Journey 2).
+// A minimal, honest tennis score-state machine used to build the
+// scenario library's scripted replay data (Journey 2).
 //
 // This is deliberately simplified - no lets, no exact tiebreak serve
 // rotation, tiebreaks collapsed to a single scripted point - because the
-// goal here is a believable, self-consistent point sequence to wire the UI
-// against, not a production match-state parser. The real match state
-// parser (logical architecture component B1) is built in Journey 6 against
-// real Sackmann point-by-point data.
+// goal here is a believable, self-consistent point sequence to demonstrate
+// specific target scenarios (docs/architecture/charter.md), not a
+// production match-state parser. The real match state parser (logical
+// architecture component B1) is match_state.py, built against real
+// archive data.
+//
+// Every point's probability is real model output, not a fabricated
+// heuristic: buildMatchReplay calls the backend's POST /probability/preview
+// (see lib/api.ts) for each point, running the same Markov + ML + blend +
+// calibration pipeline real matches use, just against a hypothetical state
+// instead of a real match_id. The two demo players have no real serve or
+// context history, so they're scored exactly like any real debut player
+// would be (cold-start serve rate, neutral context features) - not given
+// arbitrary made-up numbers. Requires the backend to be running; unlike
+// before this change, the scenario library is no longer fully standalone.
 
+import { previewProbability } from "./api";
 import type { PointEvent, ProbabilityQuote, Server } from "./types";
 
 const other = (p: Server): Server => (p === "player_a" ? "player_b" : "player_a");
@@ -31,40 +43,26 @@ export interface MatchScript {
   sets: SetScript[];
 }
 
-/**
- * A deliberately crude score-differential heuristic - NOT the Markov or ML
- * engine built in Journeys 9 and 11. It exists only so the probability
- * chart and price ticker have something plausible to render against mock
- * data. Every quote it produces carries `modelVersion: "mock_placeholder_v0"`
- * so it can never be confused with a real estimate.
- */
-function mockPlaceholderProbability(state: {
+interface PreviewState {
   setsA: number;
   setsB: number;
   gamesA: number;
   gamesB: number;
   server: Server;
-  breakPoint: boolean;
-}): number {
-  let p = 0.5;
-  p += 0.12 * (state.setsA - state.setsB);
-  p += 0.02 * (state.gamesA - state.gamesB);
-  p += state.server === "player_a" ? 0.04 : -0.04;
-  if (state.breakPoint) {
-    p += state.server === "player_a" ? -0.08 : 0.08;
-  }
-  return Math.min(0.97, Math.max(0.03, p));
+  pointsA: number;
+  pointsB: number;
 }
 
-const MOCK_MODEL_VERSION = "mock_placeholder_v0";
-
-/** Expand a scripted match into a flat, sequenced list of point events and mock quotes. */
-export function buildMatchReplay(
+/** Expand a scripted match into a flat, sequenced list of point events,
+ * then score every point through the real backend pipeline in parallel
+ * (POST /probability/preview) - the same pattern lib/api.ts's
+ * getRealMatchReplay already uses for real matches. */
+export async function buildMatchReplay(
   matchId: string,
   script: MatchScript,
-): { points: PointEvent[]; quotes: ProbabilityQuote[] } {
+): Promise<{ points: PointEvent[]; quotes: ProbabilityQuote[] }> {
   const points: PointEvent[] = [];
-  const quotes: ProbabilityQuote[] = [];
+  const previewStates: PreviewState[] = [];
   let pointSequence = 0;
   let setsA = 0;
   let setsB = 0;
@@ -123,32 +121,55 @@ export function buildMatchReplay(
           label: isLastPointOfGame ? game.label : undefined,
         });
 
-        const probabilityPlayerA = mockPlaceholderProbability({
+        previewStates.push({
           setsA,
           setsB,
           gamesA,
           gamesB,
           server: game.server,
-          breakPoint,
-        });
-        const margin = 0.05;
-        quotes.push({
-          probabilityRequestId: `req_${matchId}_${pointSequence}`,
-          matchId,
-          pointSequence,
-          interpretation,
-          probabilityPlayerA,
-          pricePlayerA: Number((1 / (probabilityPlayerA * (1 + margin))).toFixed(2)),
-          pricePlayerB: Number((1 / ((1 - probabilityPlayerA) * (1 + margin))).toFixed(2)),
-          modelVersion: MOCK_MODEL_VERSION,
-          fallbackUsed: false,
-          suspended: false,
+          // Tiebreaks are collapsed to one scripted point with no
+          // meaningful in-game point score to report.
+          pointsA: game.isTiebreak ? 0 : pointsA,
+          pointsB: game.isTiebreak ? 0 : pointsB,
         });
       });
     });
 
     if (gamesA > gamesB) setsA += 1;
     else setsB += 1;
+  });
+
+  const previews = await Promise.all(
+    previewStates.map((s) =>
+      previewProbability({
+        bestOf: script.bestOf,
+        setsA: s.setsA,
+        setsB: s.setsB,
+        gamesA: s.gamesA,
+        gamesB: s.gamesB,
+        server: s.server,
+        pointsA: s.pointsA,
+        pointsB: s.pointsB,
+      }),
+    ),
+  );
+
+  const quotes: ProbabilityQuote[] = points.map((point, i) => {
+    const preview = previews[i];
+    return {
+      probabilityRequestId: `req_${matchId}_${point.pointSequence}`,
+      matchId,
+      pointSequence: point.pointSequence,
+      interpretation: point.interpretation,
+      probabilityPlayerA: preview.probabilityPlayerA,
+      pricePlayerA: preview.pricePlayerA,
+      pricePlayerB: preview.pricePlayerB,
+      modelVersion: preview.modelVersion,
+      fallbackUsed: preview.fallbackUsed,
+      suspended: preview.suspended,
+      markovProbabilityA: preview.markovProbabilityA,
+      mlProbabilityA: preview.mlProbabilityA,
+    };
   });
 
   return { points, quotes };

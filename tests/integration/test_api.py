@@ -156,3 +156,65 @@ def test_ops_summary_handles_an_empty_log_without_error(tmp_path, monkeypatch):
     assert body["latency"] == {"n_quotes": 0, "median_ms": None, "p95_ms": None}
     assert body["errors"]["fallback_count"] == 0
     assert body["errors"]["fallback_rate"] == 0.0
+
+
+def test_probability_preview_scores_a_hypothetical_state():
+    """No real match involved - the frontend's scripted scenario-library
+    demo matches use this so their probabilities are genuine model
+    output, not tied to any match in the repository."""
+    response = client.post(
+        "/probability/preview",
+        json={
+            "best_of": 3,
+            "sets_a": 0,
+            "sets_b": 0,
+            "games_a": 0,
+            "games_b": 0,
+            "server": "player_a",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert 0 <= body["probability_player_a"] <= 1
+    assert body["model_version"] == _EXPECTED_MODEL_VERSION
+    assert body["fallback_used"] is _EXPECTED_FALLBACK_USED
+    assert 0 <= body["markov_probability_a"] <= 1
+    if _artefacts is None:
+        assert body["ml_probability_a"] is None
+    else:
+        assert 0 <= body["ml_probability_a"] <= 1
+
+
+def test_probability_preview_reflects_the_requested_state():
+    """Two very different hypothetical states should score very
+    differently - a sanity check that the request body is actually
+    driving the computation, not a hardcoded response."""
+    losing_badly = client.post(
+        "/probability/preview",
+        json={
+            "best_of": 3, "sets_a": 0, "sets_b": 2, "games_a": 0, "games_b": 6,
+            "server": "player_b",
+        },
+    ).json()
+    winning_easily = client.post(
+        "/probability/preview",
+        json={
+            "best_of": 3, "sets_a": 2, "sets_b": 0, "games_a": 6, "games_b": 0,
+            "server": "player_a",
+        },
+    ).json()
+    assert winning_easily["markov_probability_a"] > losing_badly["markov_probability_a"]
+
+
+def test_probability_preview_defaults_serve_rates_to_cold_start():
+    """p_a_serve_rate/p_b_serve_rate are optional - omitting them should
+    still produce a valid, sensible probability rather than an error."""
+    response = client.post(
+        "/probability/preview",
+        json={
+            "best_of": 3, "sets_a": 1, "sets_b": 0, "games_a": 3, "games_b": 2,
+            "server": "player_b",
+        },
+    )
+    assert response.status_code == 200
+    assert 0 <= response.json()["markov_probability_a"] <= 1

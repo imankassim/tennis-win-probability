@@ -81,6 +81,38 @@ class ProbabilityResponse(BaseModel):
     ml_probability_a: float | None
 
 
+class ProbabilityPreviewRequest(BaseModel):
+    """A hypothetical score state, not tied to any real match in the
+    repository - see backend/main.py's /probability/preview for why this
+    exists (the frontend's scripted scenario-library demo matches)."""
+
+    best_of: int
+    sets_a: int
+    sets_b: int
+    games_a: int
+    games_b: int
+    server: str
+    points_a: int = 0
+    points_b: int = 0
+    # Matches pricing.markov.serve_rate.COLD_START_SERVE_RATE - the same
+    # neutral default the real pipeline uses for a player with no serve
+    # history, so a hypothetical demo player is treated exactly like a
+    # real debut player would be, not given an arbitrary made-up rate.
+    p_a_serve_rate: float = 0.6
+    p_b_serve_rate: float = 0.6
+
+
+class ProbabilityPreviewResponse(BaseModel):
+    probability_player_a: float | None
+    price_player_a: float | None
+    price_player_b: float | None
+    model_version: str
+    fallback_used: bool
+    suspended: bool
+    markov_probability_a: float
+    ml_probability_a: float | None
+
+
 class OpsLatencySummary(BaseModel):
     n_quotes: int
     median_ms: float | None

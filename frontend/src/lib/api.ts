@@ -152,6 +152,74 @@ async function fetchProbability(
   };
 }
 
+interface ApiProbabilityPreviewResponse {
+  probability_player_a: number | null;
+  price_player_a: number | null;
+  price_player_b: number | null;
+  model_version: string;
+  fallback_used: boolean;
+  suspended: boolean;
+  markov_probability_a: number;
+  ml_probability_a: number | null;
+}
+
+export interface ProbabilityPreview {
+  probabilityPlayerA: number | null;
+  pricePlayerA: number | null;
+  pricePlayerB: number | null;
+  modelVersion: string;
+  fallbackUsed: boolean;
+  suspended: boolean;
+  markovProbabilityA: number;
+  mlProbabilityA: number | null;
+}
+
+/**
+ * Scores a hypothetical score state through the real pipeline, not tied
+ * to any match in the repository - POST /probability/preview. Used by
+ * the scenario library's scripted demo matches (lib/scoring.ts) so their
+ * probabilities are genuine model output, not a fabricated placeholder
+ * heuristic - see backend/main.py's post_probability_preview for why
+ * this exists as a separate endpoint from fetchProbability above.
+ */
+export async function previewProbability(state: {
+  bestOf: 3 | 5;
+  setsA: number;
+  setsB: number;
+  gamesA: number;
+  gamesB: number;
+  server: "player_a" | "player_b";
+  pointsA?: number;
+  pointsB?: number;
+}): Promise<ProbabilityPreview> {
+  const res = await fetch(`${API_BASE_URL}/probability/preview`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      best_of: state.bestOf,
+      sets_a: state.setsA,
+      sets_b: state.setsB,
+      games_a: state.gamesA,
+      games_b: state.gamesB,
+      server: state.server,
+      points_a: state.pointsA ?? 0,
+      points_b: state.pointsB ?? 0,
+    }),
+  });
+  if (!res.ok) throw new Error(`Failed to preview probability: ${res.status}`);
+  const q: ApiProbabilityPreviewResponse = await res.json();
+  return {
+    probabilityPlayerA: q.probability_player_a,
+    pricePlayerA: q.price_player_a,
+    pricePlayerB: q.price_player_b,
+    modelVersion: q.model_version,
+    fallbackUsed: q.fallback_used,
+    suspended: q.suspended,
+    markovProbabilityA: q.markov_probability_a,
+    mlProbabilityA: q.ml_probability_a,
+  };
+}
+
 /** Journey 19's monitoring dashboard: GET /ops/summary. */
 export async function getOpsSummary(): Promise<OpsSummary> {
   const res = await fetch(`${API_BASE_URL}/ops/summary`);

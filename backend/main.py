@@ -11,6 +11,7 @@ from __future__ import annotations
 import itertools
 import os
 import time
+from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -21,6 +22,7 @@ from backend.fixtures import demo_repository_data
 from backend.match_state import compute_break_point, game_score_before
 from backend.probability import compute_probability, load_artefacts
 from backend.repository import InMemoryMatchRepository, MatchRepository, load_from_csv
+from database.models import Match
 from evaluation.metrics import percentile
 from pricing.markov.serve_rate import COLD_START_SERVE_RATE, bulk_shrunk_serve_rates
 from pricing.ml.features import compute_match_context_features
@@ -35,6 +37,8 @@ from backend.schemas import (
     OpsSummaryResponse,
     OutcomeSchema,
     PointSchema,
+    ProbabilityPreviewRequest,
+    ProbabilityPreviewResponse,
     ProbabilityRequest,
     ProbabilityResponse,
     ReplayResponse,
@@ -282,3 +286,56 @@ def post_probability(request: ProbabilityRequest) -> ProbabilityResponse:
     latency_ms = (time.perf_counter() - started_at) * 1000
     log_quote(response, latency_ms=latency_ms)
     return response
+
+
+@app.post("/probability/preview", response_model=ProbabilityPreviewResponse)
+def post_probability_preview(request: ProbabilityPreviewRequest) -> ProbabilityPreviewResponse:
+    """Scores a hypothetical score state through the same pipeline
+    `/probability` uses, without needing a real match in the repository.
+    Used by the frontend's scripted scenario-library demo matches
+    (frontend/src/lib/scoring.ts) so their probabilities are genuine
+    model output - not a fabricated placeholder heuristic - while still
+    letting the frontend script specific narrative beats (a suspension,
+    a stale quote) that a historical replay has no way to reproduce on
+    its own. Never logged to the quote event log: this isn't a real
+    served quote, and mixing it into Journey 19's ops dashboard would
+    misrepresent real production traffic with demo-page noise."""
+    preview_match = Match(
+        match_id="preview",
+        tournament="",
+        round="",
+        surface="hard",
+        best_of=request.best_of,
+        match_date=date.today(),
+        player_a_id="preview_a",
+        player_b_id="preview_b",
+        source="preview",
+    )
+    pricing_result = compute_probability(
+        artefacts=_artefacts,
+        match=preview_match,
+        points_so_far=[],
+        context={},
+        p_a_serve_rate=request.p_a_serve_rate,
+        p_b_serve_rate=request.p_b_serve_rate,
+        sets_won_a=request.sets_a,
+        sets_won_b=request.sets_b,
+        games_won_a=request.games_a,
+        games_won_b=request.games_b,
+        server=request.server,
+        points_a=request.points_a,
+        points_b=request.points_b,
+    )
+    margin = WIDENED_MARGIN if pricing_result.widen_margin else DEFAULT_MARGIN
+    trading_result = apply_trading_rules(pricing_result.probability_a, margin=margin)
+
+    return ProbabilityPreviewResponse(
+        probability_player_a=None if trading_result.suspended else pricing_result.probability_a,
+        price_player_a=trading_result.price_a,
+        price_player_b=trading_result.price_b,
+        model_version=pricing_result.model_version,
+        fallback_used=pricing_result.fallback_used,
+        suspended=trading_result.suspended,
+        markov_probability_a=pricing_result.markov_probability_a,
+        ml_probability_a=pricing_result.ml_probability_a,
+    )
