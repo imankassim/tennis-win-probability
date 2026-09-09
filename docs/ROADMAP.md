@@ -113,7 +113,7 @@ relationship, not an assessment decision.
 
 ## Current status
 
-**Journeys 1–20 are complete.** Journey 10 (context features) was built
+**Journeys 1–21 are complete.** Journey 10 (context features) was built
 ahead of schedule by mistake between Journeys 6 and 7 — corrected rather
 than hidden; the work itself is real and tested, just out of sequence.
 Journey 16 (optional extensions) is deliberately deferred — it's
@@ -285,7 +285,16 @@ Done so far:
   available in this project's dev environment (verified, not assumed),
   so these were written by inspection and verified for real by CI's
   `docker-build` job on GitHub's hosted runners instead, which builds
-  both images and smoke-tests the backend one against `/health`.
+  both images and smoke-tests the backend one against `/health` — and
+  that verification caught two real bugs inspection alone missed:
+  the backend image needed `libgomp1` installed (LightGBM's Linux wheel
+  needs the OpenMP runtime, which `python:3.12-slim` doesn't ship), and
+  the frontend image needed `next.config.ts`'s `output: "standalone"`
+  (an earlier hand-rolled build failed in the container for reasons
+  that were genuinely hard to diagnose without direct log access — see
+  [infrastructure/README.md](../infrastructure/README.md) for how that
+  was actually debugged with no local Docker and no direct CI log
+  access either).
   **CI** (`.github/workflows/ci.yml`): backend tests, frontend lint plus
   build, and the Docker build/smoke-test, on every push and PR to
   `main` — a single source of truth for the dependency list
@@ -302,8 +311,33 @@ Done so far:
   [infrastructure/README.md](../infrastructure/README.md) and
   [pricing/README.md](../pricing/README.md).
 
-Next: **Journey 21** (final evaluation — held-out test, model card, data
-sheet, ethics review).
+- Final evaluation (`evaluation/FINAL_EVALUATION.md`,
+  `docs/model_cards/blend_v1_calibrated.md`, `docs/ethics/assessment.md`):
+  the journey's own "held-out test, model card, data sheet, ethics
+  review," each addressed as a real document rather than a checkbox.
+  **Final held-out test**: rather than inventing a new, disjoint split
+  just for this journey, `FINAL_EVALUATION.md` synthesises the full
+  evidence chain already gathered (EXP1 through EXP44) into one answer
+  to the charter's research question — real, over the Markov baseline
+  (a 15.1% Brier improvement, concentrated mostly in the ML step);
+  honestly not, against the de-vigged market pre-match. **Model card**:
+  training data, the exact 14-feature schema (cross-checked against
+  `pricing/ml/features.py` directly, not written from memory), and the
+  promoted pipeline's real quality numbers. **Data sheet**: already
+  existed (`docs/data_sheets/data_provenance.md`, Journey 4) — reused,
+  not duplicated. **Ethics review**: an honest self-audit against
+  `docs/architecture/governance.md`'s control table that records what it
+  found missing (the Markov/ML contribution split isn't exposed in
+  served output; no dedicated favourite-vs-underdog/surface accuracy
+  breakdown exists) alongside what's met, and states plainly that this
+  project only ever ingested men's ATP data — nothing here should be
+  assumed to generalise to women's tennis or other levels of play.
+  README.md gains a full runnable demonstration walkthrough (ingest →
+  promote → serve → both dashboards).
+
+All 21 journeys are now complete except Journey 16 (optional
+extensions), deliberately deferred as explicitly optional in the source
+spec itself.
 
 ## Source
 
