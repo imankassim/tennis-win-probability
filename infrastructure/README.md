@@ -35,12 +35,30 @@ trusting this README alone.
   `next.config.ts`'s `output: "standalone"` (Next's own recommended
   Docker pattern) — the final image copies just the self-contained
   `.next/standalone` bundle plus `.next/static` and `public/`, not the
-  full `node_modules` tree. An earlier hand-rolled non-standalone version
-  failed CI's docker-build job without a clear enough error to diagnose
-  which of several plausible causes it was (no local Docker to
-  reproduce against — see the limitation noted above); switching to the
-  well-tested standalone pattern was more productive than continuing to
-  guess at the bespoke one.
+  full `node_modules` tree.
+
+  Getting this to actually build in CI took several attempts, worth
+  recording honestly rather than smoothing over: with no local Docker
+  to reproduce against and the job-logs API requiring admin rights even
+  on this public repo (an unauthenticated `docker build` succeeding
+  locally tells you nothing about a container's Linux runtime, and
+  vice versa isn't diagnosable without seeing the actual log), the real
+  error stayed invisible for several failed runs. It finally surfaced
+  by having a CI step publish the build log to a throwaway git branch,
+  fetchable unauthenticated via `raw.githubusercontent.com` — and even
+  that needed two fixes first (the log-capture step's own exit code was
+  masked by a trailing `cat`, misreporting a real failure as success;
+  the git push then failed silently on the repo's default read-only
+  workflow token, fixed by declaring `permissions: contents: write` on
+  the job). The actual root cause, once visible, was unrelated to
+  standalone output at all: `frontend/public/` is genuinely empty, and
+  git never tracks empty directories — so it doesn't exist after a
+  fresh checkout, and `COPY --from=builder /app/public ./public` failed
+  with `"/app/public": not found`. Fixed with a `.gitkeep` placeholder
+  so the directory is actually committed. The standalone-output switch
+  was a genuine improvement (smaller image, Next's own recommended
+  pattern) but not what was actually broken — recorded here so a future
+  reader doesn't waste time on the wrong lead the way this session did.
 - `docker-compose.yml` — wires both together for local use. No postgres
   service: despite [decision
   3](../docs/decisions/3-postgres-source-of-truth-duckdb-feature-store.md)

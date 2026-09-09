@@ -67,12 +67,6 @@ jobs:
   docker-build:
     name: Docker image build and smoke test
     runs-on: ubuntu-latest
-    # Needed for the temporary "Publish build log for debugging" step
-    # below, which pushes to a debug branch — the repo's default
-    # workflow token permissions are read-only, so without this the
-    # push silently fails with no visible error beyond "step failed".
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -99,27 +93,4 @@ jobs:
           exit 1
 
       - name: Build frontend image
-        run: |
-          docker build --progress=plain -f infrastructure/Dockerfile.frontend -t courtedge-frontend frontend 2>&1 | tee /tmp/frontend-build.log
-          exit ${PIPESTATUS[0]}
-
-      # TEMPORARY debug aid, take 2: the previous version of this step
-      # had a real bug — redirecting docker build's output to a file and
-      # then `cat`-ing it in the same step meant the step's own exit code
-      # reflected `cat` (always 0), not docker build, so a genuine
-      # failure was misread as success. Fixed here with `tee` +
-      # PIPESTATUS so the step's exit code is now docker build's real
-      # one, and this publish step uses `if: failure()` (which still
-      # runs after a prior step fails, by GitHub Actions design) instead
-      # of manual exit-code tracking.
-      - name: Publish build log for debugging
-        if: failure()
-        run: |
-          git config user.email "ci@localhost"
-          git config user.name "CI"
-          git checkout --orphan ci-debug-logs
-          git rm -rf . > /dev/null 2>&1 || true
-          cp /tmp/frontend-build.log frontend-build.log
-          git add frontend-build.log
-          git commit -m "CI debug log"
-          git push --force origin ci-debug-logs
+        run: docker build -f infrastructure/Dockerfile.frontend -t courtedge-frontend frontend

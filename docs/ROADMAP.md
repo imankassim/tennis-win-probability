@@ -286,15 +286,21 @@ Done so far:
   so these were written by inspection and verified for real by CI's
   `docker-build` job on GitHub's hosted runners instead, which builds
   both images and smoke-tests the backend one against `/health` — and
-  that verification caught two real bugs inspection alone missed:
-  the backend image needed `libgomp1` installed (LightGBM's Linux wheel
+  that verification caught real bugs inspection alone missed: the
+  backend image needed `libgomp1` installed (LightGBM's Linux wheel
   needs the OpenMP runtime, which `python:3.12-slim` doesn't ship), and
-  the frontend image needed `next.config.ts`'s `output: "standalone"`
-  (an earlier hand-rolled build failed in the container for reasons
-  that were genuinely hard to diagnose without direct log access — see
-  [infrastructure/README.md](../infrastructure/README.md) for how that
-  was actually debugged with no local Docker and no direct CI log
-  access either).
+  the frontend image failed because `frontend/public/` — genuinely
+  empty — was never committed to git at all (git doesn't track empty
+  directories), so it didn't exist after a fresh checkout for
+  `COPY --from=builder /app/public ./public` to find; fixed with a
+  `.gitkeep` placeholder. Diagnosing the second one took real work with
+  no local Docker and no direct CI log access (the job-logs API needs
+  admin rights even on a public repo) — see
+  [infrastructure/README.md](../infrastructure/README.md) for exactly
+  how it was actually tracked down, including two wrong leads
+  (suspecting the non-standalone build approach itself, then a broken
+  diagnostic step that misreported a real failure as success) before
+  the real cause surfaced.
   **CI** (`.github/workflows/ci.yml`): backend tests, frontend lint plus
   build, and the Docker build/smoke-test, on every push and PR to
   `main` — a single source of truth for the dependency list
