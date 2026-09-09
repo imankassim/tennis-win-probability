@@ -93,30 +93,4 @@ jobs:
           exit 1
 
       - name: Build frontend image
-        run: |
-          set +e
-          docker build --progress=plain -f infrastructure/Dockerfile.frontend -t courtedge-frontend frontend > /tmp/frontend-build.log 2>&1
-          echo "exit_code=$?" >> "$GITHUB_ENV"
-          cat /tmp/frontend-build.log
-
-      # TEMPORARY debug aid: the job-logs download API requires admin
-      # rights even on this public repo, so a failed build's output is
-      # otherwise unreadable outside GitHub's own web UI. Publishes the
-      # raw log to a throwaway branch (force-pushed, orphan history) so
-      # it's fetchable via raw.githubusercontent.com without auth. To be
-      # removed once the current frontend-image build failure is
-      # diagnosed and fixed.
-      - name: Publish build log for debugging
-        if: always() && env.exit_code != '0'
-        run: |
-          git config user.email "ci@localhost"
-          git config user.name "CI"
-          git checkout --orphan ci-debug-logs
-          git rm -rf . > /dev/null 2>&1 || true
-          cp /tmp/frontend-build.log frontend-build.log
-          git add frontend-build.log
-          git commit -m "CI debug log"
-          git push --force origin ci-debug-logs
-
-      - name: Fail if the frontend image build failed
-        run: exit ${{ env.exit_code }}
+        run: docker build -f infrastructure/Dockerfile.frontend -t courtedge-frontend frontend
