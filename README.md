@@ -128,6 +128,9 @@ courtedge/
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Journey roadmap, work packages, stage decision gates, testing matrix. |
 | [docs/REFERENCES.md](docs/REFERENCES.md) | Academic and technical sources behind the modelling approach. |
 | [docs/CourtEdge_Architecture_and_Task_Definition.docx](docs/CourtEdge_Architecture_and_Task_Definition.docx) | The original, full source specification this repository implements. |
+| [docs/model_cards/blend_v1_calibrated.md](docs/model_cards/blend_v1_calibrated.md) | The served pipeline's model card: training data, feature schema, real evaluation numbers, caveats. |
+| [docs/ethics/assessment.md](docs/ethics/assessment.md) | Privacy, fairness, responsible-gambling and licensing review — including the gaps it found, not only what passed. |
+| [evaluation/FINAL_EVALUATION.md](evaluation/FINAL_EVALUATION.md) | The full evidence trail (EXP1 through EXP44) synthesised into one answer to the research question above. |
 
 ## Running it locally
 
@@ -149,6 +152,34 @@ The backend serves a small synthetic demo match out of the box; point it
 at real ingested data with `COURTEDGE_DATA_DIR` — see
 [backend/README.md](backend/README.md) and
 [database/README.md](database/README.md).
+
+### Full demonstration (real data, the promoted pipeline, both dashboards)
+
+```bash
+# 1. Download the real archive (not committed — see database/README.md)
+curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-matches.csv
+curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-points-2010s.csv
+curl -O https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/charting-m-points-2020s.csv
+
+# 2. Promote the pricing pipeline (trains the ML model, fits the
+#    calibrator, records a versioned entry in the model registry)
+python -m pricing.run_promotion charting-m-matches.csv charting-m-points-2010s.csv charting-m-points-2020s.csv
+
+# 3. Run the backend against the real archive
+COURTEDGE_DATA_DIR=. python -m uvicorn backend.main:app --reload
+
+# 4. Run the frontend (separate terminal)
+cd frontend && npm install && npm run dev
+```
+
+Then open `/matches` to browse and replay real matches priced by the
+full blended, calibrated pipeline (`model_version=blend_v1_calibrated`
+in each response), and `/ops` for the monitoring dashboard — quote
+latency, fallback/suspended rates, and the promoted model's own
+calibration-time quality numbers. `python -m pricing.rollback_model
+--list` shows every promoted version; see
+[pricing/README.md](pricing/README.md) for rolling back to an earlier
+one.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full 21-journey plan, the
 stage decision gates each journey must pass before the next begins, and
