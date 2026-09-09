@@ -84,6 +84,46 @@ For the full set of views (system context, data architecture, offline
 training pipeline, deployment roles, security/governance) see
 [docs/architecture/](docs/architecture/).
 
+## Results
+
+Real numbers from this project's own experiments (not estimates), each
+one a real, reproducible measurement, not a favourable example picked
+after the fact. Scored across every point of every held-out match:
+
+| Configuration | Brier score (lower is better) |
+|---|---|
+| Always guess 50/50 | 0.2500 |
+| Score-leader heuristic | 0.1934 |
+| Markov chain (the analytic formula alone) | 0.1839 |
+| Machine-learned model alone | 0.1500 |
+| Blend + calibration (what this system actually serves) | 0.1481 |
+
+The learned model is the single biggest improvement in that chain,
+beating the Markov formula alone by about 15%. Combining the two adds a
+further small improvement, and calibration (making a "70% chance" quote
+actually right about 70% of the time) improves separately, cutting
+calibration error by more than half versus the uncalibrated blend.
+
+A separate, honest comparison, using only the moment before a match
+starts (where no in-play score state exists yet for either side): real,
+de-vigged bookmaker prices score 0.1828 there, clearly beating this
+system's 0.1984 at the same pre-match moment. That is expected, not a
+failure to hide. A market price reflects information this prototype has
+no access to (injury news, insider form, line movement), and pre-match
+is the hardest comparison point for this system specifically, since it
+has nothing but background context to work from, no live score yet. A
+negative meta-model result (a more "sophisticated" learned combiner
+underperformed the simple tuned blend, diagnosed as overfitting on a
+modest number of independent matches) and a rejected calibration method
+(Platt scaling made calibration worse, not better) are both kept and
+documented rather than discarded, since a negative result is still
+evidence.
+
+See [evaluation/FINAL_EVALUATION.md](evaluation/FINAL_EVALUATION.md) for
+the full evidence trail behind these numbers and
+[docs/model_cards/blend_v1_calibrated.md](docs/model_cards/blend_v1_calibrated.md)
+for the served model's training data, feature schema and caveats.
+
 ## Repository structure
 
 ```
