@@ -5,11 +5,30 @@ import Link from "next/link";
 import { getOpsSummary } from "@/lib/api";
 import type { OpsSummary, PageState } from "@/lib/types";
 
-function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function StatCard({
+  label,
+  value,
+  hint,
+  small,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  /** Use for long text values (e.g. a model version string or a
+   * timestamp) that would otherwise overflow the card at the default
+   * size — numeric stats stay large and prominent. */
+  small?: boolean;
+}) {
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
       <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-slate-100">{value}</p>
+      <p
+        className={`mt-1 break-words font-semibold text-slate-100 ${
+          small ? "text-base" : "text-2xl"
+        }`}
+      >
+        {value}
+      </p>
       {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
     </div>
   );
@@ -119,7 +138,7 @@ export default function OpsPage() {
               </p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-3">
-                <StatCard label="Model version" value={summary.model.modelVersion} />
+                <StatCard label="Model version" value={summary.model.modelVersion} small />
                 <StatCard
                   label="Calibration Brier"
                   value={summary.model.calibrationBrier.toFixed(4)}
@@ -141,6 +160,7 @@ export default function OpsPage() {
                 <StatCard
                   label="Trained at"
                   value={new Date(summary.model.trainedAt).toLocaleString()}
+                  small
                 />
               </div>
             )}
