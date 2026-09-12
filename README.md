@@ -3,8 +3,7 @@
 CourtEdge is an original in-play tennis probability and pricing research
 prototype, inspired by the type of real-time pricing systems used by sports
 betting companies. It is not a copy of any real bookmaker's product, brand
-or proprietary pricing feed, and it is **not** a real-money trading system -
-see [Prototype boundary](#prototype-boundary).
+or proprietary pricing feed, and it is **not** a real-money trading system.
 
 ## Research question
 
